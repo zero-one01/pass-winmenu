@@ -28,7 +28,7 @@ namespace PassWinmenu
 		{
 			ConfigManager.Load("pass-winmenu.yaml");
 
-			hotkeyId = HotKeyManager.RegisterHotKey(Keys.P, KeyModifiers.Control);
+			hotkeyId = HotKeyManager.RegisterHotKey(Keys.P, KeyModifiers.Control | KeyModifiers.Alt);
 			HotKeyManager.HotKeyPressed += (_, __) => NotifyMainThread();
 		}
 
