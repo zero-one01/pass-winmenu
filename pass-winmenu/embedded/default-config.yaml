@@ -1,0 +1,56 @@
+
+# This is the default configuration file for pass-winmenu.
+# If your password store is is located at %userprofile%\.password-store
+# and GPG is accessible from your PATH, this settings file will work out
+# of the box. Otherwise, you'll have to tweak it a bit.
+
+# All values in this file are set to the pass-winmenu's default settings,
+# so they can be freely deleted from this file; they're only here
+# for your reference.
+password-store: '%userprofile%\\.password-store'
+password-file-match: '*.gpg'
+# Path to the GPG executable. Can be either a 'command name' (if GPG is added
+# to your PATH) or an absolute directory.
+gpg-path: 'gpg'
+# Amount of time (in seconds) your passwords should remain on the clipboard.
+clipboard-timeout: 30
+# The directory separator that will be used to separate directories and files
+# in the password menu. It's purely a visual indicator, so it can be set to
+# whatever character (or sequence of characters) you like.
+directory-separator: '/'
+# If set to true, only the first line in a decrypted password file will be
+# copied to the clipboard. This is the recommended behaviour, as many password
+# managers for pass will work the same way.
+first-line-only: true
+
+# All colour strings must be formatted as hexadecimal ARGB strings,
+# such as #AA00FF44. To 'unset' a colour, a fully transparent colour
+# can be used, which is any colour starting with #00.
+style:
+    font-size: 14
+    font-family: 'Consolas'
+    background-colour: '#FF202020'
+    # Offset and dimensions of the menu.
+    offset-left: 0
+    offset-top: 0
+    width: 1920
+    height: 18
+
+    # This determines the styling of the search text.
+    search:
+        text-colour: '#FFDDDDDD'
+        background-colour: '#00FFFFFF'
+        border-colour: '#FF000000'
+        border-width: 0
+    # This determines the styling of all unselected options.
+    options:
+        text-colour: '#FFDDDDDD'
+        background-colour: '#00FFFFFF'
+        border-colour: '#FF000000'
+        border-width: 0
+    # This determines the styling of the current selection.
+    selection:
+        text-colour: '#FFFFFFFF'
+        background-colour: '#FFD88900'
+        border-colour: '#FF000000'
+        border-width: 0
