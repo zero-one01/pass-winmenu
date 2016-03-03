@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -30,6 +31,7 @@ namespace PassWinmenu.Windows
 		/// <param name="options">A list of options the user should choose from.</param>
 		public MainWindow(IEnumerable<string> options)
 		{
+
 			style = ConfigManager.Config.Style;
 			InitializeComponent();
 
@@ -54,7 +56,7 @@ namespace PassWinmenu.Windows
 					FontFamily = new FontFamily(style.FontFamily),
 					Background = BrushFromColourString(style.Options.BackgroundColour),
 					Foreground = BrushFromColourString(style.Options.TextColour),
-					Padding = new Thickness(0,0,0,2),
+					Padding = new Thickness(0, 0, 0, 2),
 					Margin = new Thickness(7, 0, 7, 0)
 				};
 				Options.Add(label);
@@ -116,27 +118,54 @@ namespace PassWinmenu.Windows
 			Selected.BorderThickness = new Thickness(style.Selection.BorderWidth);
 		}
 
+		/// <summary>
+		/// Converts an ARGB hex colour code into a Color object.
+		/// </summary>
+		/// <param name="str">A hexadecimal colour code string (such as #AAFF00FF)</param>
+		/// <returns>A colour object created from the colour code.</returns>
 		private static Color ColourFromString(string str)
 		{
 			return (Color)ColorConverter.ConvertFromString(str);
 		}
 
+		/// <summary>
+		/// Converts an ARGB hex colour code into a SolidColorBrush object.
+		/// </summary>
+		/// <param name="colour">A hexadecimal colour code string (such as #AAFF00FF)</param>
+		/// <returns>A SolidColorBrush created from a Colour object created from the colour code.</returns>
 		private static SolidColorBrush BrushFromColourString(string colour)
 		{
 			return new SolidColorBrush(ColourFromString(colour));
 		}
 
-		private void MainWindow_OnGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		private bool firstActivation = true;
+		protected override void OnActivated(EventArgs e)
 		{
+			// If this is the first time the window is activated, we need to do a second call to Activate(),
+			// otherwise it won't actually gain focus for some reason ¯\_(ツ)_/¯
+			if (firstActivation)
+			{
+				firstActivation = false;
+				Activate();
+			}
+			base.OnActivated(e);
+			// Whenever the window is activated, the search box should gain focus.
 			SearchBox.Focus();
 		}
-
-		private void MainWindow_OnLostFocus(object sender, RoutedEventArgs e)
+		
+		// Whenever the window loses focus, we reactivate it so it's brought to the front again, allowing it
+		// to regain focus.
+		protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
 		{
-			Topmost = true;
-			Focus();
+			base.OnLostKeyboardFocus(e);
+			Activate();
 		}
 
+		/// <summary>
+		/// Finds the first non-hidden label to the left of the label at the specified index.
+		/// </summary>
+		/// <param name="index">The position in the label list where searching should begin.</param>
+		/// <returns>The first label matching this condition, or null if no matching labels were found.</returns>
 		private Label FindPrevious(int index)
 		{
 			int previous = index - 1;
@@ -150,6 +179,12 @@ namespace PassWinmenu.Windows
 				return null;
 			}
 		}
+
+		/// <summary>
+		/// Finds the first non-hidden label to the right of the label at the specified index.
+		/// </summary>
+		/// <param name="index">The position in the label list where searching should begin.</param>
+		/// <returns>The first label matching this condition, or null if no matching labels were found.</returns>
 		private Label FindNext(int index)
 		{
 			int next = index + 1;

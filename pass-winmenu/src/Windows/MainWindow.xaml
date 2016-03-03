@@ -5,8 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="pass-winmenu" Width="500" WindowStartupLocation="Manual" Left="0" Top="0" AllowsTransparency="True" WindowStyle="None"
-        GotKeyboardFocus="MainWindow_OnGotKeyboardFocus"
-        LostFocus="MainWindow_OnLostFocus"
         ResizeMode="NoResize" Height="30">
 	<Grid Name="Grid">
 		<WrapPanel Name="WrapPanel">
