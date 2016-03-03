@@ -14,3 +14,7 @@ Edit the file and restart the application to apply the changes.
 ## Known issues
 
 - Opening the menu seems to occasionally crash it after it has been running for a while. (Possibly fixed, needs testing)
+
+To do:
+
+- Add Git integration
