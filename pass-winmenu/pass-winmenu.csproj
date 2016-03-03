@@ -86,9 +86,14 @@
   <ItemGroup>
     <Compile Include="src\Config.cs" />
     <Compile Include="src\ConfigManager.cs" />
+    <Compile Include="src\Git.cs" />
     <Compile Include="src\GPG.cs" />
-    <Compile Include="src\HotKeyManager.cs" />
-    <Compile Include="src\Program.cs" />
+    <Compile Include="src\Hotkeys.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\Program.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="src\EmbeddedResources.cs" />
     <Page Include="src\Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

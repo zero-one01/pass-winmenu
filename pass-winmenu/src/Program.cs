@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -11,7 +13,7 @@ using System.Windows.Forms;
 
 namespace PassWinmenu
 {
-	internal class Program : IDisposable
+	internal partial class Program : Form
 	{
 		private enum MainThreadAction
 		{
@@ -20,16 +22,22 @@ namespace PassWinmenu
 		}
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
-		private readonly int hotkeyId;
-		private readonly AutoResetEvent hotkeyEvent = new AutoResetEvent(false);
-		private MainThreadAction nextMainThreadAction;
+		//private readonly int hotkeyId;
 
 		public Program()
 		{
 			ConfigManager.Load("pass-winmenu.yaml");
+			//hotkeyId = HotKeyManager.RegisterHotKey(Keys.P, KeyModifiers.Control | KeyModifiers.Alt);
+			//HotKeyManager.HotKeyPressed += (_, __) => ShowPassword();
 
-			hotkeyId = HotKeyManager.RegisterHotKey(Keys.P, KeyModifiers.Control | KeyModifiers.Alt);
-			HotKeyManager.HotKeyPressed += (_, __) => NotifyMainThread();
+			AddHotKey(ModifierKey.Control | ModifierKey.Alt, Keys.P, ShowPassword);
+
+			CreateNotifyIcon();
+		}
+
+		protected override void SetVisibleCore(bool value)
+		{
+			base.SetVisibleCore(false);
 		}
 
 		/// <summary>
@@ -48,15 +56,13 @@ namespace PassWinmenu
 		/// </summary>
 		/// <param name="options">A list of options the user can choose from.</param>
 		/// <returns>One of the values contained in <paramref name="options"/>, or null if no option was chosen.</returns>
-		private string OpenMenu(IEnumerable<string> options)
+		private string OpenMenuAsync(IEnumerable<string> options)
 		{
 			var menu = new Windows.MainWindow(options);
 			menu.ShowDialog();
-
 			if (menu.Success)
 			{
-				var result = (string)menu.Selected.Content;
-				return result;
+				return (string)menu.Selected.Content;
 			}
 			else
 			{
@@ -81,14 +87,6 @@ namespace PassWinmenu
 					Clipboard.Clear();
 				}
 			});
-		}
-
-		/// <summary>
-		/// Notifies the main thread that it should perform an action.
-		/// </summary>
-		private void NotifyMainThread()
-		{
-			hotkeyEvent.Set();
 		}
 
 		private void CreateShortcut()
@@ -122,67 +120,52 @@ namespace PassWinmenu
 			}
 		}
 
-		/// <summary>
-		/// Waits notifications from the hotkey thread, showing the search window as soon as it receives one.
-		/// </summary>
-		public void Run()
+		private void CreateNotifyIcon()
 		{
-			new Thread(() =>
+			icon.Icon = EmbeddedResources.Icon;
+			icon.Visible = true;
+			var menu = new ContextMenuStrip();
+			menu.Items.Add(new ToolStripLabel("pass-winmenu v0.1"));
+			menu.Items.Add(new ToolStripSeparator());
+			menu.Items.Add("Decrypt Password");
+			menu.Items.Add("Start with Windows");
+			menu.Items.Add("About");
+			menu.Items.Add("Quit");
+			menu.ItemClicked += (sender, args) =>
 			{
-				icon.Icon = EmbeddedResources.Icon;
-				icon.Visible = true;
-				var menu = new ContextMenuStrip();
-				menu.Items.Add(new ToolStripLabel("pass-winmenu v0.1"));
-				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add("Decrypt Password");
-				menu.Items.Add("Start with Windows");
-				menu.Items.Add("About");
-				menu.Items.Add("Quit");
-				menu.ItemClicked += (sender, args) =>
+				switch (args.ClickedItem.Text)
 				{
-					switch (args.ClickedItem.Text)
-					{
-						case "Decrypt Password":
-							nextMainThreadAction = MainThreadAction.ShowSearch;
-							NotifyMainThread();
-							break;
-						case "Start with Windows":
-							CreateShortcut();
-							break;
-						case "About":
-							Process.Start("https://github.com/Baggykiin/pass-winmenu");
-							break;
-						case "Quit":
-							nextMainThreadAction = MainThreadAction.Quit;
-							NotifyMainThread();
-							break;
-
-					}
-				};
-				icon.ContextMenuStrip = menu;
-				Application.Run();
-			}).Start();
-
-			while (nextMainThreadAction != MainThreadAction.Quit)
-			{
-				hotkeyEvent.WaitOne();
-				switch (nextMainThreadAction)
-				{
-					case MainThreadAction.ShowSearch:
-						Show();
+					case "Decrypt Password":
+						ShowPassword();
 						break;
+					case "Start with Windows":
+						CreateShortcut();
+						break;
+					case "About":
+						Process.Start("https://github.com/Baggykiin/pass-winmenu");
+						break;
+					case "Quit":
+						Close();
+						break;
+
 				}
-			}
-			Application.Exit();
+			};
+			icon.ContextMenuStrip = menu;
 		}
 
 		/// <summary>
 		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
 		/// </summary>
-		private void Show()
+		private async void ShowPassword()
 		{
+			if (InvokeRequired)
+			{
+				Invoke((MethodInvoker) ShowPassword);
+			}
+
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
 
+			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
 			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
 			var shortNames = passFiles.ToDictionary(
 				file => GetRelativePath(file, ConfigManager.Config.PasswordStore)
@@ -190,7 +173,7 @@ namespace PassWinmenu
 					.Replace(".gpg", ""),
 				file => file);
 
-			var selection = OpenMenu(shortNames.Keys);
+			var selection = OpenMenuAsync(shortNames.Keys);
 			// If the user cancels their selection, the password decryption should be cancelled too.
 			if (selection == null) return;
 
@@ -246,16 +229,17 @@ namespace PassWinmenu
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			using (var program = new Program())
-			{
-				program.Run();
-			}
+			Application.EnableVisualStyles();
+			Application.SetCompatibleTextRenderingDefault(false);
+			Application.Run(new Program());
 		}
 
-		public void Dispose()
+		protected override void OnClosed(EventArgs e)
 		{
 			icon.Dispose();
-			HotKeyManager.UnregisterHotKey(hotkeyId);
+			//HotKeyManager.UnregisterHotKey(hotkeyId);
+
+			base.OnClosed(e);
 		}
 	}
 }

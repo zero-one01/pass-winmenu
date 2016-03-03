@@ -12,7 +12,7 @@ using System.Windows.Forms;
 namespace PassWinmenu
 {
 	/// <summary>
-	/// Simple wrapper over the GPG program.
+	/// Simple wrapper over GPG.
 	/// </summary>
 	internal class GPG
 	{

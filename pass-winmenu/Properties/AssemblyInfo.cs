@@ -8,7 +8,7 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("pass-winmenu")]
-[assembly: AssemblyDescription("A pass-based password manager for Windows.")]
+[assembly: AssemblyDescription("A dmenu-inspired Windows interface for pass.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("pass-winmenu")]
