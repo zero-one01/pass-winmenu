@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace PassWinmenu
+namespace PassWinmenu.ExternalPrograms
 {
 	/// <summary>
 	/// Simple wrapper over GPG.
@@ -64,7 +57,7 @@ namespace PassWinmenu
 			return RunGPG($"--decrypt \"{file}\"");
 		}
 	}
-
+	
 	internal class GpgException : Exception
 	{
 		public int ExitCode { get; }

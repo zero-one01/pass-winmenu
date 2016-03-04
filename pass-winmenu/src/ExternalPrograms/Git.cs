@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace PassWinmenu
+namespace PassWinmenu.ExternalPrograms
 {
 	/// <summary>
 	/// Simple wrapper over git.
@@ -56,13 +49,17 @@ namespace PassWinmenu
 			return result;
 		}
 
+		/// <summary>
+		/// Updates the password store by running git pull.
+		/// </summary>
+		/// <returns>True if the password store is now up-to-date. False if an error occurred.</returns>
 		public bool Update()
 		{
-			var result = RunGit("pull");
+			var pull = RunGit("pull");
 			return true;
 		}
 	}
-
+	
 	internal class GitException : Exception
 	{
 		public int ExitCode { get; }
