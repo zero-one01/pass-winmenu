@@ -1,17 +1,19 @@
 
 # This is the default configuration file for pass-winmenu.
 # If your password store is is located at %userprofile%\.password-store
-# and GPG is accessible from your PATH, this settings file will work out
-# of the box. Otherwise, you'll have to tweak it a bit.
+# and GPG and git are accessible from your PATH, this settings file will work 
+# out of the box. Otherwise, you'll have to tweak it a bit.
 
-# All values in this file are set to the pass-winmenu's default settings,
-# so they can be freely deleted from this file; they're only here
+# All values in this file are set to pass-winmenu's default settings,
+# so feel free to delete them from this file; they're only here
 # for your reference.
 password-store: '%userprofile%\\.password-store'
 password-file-match: '*.gpg'
-# Path to the GPG executable. Can be either a 'command name' (if GPG is added
+# Path to the GPG executable. Can be either a command name (if GPG is added
 # to your PATH) or an absolute directory.
 gpg-path: 'gpg'
+# Path to the git executable.
+git-path: 'git'
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30
 # The directory separator that will be used to separate directories and files
@@ -22,6 +24,9 @@ directory-separator: '/'
 # copied to the clipboard. This is the recommended behaviour, as many password
 # managers for pass will work the same way.
 first-line-only: true
+# If set to true, the menu will be opened on the same screen the mouse cursor
+# is currently on. If set to false, it will be opened on the primary screen.
+follow-cursor: true
 
 # All colour strings must be formatted as hexadecimal ARGB strings,
 # such as #AA00FF44. To 'unset' a colour, a fully transparent colour
@@ -33,7 +38,7 @@ style:
     # Offset and dimensions of the menu.
     offset-left: 0
     offset-top: 0
-    width: 1920
+    width: 100%
     height: 18
 
     # This determines the styling of the search text.
