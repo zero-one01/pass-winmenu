@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using PassWinmenu.Configuration;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using FontFamily = System.Windows.Media.FontFamily;
 
 namespace PassWinmenu.Windows
 {
@@ -25,13 +30,15 @@ namespace PassWinmenu.Windows
 		public bool Success { get; private set; }
 
 		private StyleConfig style;
+
 		/// <summary>
 		/// Initialises the window with the provided options.
 		/// </summary>
 		/// <param name="options">A list of options the user should choose from.</param>
-		public MainWindow(IEnumerable<string> options)
+		/// <param name="position">A vector representing the position of the top-left corner of the window.</param>
+		/// <param name="dimensions">A vector representing the width and height of the window.</param>
+		public MainWindow(IEnumerable<string> options, Vector position, Vector dimensions)
 		{
-
 			style = ConfigManager.Config.Style;
 			InitializeComponent();
 
@@ -43,10 +50,12 @@ namespace PassWinmenu.Windows
 			SearchBox.FontFamily = new FontFamily(style.FontFamily);
 
 			Background = BrushFromColourString(style.BackgroundColour);
-			Left = style.OffsetLeft;
-			Top = style.OffsetTop;
-			Width = style.Width;
-			Height = style.Height;
+
+			Left = position.X;
+			Top = position.Y;
+			Width = dimensions.X;
+			Height = dimensions.Y;
+
 			foreach (var option in options)
 			{
 				var label = new Label
@@ -72,13 +81,13 @@ namespace PassWinmenu.Windows
 		{
 			// We split on spaces to allow the user to quickly search for a certain term, as it allows them
 			// to search, for example, for reddit.com/username by entering "re us"
-			var terms = SearchBox.Text.ToLower().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			var terms = SearchBox.Text.ToLower(CultureInfo.CurrentCulture).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
 			var firstSelectionFound = false;
 			foreach (var option in Options)
 			{
 				var content = (string)option.Content;
-				var lContent = content.ToLower();
+				var lContent = content.ToLower(CultureInfo.CurrentCulture);
 
 				// The option is only a match if it contains every term in the terms array.
 				if (terms.All(term => lContent.Contains(term)))
@@ -101,7 +110,7 @@ namespace PassWinmenu.Windows
 		/// <summary>
 		/// Selects a label; deselecting the previously selected label.
 		/// </summary>
-		/// <param name="label">The label to be selected.</param>
+		/// <param name="label">The label to be selected. If this value is null, the selected label will not be changed.</param>
 		private void Select(Label label)
 		{
 			if (label == null) return;
@@ -201,27 +210,28 @@ namespace PassWinmenu.Windows
 
 		private void SearchBox_OnPreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.Left)
+			var selectionIndex = Options.IndexOf(Selected);
+			switch (e.Key)
 			{
-				e.Handled = true;
-				var index = Options.IndexOf(Selected);
-				if (index > 0) Select(FindPrevious(index));
-			}
-			else if (e.Key == Key.Right)
-			{
-				e.Handled = true;
-				var index = Options.IndexOf(Selected);
-				if (index < Options.Count - 1) Select(FindNext(index));
-			}
-			else if (e.Key == Key.Enter)
-			{
-				e.Handled = true;
-				Success = true;
-				Close();
-			}
-			else if (e.Key == Key.Escape)
-			{
-				Close();
+				case Key.Left:
+					e.Handled = true;
+					if (selectionIndex > 0)
+						Select(FindPrevious(selectionIndex));
+					break;
+				case Key.Right:
+					e.Handled = true;
+					if (selectionIndex < Options.Count - 1)
+						Select(FindNext(selectionIndex));
+					break;
+				case Key.Enter:
+					e.Handled = true;
+					Success = true;
+					Close();
+					break;
+				case Key.Escape:
+					e.Handled = true;
+					Close();
+					break;
 			}
 		}
 	}

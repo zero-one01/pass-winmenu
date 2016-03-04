@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PassWinmenu.Configuration;
+using PassWinmenu.ExternalPrograms;
+using System.Drawing;
+using System.Windows;
+using Application = System.Windows.Forms.Application;
+using Clipboard = System.Windows.Forms.Clipboard;
 
 namespace PassWinmenu
 {
@@ -22,6 +25,7 @@ namespace PassWinmenu
 		}
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
+		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
 		//private readonly int hotkeyId;
 
 		public Program()
@@ -56,9 +60,44 @@ namespace PassWinmenu
 		/// </summary>
 		/// <param name="options">A list of options the user can choose from.</param>
 		/// <returns>One of the values contained in <paramref name="options"/>, or null if no option was chosen.</returns>
-		private string OpenMenuAsync(IEnumerable<string> options)
+		private string OpenMenu(IEnumerable<string> options)
 		{
-			var menu = new Windows.MainWindow(options);
+			Screen selectedScreen;
+			if (ConfigManager.Config.FollowCursor)
+			{
+				// Find the screen that currently contains the mouse cursor.
+				selectedScreen = Screen.AllScreens.First(screen => screen.Bounds.Contains(Cursor.Position));
+			}
+			else
+			{
+				selectedScreen = Screen.PrimaryScreen;
+			}
+
+			double left, top, width, height;
+			try
+			{
+				// The menu position may either be specified in pixels or percentage values.
+				// ParseSize takes care of parsing both into a double (representing pixel values).
+				left = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetLeft, Direction.Horizontal);
+				top = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetTop, Direction.Vertical);
+			}
+			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
+			{
+				RaiseNotification($"Unable to parse the menu position from the config file (reason: {e.Message})", ToolTipIcon.Error);
+				return null;
+			}
+			try
+			{
+				width = selectedScreen.ParseSize(ConfigManager.Config.Style.Width, Direction.Horizontal);
+				height = selectedScreen.ParseSize(ConfigManager.Config.Style.Height, Direction.Vertical);
+			}
+			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
+			{
+				RaiseNotification($"Unable to parse the menu dimensions from the config file (reason: {e.Message})", ToolTipIcon.Error);
+				return null;
+			}
+
+			var menu = new Windows.MainWindow(options, new Vector(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top), new Vector(width, height));
 			menu.ShowDialog();
 			if (menu.Success)
 			{
@@ -156,11 +195,11 @@ namespace PassWinmenu
 		/// <summary>
 		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
 		/// </summary>
-		private async void ShowPassword()
+		private void ShowPassword()
 		{
 			if (InvokeRequired)
 			{
-				Invoke((MethodInvoker) ShowPassword);
+				Invoke((MethodInvoker)ShowPassword);
 			}
 
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
@@ -173,7 +212,7 @@ namespace PassWinmenu
 					.Replace(".gpg", ""),
 				file => file);
 
-			var selection = OpenMenuAsync(shortNames.Keys);
+			var selection = OpenMenu(shortNames.Keys);
 			// If the user cancels their selection, the password decryption should be cancelled too.
 			if (selection == null) return;
 
