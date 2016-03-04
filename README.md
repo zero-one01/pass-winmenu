@@ -1,7 +1,7 @@
 # pass-winmenu
 dmenu-inspired Windows interface for pass
 
-# Usage
+## Usage
 
 Press Ctrl-Alt-P to open the password menu.
 
