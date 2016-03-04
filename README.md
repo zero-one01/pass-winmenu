@@ -11,10 +11,6 @@ On first run the application will generate a pass-winmenu.yaml file
 (containing all its settings initialised to their default value) in its current directory. 
 Edit the file and restart the application to apply the changes.
 
-## Known issues
-
-- None so far
-
 ## To do
 
 - Add Git integration
