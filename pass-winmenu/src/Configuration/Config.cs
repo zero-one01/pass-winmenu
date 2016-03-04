@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PassWinmenu
+namespace PassWinmenu.Configuration
 {
 	internal class Config
 	{
@@ -17,10 +12,12 @@ namespace PassWinmenu
 		}
 		public string PasswordFileMatch { get; set; } = "*.gpg";
 		public string GpgPath { get; set; } = "gpg";
+		public string GitPath { get; set; } = "git";
 		public double ClipboardTimeout { get; set; } = 30;
 		public string DirectorySeparator { get; set; } = "/";
 		public StyleConfig Style { get; set; } = new StyleConfig();
 		public bool FirstLineOnly { get; set; } = true;
+		public bool FollowCursor { get; set; } = true;
 	}
 
 	internal class StyleConfig
@@ -32,10 +29,11 @@ namespace PassWinmenu
 		public double FontSize { get; set; } = 14;
 		public string FontFamily { get; set; } = "Consolas";
 		public string BackgroundColour { get; set; } = "#FF202020";
-		public double OffsetLeft { get; set; } = 0;
-		public double OffsetTop { get; set; } = 0;
-		public double Width { get; set; } = 1920;
-		public double Height { get; set; } = 18;
+		// These have to be strings, because they need to support percentage values.
+		public string OffsetLeft { get; set; } = "0";
+		public string OffsetTop { get; set; } = "0";
+		public string Width { get; set; } = "100%";
+		public string Height { get; set; } = "18";
 	}
 
 	internal class LabelStyleConfig
