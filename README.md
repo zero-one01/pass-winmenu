@@ -1,7 +1,7 @@
 # pass-winmenu
 dmenu-inspired Windows interface for pass
 
-# Usage
+## Usage
 
 Press Ctrl-Alt-P to open the password menu.
 
@@ -10,10 +10,6 @@ Press Ctrl-Alt-P to open the password menu.
 On first run the application will generate a pass-winmenu.yaml file 
 (containing all its settings initialised to their default value) in its current directory. 
 Edit the file and restart the application to apply the changes.
-
-## Known issues
-
-- None so far
 
 ## To do
 
