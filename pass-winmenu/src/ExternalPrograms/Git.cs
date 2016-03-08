@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -55,15 +56,33 @@ namespace PassWinmenu.ExternalPrograms
 		/// <summary>
 		/// Updates the password store by running git pull.
 		/// </summary>
-		/// <returns>The number of files changed.</returns>
+		/// <returns>A message containing information about the files that were changed.</returns>
 		public string Update()
 		{
 			var pull = RunGit("pull");
 			var match = Regex.Match(pull, @"(\d*?) (file.?) changed");
 			if (match.Success)
 			{
-				var was = match.Groups[2].Value == "files" ? "were" : "was";
-				return $"The password store has been updated.\n{match.Groups[1].Value} {match.Groups[2].Value} {was} changed.";
+				var have = match.Groups[2].Value == "files" ? "have" : "has";
+				var sb = new StringBuilder();
+				sb.AppendLine($"The password store has been updated.\n{match.Groups[1].Value} {match.Groups[2].Value} {have} been changed.");
+				var lines = new List<string>();
+				foreach (var line in pull.Split(new[] {"\r\n", "\n"}, StringSplitOptions.RemoveEmptyEntries))
+				{
+					match = Regex.Match(line, @"create mode \d+ (.*)");
+					if (match.Success)
+					{
+						lines.Add($"added {match.Groups[1].Value}");
+					}
+					match = Regex.Match(line, @"delete mode \d+ (.*)");
+					if (match.Success)
+					{
+						lines.Add($"deleted {match.Groups[1].Value}");
+					}
+				}
+				if(lines.Count > 0) sb.AppendLine("Changes: " + string.Join(", ", lines));
+
+				return sb.ToString();
 			}
 			else if (Regex.IsMatch(pull, @"Already up-to-date\."))
 			{
