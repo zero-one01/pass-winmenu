@@ -164,9 +164,11 @@ namespace PassWinmenu
 			icon.Icon = EmbeddedResources.Icon;
 			icon.Visible = true;
 			var menu = new ContextMenuStrip();
-			menu.Items.Add(new ToolStripLabel("pass-winmenu v0.1"));
+			menu.Items.Add(new ToolStripLabel("pass-winmenu v0.2"));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password");
+			menu.Items.Add("Update Password Store");
+			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Start with Windows");
 			menu.Items.Add("About");
 			menu.Items.Add("Quit");
@@ -176,6 +178,9 @@ namespace PassWinmenu
 				{
 					case "Decrypt Password":
 						ShowPassword();
+						break;
+					case "Update Password Store":
+						Task.Run((Action)UpdatePasswordStore);
 						break;
 					case "Start with Windows":
 						CreateShortcut();
@@ -190,6 +195,19 @@ namespace PassWinmenu
 				}
 			};
 			icon.ContextMenuStrip = menu;
+		}
+
+		private void UpdatePasswordStore()
+		{
+			try
+			{
+				var result = git.Update();
+				RaiseNotification(result, ToolTipIcon.Info);
+			}
+			catch (GitException e)
+			{
+				RaiseNotification("Failed to update the password store.\nYou might have to update it manually.", ToolTipIcon.Error);
+			}
 		}
 
 		/// <summary>

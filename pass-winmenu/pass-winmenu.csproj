@@ -87,7 +87,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="src\NativeMethods.cs" />
     <Compile Include="src\Configuration\Config.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
     <Compile Include="src\ExtensionMethods.cs" />

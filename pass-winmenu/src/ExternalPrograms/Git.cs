@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -52,12 +55,26 @@ namespace PassWinmenu.ExternalPrograms
 		/// <summary>
 		/// Updates the password store by running git pull.
 		/// </summary>
-		/// <returns>True if the password store is now up-to-date. False if an error occurred.</returns>
-		public bool Update()
+		/// <returns>The number of files changed.</returns>
+		public string Update()
 		{
 			var pull = RunGit("pull");
-			return true;
+			var match = Regex.Match(pull, @"(\d*?) (file.?) changed");
+			if (match.Success)
+			{
+				var was = match.Groups[2].Value == "files" ? "were" : "was";
+				return $"The password store has been updated.\n{match.Groups[1].Value} {match.Groups[2].Value} {was} changed.";
+			}
+			else if (Regex.IsMatch(pull, @"Already up-to-date\."))
+			{
+				return "The password store is up-to-date.";
+			}
+			else
+			{
+				return $"Git returned an unknown result: \n\"{pull}\"";
+			}
 		}
+
 	}
 	
 	internal class GitException : Exception
