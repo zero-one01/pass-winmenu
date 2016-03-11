@@ -20,10 +20,27 @@ namespace PassWinmenu
 			Windows = 8
 		}
 
+		internal class HotkeyException : Exception
+		{
+			public HotkeyException(string message) : base(message){ }
+		}
+
 		private void AddHotKey(ModifierKey mod, Keys key, Action action)
 		{
 			var success = NativeMethods.RegisterHotKey(Handle, hotkeyIdCounter, (int) mod, (int) key);
-			if(!success) throw new InvalidOperationException($"Failed to set the hotkey. Win32 error code: {Marshal.GetLastWin32Error()}");
+			if (!success)
+			{
+				var errorCode = Marshal.GetLastWin32Error();
+				if (errorCode == 1409)
+				{
+					throw new HotkeyException($"Failed to register the hotkey \"{mod}, {key}\". This hotkey has already been registered by a different application.");
+				}
+				else
+				{
+					throw new HotkeyException($"Failed to register the hotkey \"{mod} + {key}\". An unknown error (Win32 error code {errorCode}) occurred.");
+				}
+			}
+			if(!success) throw new InvalidOperationException();
 			hotkeyActions[hotkeyIdCounter] = action;
 		}
 
