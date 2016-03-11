@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -29,7 +30,11 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		public bool Success { get; private set; }
 
-		private StyleConfig style;
+
+		private bool isClosing;
+		private bool firstActivation = true;
+
+		private readonly StyleConfig style;
 
 		/// <summary>
 		/// Initialises the window with the provided options.
@@ -147,7 +152,6 @@ namespace PassWinmenu.Windows
 			return new SolidColorBrush(ColourFromString(colour));
 		}
 
-		private bool firstActivation = true;
 		protected override void OnActivated(EventArgs e)
 		{
 			// If this is the first time the window is activated, we need to do a second call to Activate(),
@@ -158,8 +162,9 @@ namespace PassWinmenu.Windows
 				Activate();
 			}
 			base.OnActivated(e);
+
 			// Whenever the window is activated, the search box should gain focus.
-			SearchBox.Focus();
+			if(!isClosing) SearchBox.Focus();
 		}
 		
 		// Whenever the window loses focus, we reactivate it so it's brought to the front again, allowing it
@@ -167,7 +172,13 @@ namespace PassWinmenu.Windows
 		protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
 		{
 			base.OnLostKeyboardFocus(e);
-			Activate();
+			if(!isClosing) Activate();
+		}
+
+		protected override void OnClosing(CancelEventArgs e)
+		{
+			base.OnClosing(e);
+			isClosing = true;
 		}
 
 		/// <summary>

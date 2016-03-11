@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="pass-winmenu" Width="500" WindowStartupLocation="Manual" Left="0" Top="0" AllowsTransparency="True" WindowStyle="None"
+        Title="pass-winmenu (menu)" Width="500" WindowStartupLocation="Manual" Left="0" Top="0" AllowsTransparency="True" WindowStyle="None"
         ResizeMode="NoResize" Height="30">
 	<Grid Name="Grid">
 		<WrapPanel Name="WrapPanel">

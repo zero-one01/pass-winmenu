@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using System.Drawing;
+using System.Text;
 using System.Windows;
 using Application = System.Windows.Forms.Application;
 using Clipboard = System.Windows.Forms.Clipboard;
@@ -43,7 +44,7 @@ namespace PassWinmenu
 				Application.Exit();
 				Environment.Exit(1);
 			}
-
+			Name = "pass-winmenu (main window)";
 		}
 
 		protected override void SetVisibleCore(bool value)
@@ -259,7 +260,6 @@ namespace PassWinmenu
 				{
 					password = password.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).First();
 				}
-
 				if (ConfigManager.Config.Output.CopyToClipboard)
 				{
 					CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
@@ -287,8 +287,8 @@ namespace PassWinmenu
 		private void EnterPassword(string password)
 		{
 			// SendKeys.Send expect special characters to be escaped by wrapping them with curly braces.
-			var specialCharacters = new[] {'{', '}', '[', ']', '(', ')', '+', '^', '%'};
-			var escaped =string.Concat(password.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
+			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%' };
+			var escaped = string.Concat(password.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
 		}
 
