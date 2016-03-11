@@ -61,6 +61,8 @@
   <PropertyGroup>
     <ApplicationIcon>embedded\pass-winmenu.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup />
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>

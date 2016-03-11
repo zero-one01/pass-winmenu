@@ -31,12 +31,19 @@ namespace PassWinmenu
 		public Program()
 		{
 			ConfigManager.Load("pass-winmenu.yaml");
-			//hotkeyId = HotKeyManager.RegisterHotKey(Keys.P, KeyModifiers.Control | KeyModifiers.Alt);
-			//HotKeyManager.HotKeyPressed += (_, __) => ShowPassword();
-
-			AddHotKey(ModifierKey.Control | ModifierKey.Alt, Keys.P, ShowPassword);
-
 			CreateNotifyIcon();
+
+			try
+			{
+				AddHotKey(ModifierKey.Control | ModifierKey.Alt, Keys.P, ShowPassword);
+			}
+			catch (HotkeyException e)
+			{
+				RaiseNotification(e.Message, ToolTipIcon.Error);
+				Application.Exit();
+				Environment.Exit(1);
+			}
+
 		}
 
 		protected override void SetVisibleCore(bool value)
@@ -128,15 +135,24 @@ namespace PassWinmenu
 			});
 		}
 
+		protected override void OnFormClosed(FormClosedEventArgs e)
+		{
+			// Unregister all hotkeys before closing the form.
+			DisposeHotkeys();
+			base.OnFormClosed(e);
+		}
+
 		private void CreateShortcut()
 		{
+			// Open the startup folder in the default file explorer (usually Windows Explorer).
 			Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.Startup));
+
+			var shortcutPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "pass-winmenu.lnk");
 
 			var t = Type.GetTypeFromCLSID(new Guid("72C24DD5-D70A-438B-8A42-98424B88AFB8")); //Windows Script Host Shell Object
 			dynamic shell = Activator.CreateInstance(t);
 			try
 			{
-				var shortcutPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "pass-winmenu.lnk");
 				if (File.Exists(shortcutPath))
 				{
 					File.Delete(shortcutPath);
@@ -145,6 +161,7 @@ namespace PassWinmenu
 				try
 				{
 					lnk.TargetPath = Assembly.GetExecutingAssembly().Location;
+					lnk.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
 					lnk.IconLocation = "shell32.dll, 1";
 					lnk.Save();
 				}
@@ -243,14 +260,36 @@ namespace PassWinmenu
 					password = password.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).First();
 				}
 
-				CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
-				RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+				if (ConfigManager.Config.Output.CopyToClipboard)
+				{
+					CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
+					RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+				}
+				if (ConfigManager.Config.Output.TypePassword)
+				{
+					EnterPassword(password);
+				}
+
 			}
 			catch (GpgException e)
 			{
 				// Not the most descriptive of error messages, but it'll have to do for now.
 				RaiseNotification($"Password decryption failed. GPG returned exit code {e.ExitCode}", ToolTipIcon.Error);
 			}
+		}
+
+		/// <summary>
+		/// Sends a password directly to the topmost window, as if it was entered by the user.
+		/// This method automatically escapes all characters with special meaning, 
+		/// then calls SendKeys.Send().
+		/// </summary>
+		/// <param name="password">The password to be sent to the active window.</param>
+		private void EnterPassword(string password)
+		{
+			// SendKeys.Send expect special characters to be escaped by wrapping them with curly braces.
+			var specialCharacters = new[] {'{', '}', '[', ']', '(', ')', '+', '^', '%'};
+			var escaped =string.Concat(password.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
+			SendKeys.Send(escaped);
 		}
 
 		/// <summary>
