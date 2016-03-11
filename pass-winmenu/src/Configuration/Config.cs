@@ -16,8 +16,15 @@ namespace PassWinmenu.Configuration
 		public double ClipboardTimeout { get; set; } = 30;
 		public string DirectorySeparator { get; set; } = "/";
 		public StyleConfig Style { get; set; } = new StyleConfig();
+		public OutputConfig Output { get; set; } = new OutputConfig();
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
+	}
+
+	internal class OutputConfig
+	{
+		public bool CopyToClipboard { get; set; } = true;
+		public bool TypePassword { get; set; } = false;
 	}
 
 	internal class StyleConfig

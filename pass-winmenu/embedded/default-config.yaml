@@ -28,6 +28,16 @@ first-line-only: true
 # is currently on. If set to false, it will be opened on the primary screen.
 follow-cursor: true
 
+# Determines where pass-winmenu should send a password
+# after it has been decrypted.
+output:
+    # If set to true, pass-winmenu will copy the decrypted password
+    # to your clipboard.
+    copy-to-clipboard: true
+    # If set to true, pass-winmenu will type the decrypted password into the
+    # currently-active (topmost) window.
+    type-password: false
+
 # All colour strings must be formatted as hexadecimal ARGB strings,
 # such as #AA00FF44. To 'unset' a colour, a fully transparent colour
 # can be used, which is any colour starting with #00.
