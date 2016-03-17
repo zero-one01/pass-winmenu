@@ -287,7 +287,7 @@ namespace PassWinmenu
 		private void EnterPassword(string password)
 		{
 			// SendKeys.Send expect special characters to be escaped by wrapping them with curly braces.
-			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%' };
+			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~'};
 			var escaped = string.Concat(password.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
 		}
@@ -334,7 +334,6 @@ namespace PassWinmenu
 		{
 			icon.Dispose();
 			//HotKeyManager.UnregisterHotKey(hotkeyId);
-
 			base.OnClosed(e);
 		}
 	}
