@@ -9,15 +9,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
-using System.Drawing;
-using System.Text;
 using System.Windows;
 using Application = System.Windows.Forms.Application;
-using Clipboard = System.Windows.Forms.Clipboard;
+using Clipboard = System.Windows.Clipboard;
 
 namespace PassWinmenu
 {
-	internal partial class Program : Form
+	internal class Program : Form
 	{
 		private enum MainThreadAction
 		{
@@ -25,6 +23,7 @@ namespace PassWinmenu
 			Quit
 		}
 		private readonly NotifyIcon icon = new NotifyIcon();
+		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
 		//private readonly int hotkeyId;
@@ -34,17 +33,25 @@ namespace PassWinmenu
 			ConfigManager.Load("pass-winmenu.yaml");
 			CreateNotifyIcon();
 
+			hotkeys = new Hotkeys(Handle);
 			try
 			{
-				AddHotKey(ModifierKey.Control | ModifierKey.Alt, Keys.P, ShowPassword);
+				var keys = Hotkeys.Parse(ConfigManager.Config.Hotkey);
+				hotkeys.AddHotKey(keys, ShowPassword);
 			}
-			catch (HotkeyException e)
+			catch (Exception e) when (e is ArgumentException || e is Hotkeys.HotkeyException)
 			{
 				RaiseNotification(e.Message, ToolTipIcon.Error);
 				Application.Exit();
 				Environment.Exit(1);
 			}
 			Name = "pass-winmenu (main window)";
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+			base.WndProc(ref m);
+			hotkeys?.WndProc(ref m);
 		}
 
 		protected override void SetVisibleCore(bool value)
@@ -139,7 +146,7 @@ namespace PassWinmenu
 		protected override void OnFormClosed(FormClosedEventArgs e)
 		{
 			// Unregister all hotkeys before closing the form.
-			DisposeHotkeys();
+			hotkeys.DisposeHotkeys();
 			base.OnFormClosed(e);
 		}
 

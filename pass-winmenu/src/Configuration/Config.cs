@@ -10,6 +10,8 @@ namespace PassWinmenu.Configuration
 			get { return passwordStore; }
 			set { passwordStore = Environment.ExpandEnvironmentVariables(value); }
 		}
+
+		public string Hotkey { get; set; } = "ctrl alt p";
 		public string PasswordFileMatch { get; set; } = "*.gpg";
 		public string GpgPath { get; set; } = "gpg";
 		public string GitPath { get; set; } = "git";
