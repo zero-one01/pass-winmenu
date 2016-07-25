@@ -38,7 +38,7 @@ namespace PassWinmenu
 			                     .Select(key => key.Trim())
 			                     .Select(key => key.First().ToString().ToUpper() + key.Substring(1))
 			                     .Select(key => key == "Ctrl" ? "Control" : key)
-			                     .Select(key => key == "Win" ? "Windows" : key);
+			                     .Select(key => (key == "Win" || key == "Super") ? "Windows" : key);
 			var mods = ModifierKeys.None;
 			var keys = Keys.None;
 			foreach (var keyStr in combination)
