@@ -273,7 +273,13 @@ namespace PassWinmenu
 				}
 				if (ConfigManager.Config.Output.TypePassword)
 				{
-					EnterPassword(password);
+					if (ConfigManager.Config.Output.TypeUsername)
+					{
+						// Enter the username and press Tab.
+						EnterText(Path.GetFileName(result).Replace(".gpg", ""));
+						SendKeys.Send("{TAB}");
+					}
+					EnterText(password);
 				}
 
 			}
@@ -285,16 +291,16 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Sends a password directly to the topmost window, as if it was entered by the user.
+		/// Sends text directly to the topmost window, as if it was entered by the user.
 		/// This method automatically escapes all characters with special meaning, 
 		/// then calls SendKeys.Send().
 		/// </summary>
-		/// <param name="password">The password to be sent to the active window.</param>
-		private void EnterPassword(string password)
+		/// <param name="text">The text to be sent to the active window.</param>
+		private void EnterText(string text)
 		{
-			// SendKeys.Send expect special characters to be escaped by wrapping them with curly braces.
+			// SendKeys.Send expects special characters to be escaped by wrapping them with curly braces.
 			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~'};
-			var escaped = string.Concat(password.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
+			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
 		}
 

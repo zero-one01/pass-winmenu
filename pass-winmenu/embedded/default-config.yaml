@@ -38,6 +38,10 @@ output:
     # If set to true, pass-winmenu will type the decrypted password into the
     # currently-active (topmost) window.
     type-password: false
+    # If set to true, pass-winmenu will use the filename of the selected
+    # password file as username, type it into the currently-active (topmost)
+	# window and press the Tab key before entering the password.
+    type-username: false
 
 # All colour strings must be formatted as hexadecimal ARGB strings,
 # such as #AA00FF44. To 'unset' a colour, a fully transparent colour
