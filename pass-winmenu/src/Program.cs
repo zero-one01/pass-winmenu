@@ -248,7 +248,6 @@ namespace PassWinmenu
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
 
 			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
-			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
 			var shortNames = passFiles.ToDictionary(
 				file => GetRelativePath(file, ConfigManager.Config.PasswordStore)
 					.Replace("\\", ConfigManager.Config.DirectorySeparator)
