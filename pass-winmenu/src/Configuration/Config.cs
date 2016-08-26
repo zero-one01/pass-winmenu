@@ -28,6 +28,7 @@ namespace PassWinmenu.Configuration
 		public bool CopyToClipboard { get; set; } = true;
 		public bool TypePassword { get; set; } = false;
 		public bool TypeUsername { get; set; } = false;
+		public bool DeadKeys { get; set; } = false;
 	}
 
 	internal class StyleConfig

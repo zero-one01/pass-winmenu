@@ -130,16 +130,19 @@ namespace PassWinmenu
 		/// </summary>
 		/// <param name="value">The text to add to the clipboard.</param>
 		/// <param name="timeout">The amount of time, in seconds, the text should remain on the clipboard.</param>
-		private static void CopyToClipboard(string value, double timeout)
+		private void CopyToClipboard(string value, double timeout)
 		{
 			Clipboard.SetText(value);
 			Task.Delay(TimeSpan.FromSeconds(timeout)).ContinueWith(_ =>
 			{
-				// Only clear the clipboard if it still contains the text we copied to it.
-				if (Clipboard.ContainsText() && Clipboard.GetText() == value)
+				Invoke((MethodInvoker) (() =>
 				{
-					Clipboard.Clear();
-				}
+					// Only clear the clipboard if it still contains the text we copied to it.
+					if (Clipboard.ContainsText() && Clipboard.GetText() == value)
+					{
+						Clipboard.Clear();
+					}
+				}));
 			});
 		}
 
@@ -298,6 +301,12 @@ namespace PassWinmenu
 		/// <param name="text">The text to be sent to the active window.</param>
 		private void EnterText(string text)
 		{
+			if (ConfigManager.Config.Output.DeadKeys)
+			{
+				var deadKeys = new[] { "\"", "'", "`", "~", "^" };
+				text = deadKeys.Aggregate(text, (current, key) => current.Replace(key, key + " "));
+			}
+
 			// SendKeys.Send expects special characters to be escaped by wrapping them with curly braces.
 			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~'};
 			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));

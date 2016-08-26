@@ -1,7 +1,6 @@
-
 # This is the default configuration file for pass-winmenu.
 # If your password store is is located at %userprofile%\.password-store
-# and GPG and git are accessible from your PATH, this settings file will work 
+# and GPG and git are accessible from your PATH, this settings file will work
 # out of the box. Otherwise, you'll have to tweak it a bit.
 
 # All values in this file are set to pass-winmenu's default settings,
@@ -40,8 +39,12 @@ output:
     type-password: false
     # If set to true, pass-winmenu will use the filename of the selected
     # password file as username, type it into the currently-active (topmost)
-	# window and press the Tab key before entering the password.
+    # window and press the Tab key before entering the password.
     type-username: false
+    # If your keyboard has dead keys enabled (type ' + e for é), this should
+    # be set to true, otherwise usernames/passwords might not be entered
+    # correctly.
+    dead-keys: false
 
 # All colour strings must be formatted as hexadecimal ARGB strings,
 # such as #AA00FF44. To 'unset' a colour, a fully transparent colour
