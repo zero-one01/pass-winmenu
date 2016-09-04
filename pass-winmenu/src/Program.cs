@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using System.Windows;
+using PassWinmenu.Windows;
 using Application = System.Windows.Forms.Application;
 using Clipboard = System.Windows.Clipboard;
 
@@ -196,6 +197,7 @@ namespace PassWinmenu
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password");
 			menu.Items.Add("Update Password Store");
+			menu.Items.Add("Add new password");
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Start with Windows");
 			menu.Items.Add("About");
@@ -210,6 +212,9 @@ namespace PassWinmenu
 					case "Update Password Store":
 						Task.Run((Action)UpdatePasswordStore);
 						break;
+					case "Add new password":
+						AddPassword();
+						break;
 					case "Start with Windows":
 						CreateShortcut();
 						break;
@@ -223,6 +228,38 @@ namespace PassWinmenu
 				}
 			};
 			icon.ContextMenuStrip = menu;
+		}
+
+		private void AddPassword()
+		{
+			var pathWindow = new PathWindow();
+			var passwordWindow = new PasswordWindow();
+
+			pathWindow.ShowDialog();
+			if (pathWindow.DialogResult == null || !pathWindow.DialogResult.Value)
+			{
+				return;
+			}
+			var path = pathWindow.Path.Text;
+
+			passwordWindow.ShowDialog();
+			if (passwordWindow.DialogResult == null || !passwordWindow.DialogResult.Value)
+			{
+				return;
+			}
+			var password = passwordWindow.Password.Text;
+
+			// Build up the full path to the password file. GetFullPath ensures that
+			// all directory separators match.
+			var fullPath = Path.GetFullPath(Path.Combine(ConfigManager.Config.PasswordStore, path));
+			// Ensure the file's parent directory exists.
+			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+
+			using (var writer = new StreamWriter(File.OpenWrite(fullPath)))
+			{
+				writer.Write(password);
+			}
+			new GPG(ConfigManager.Config.GpgPath).Encrypt(fullPath);
 		}
 
 		private void UpdatePasswordStore()
