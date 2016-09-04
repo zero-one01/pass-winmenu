@@ -56,6 +56,16 @@ namespace PassWinmenu.ExternalPrograms
 		{
 			return RunGPG($"--decrypt \"{file}\"");
 		}
+
+		/// <summary>
+		/// Encrypt a file with GPG.
+		/// </summary>
+		/// <param name="file">The path to the file to be encrypted.</param>
+		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
+		public void Encrypt(string file)
+		{
+			RunGPG($"--default-recipient-self --encrypt \"{file}\"");
+		}
 	}
 	
 	internal class GpgException : Exception
