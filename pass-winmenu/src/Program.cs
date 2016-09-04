@@ -193,7 +193,7 @@ namespace PassWinmenu
 			icon.Icon = EmbeddedResources.Icon;
 			icon.Visible = true;
 			var menu = new ContextMenuStrip();
-			menu.Items.Add(new ToolStripLabel("pass-winmenu v0.2.2"));
+			menu.Items.Add(new ToolStripLabel("pass-winmenu v0.2.3-git"));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password");
 			menu.Items.Add("Update Password Store");
