@@ -197,7 +197,7 @@ namespace PassWinmenu
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password");
 			menu.Items.Add("Update Password Store");
-			menu.Items.Add("Add new password");
+			menu.Items.Add("Add new Password");
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Start with Windows");
 			menu.Items.Add("About");
