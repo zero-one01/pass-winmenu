@@ -259,7 +259,23 @@ namespace PassWinmenu
 			{
 				writer.Write(password);
 			}
-			new GPG(ConfigManager.Config.GpgPath).Encrypt(fullPath);
+			try
+			{
+				new GPG(ConfigManager.Config.GpgPath).Encrypt(fullPath);
+			}
+			catch (GpgException e)
+			{
+				RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
+				return;
+			}
+			finally
+			{
+				File.Delete(fullPath);
+			}
+			
+			// Copy the newly generated password.
+			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
+			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 		}
 
 		private void UpdatePasswordStore()
@@ -340,6 +356,9 @@ namespace PassWinmenu
 		{
 			if (ConfigManager.Config.Output.DeadKeys)
 			{
+				// If dead keys are enabled, insert a space directly after each dead key to prevent
+				// it from being combined with the character following it.
+				// See https://en.wikipedia.org/wiki/Dead_key
 				var deadKeys = new[] { "\"", "'", "`", "~", "^" };
 				text = deadKeys.Aggregate(text, (current, key) => current.Replace(key, key + " "));
 			}

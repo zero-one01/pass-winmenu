@@ -41,7 +41,7 @@ namespace PassWinmenu.ExternalPrograms
 			var result = proc.StandardOutput.ReadToEnd();
 			if (proc.ExitCode != 0)
 			{
-				throw new GpgException(proc.ExitCode);
+				throw new GpgException(proc.ExitCode, result);
 			}
 			return result;
 		}
@@ -71,10 +71,14 @@ namespace PassWinmenu.ExternalPrograms
 	internal class GpgException : Exception
 	{
 		public int ExitCode { get; }
+		public string GpgOutput { get; }
+		public override string Message { get; }
 
-		public GpgException(int exitCode)
+		public GpgException(int exitCode, string output)
 		{
 			ExitCode = exitCode;
+			GpgOutput = output;
+			Message = "GPG exited with code " + exitCode;
 		}
 	}
 }
