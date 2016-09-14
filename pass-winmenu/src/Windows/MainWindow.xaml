@@ -7,13 +7,14 @@
         Title="pass-winmenu (menu)" Width="500" WindowStartupLocation="Manual" Left="0" Top="0" AllowsTransparency="True" WindowStyle="None"
         ResizeMode="NoResize" Height="30">
 	<Grid Name="Grid">
+		<TextBox x:Name="SearchBox"
+		         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
+		         MinWidth="1"
+		         Margin="0,0,5,0"
+		         TextWrapping="NoWrap"
+		         TextChanged="SearchBox_OnTextChanged"/>
 		<WrapPanel Name="WrapPanel">
-			<TextBox x:Name="SearchBox"
-			         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
-			         MinWidth="1"
-			         Margin="0,0,5,0"
-			         TextWrapping="NoWrap"
-			         TextChanged="SearchBox_OnTextChanged"/>
+
 		</WrapPanel>
 	</Grid>
 </Window>

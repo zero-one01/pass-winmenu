@@ -116,7 +116,15 @@ namespace PassWinmenu
 				return null;
 			}
 
-			var menu = new Windows.MainWindow(options, new Vector(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top), new Vector(width, height));
+			System.Windows.Controls.Orientation orientation;
+
+			if (!Enum.TryParse(ConfigManager.Config.Style.Orientation, true, out orientation))
+			{
+				RaiseNotification($"Unable to parse the menu orientation from the config file.", ToolTipIcon.Error);
+				return null;
+			}
+
+			var menu = new Windows.MainWindow(options, new Vector(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top), new Vector(width, height), orientation);
 			menu.ShowDialog();
 			if (menu.Success)
 			{

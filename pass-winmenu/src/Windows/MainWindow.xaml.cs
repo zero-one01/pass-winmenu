@@ -42,10 +42,41 @@ namespace PassWinmenu.Windows
 		/// <param name="options">A list of options the user should choose from.</param>
 		/// <param name="position">A vector representing the position of the top-left corner of the window.</param>
 		/// <param name="dimensions">A vector representing the width and height of the window.</param>
-		public MainWindow(IEnumerable<string> options, Vector position, Vector dimensions)
+		/// <param name="orientation">The orientation along which the options will be shown.</param>
+		public MainWindow(IEnumerable<string> options, Vector position, Vector dimensions, Orientation orientation)
 		{
 			style = ConfigManager.Config.Style;
 			InitializeComponent();
+
+			if (orientation == Orientation.Vertical)
+			{
+				WrapPanel.Orientation = Orientation.Vertical;
+				// In order to prevent its content from wrapping, the WrapPanel should be added to a ScrollViewer.
+				var scrollViewer = new ScrollViewer
+				{
+					VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+					Content = WrapPanel,
+					Margin = new Thickness
+					{
+						Top = 25,
+						Right = WrapPanel.Margin.Right,
+						Bottom = WrapPanel.Margin.Bottom,
+						Left = WrapPanel.Margin.Left
+					}
+				};
+				// The WrapPanel must be removed from the grid before its ScrollViewer can be added.
+				Grid.Children.Remove(WrapPanel);
+				Grid.Children.Add(scrollViewer);
+
+				// Reorient the searchbox so its margins match those of the WrapPanel.
+				SearchBox.Margin = new Thickness(5, 5, 5, 5);
+			}
+			else
+			{
+				Grid.Children.Remove(SearchBox);
+				WrapPanel.Children.Add(SearchBox);
+			}
+
 
 			SearchBox.Background = BrushFromColourString(style.Search.BackgroundColour);
 			SearchBox.Foreground = BrushFromColourString(style.Search.TextColour);
@@ -76,6 +107,7 @@ namespace PassWinmenu.Windows
 				Options.Add(label);
 				WrapPanel.Children.Add(label);
 			}
+
 			Select(Options.First());
 		}
 
@@ -130,6 +162,7 @@ namespace PassWinmenu.Windows
 			Selected.Background = BrushFromColourString(style.Selection.BackgroundColour);
 			Selected.Foreground = BrushFromColourString(style.Selection.TextColour);
 			Selected.BorderThickness = new Thickness(style.Selection.BorderWidth);
+			Selected.BringIntoView();
 		}
 
 		/// <summary>
@@ -230,6 +263,16 @@ namespace PassWinmenu.Windows
 						Select(FindPrevious(selectionIndex));
 					break;
 				case Key.Right:
+					e.Handled = true;
+					if (selectionIndex < Options.Count - 1)
+						Select(FindNext(selectionIndex));
+					break;
+				case Key.Up:
+					e.Handled = true;
+					if (selectionIndex > 0)
+						Select(FindPrevious(selectionIndex));
+					break;
+				case Key.Down:
 					e.Handled = true;
 					if (selectionIndex < Options.Count - 1)
 						Select(FindNext(selectionIndex));

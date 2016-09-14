@@ -37,14 +37,15 @@ namespace PassWinmenu.Configuration
 		public LabelStyleConfig Options { get; set; } = new LabelStyleConfig { TextColour = "#FFDDDDDD", BackgroundColour = "#00FFFFFF", BorderWidth = 0, BorderColour = "#FF000000" };
 		public LabelStyleConfig Selection { get; set; } = new LabelStyleConfig { TextColour = "#FFFFFFFF", BackgroundColour = "#FFD88900", BorderWidth = 0, BorderColour = "#FF000000" };
 
+		public string Orientation { get; set; } = "vertical";
 		public double FontSize { get; set; } = 14;
 		public string FontFamily { get; set; } = "Consolas";
 		public string BackgroundColour { get; set; } = "#FF202020";
 		// These have to be strings, because they need to support percentage values.
-		public string OffsetLeft { get; set; } = "0";
-		public string OffsetTop { get; set; } = "0";
-		public string Width { get; set; } = "100%";
-		public string Height { get; set; } = "18";
+		public string OffsetLeft { get; set; } = "40%";
+		public string OffsetTop { get; set; } = "40%";
+		public string Width { get; set; } = "20%";
+		public string Height { get; set; } = "20%";
 	}
 
 	internal class LabelStyleConfig
