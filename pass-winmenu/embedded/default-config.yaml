@@ -8,7 +8,9 @@
 # for your reference.
 hotkey: 'ctrl alt p'
 password-store: '%userprofile%\\.password-store'
-password-file-match: '*.gpg'
+# A regex string against which all filenames in the password directory are 
+# compared. All matching files are considered password files.
+password-file-match: '.*\.gpg$'
 # Path to the GPG executable. Can be either a command name (if GPG is added
 # to your PATH) or an absolute directory.
 gpg-path: 'gpg'

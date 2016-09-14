@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PassWinmenu.Configuration;
@@ -398,7 +399,11 @@ namespace PassWinmenu
 		/// <returns></returns>
 		private static IEnumerable<string> GetPasswordFiles(string directory, string pattern)
 		{
-			return Directory.EnumerateFiles(directory, pattern, SearchOption.AllDirectories);
+			var files = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories);
+
+			var matches = files.Where(f => Regex.IsMatch(Path.GetFileName(f), pattern)).ToArray();
+
+			return matches;
 		}
 
 		[STAThread]

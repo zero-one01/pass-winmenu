@@ -12,7 +12,7 @@ namespace PassWinmenu.Configuration
 		}
 
 		public string Hotkey { get; set; } = "ctrl alt p";
-		public string PasswordFileMatch { get; set; } = "*.gpg";
+		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";
 		public string GpgPath { get; set; } = "gpg";
 		public string GitPath { get; set; } = "git";
 		public double ClipboardTimeout { get; set; } = 30;
