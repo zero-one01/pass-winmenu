@@ -25,7 +25,7 @@ namespace PassWinmenu
 			Quit
 		}
 
-		private const string version = "0.3";
+		private const string version = "0.3-git";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
