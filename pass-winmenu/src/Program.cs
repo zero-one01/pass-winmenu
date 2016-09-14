@@ -23,6 +23,8 @@ namespace PassWinmenu
 			ShowSearch,
 			Quit
 		}
+
+		private const string version = "0.3";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
@@ -193,7 +195,7 @@ namespace PassWinmenu
 			icon.Icon = EmbeddedResources.Icon;
 			icon.Visible = true;
 			var menu = new ContextMenuStrip();
-			menu.Items.Add(new ToolStripLabel("pass-winmenu v0.2.3-git"));
+			menu.Items.Add(new ToolStripLabel("pass-winmenu v" + version));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password");
 			menu.Items.Add("Update Password Store");
