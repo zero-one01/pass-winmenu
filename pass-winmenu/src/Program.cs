@@ -223,7 +223,7 @@ namespace PassWinmenu
 					case "Update Password Store":
 						Task.Run((Action)UpdatePasswordStore);
 						break;
-					case "Add new password":
+					case "Add new Password":
 						AddPassword();
 						break;
 					case "Start with Windows":
