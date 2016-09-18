@@ -91,6 +91,7 @@ namespace PassWinmenu
 			}
 			if (!success) throw new InvalidOperationException();
 			hotkeyActions[hotkeyIdCounter] = action;
+			hotkeyIdCounter++;
 		}
 
 		public void DisposeHotkeys()

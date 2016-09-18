@@ -17,6 +17,8 @@ using Clipboard = System.Windows.Clipboard;
 
 namespace PassWinmenu
 {
+	delegate void ShowPasswordDelegate(bool copyToClipboard, bool typeUsername, bool typePassword);
+
 	internal class Program : Form
 	{
 		private enum MainThreadAction
@@ -25,12 +27,12 @@ namespace PassWinmenu
 			Quit
 		}
 
-		private const string version = "0.3.1-git";
+		private const string version = "0.3.2-git";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
-		//private readonly int hotkeyId;
+		//private readonly int hotkeyId
 
 		public Program()
 		{
@@ -40,8 +42,11 @@ namespace PassWinmenu
 			hotkeys = new Hotkeys(Handle);
 			try
 			{
-				var keys = Hotkeys.Parse(ConfigManager.Config.Hotkey);
-				hotkeys.AddHotKey(keys, ShowPassword);
+				foreach (var config in ConfigManager.Config.Hotkeys)
+				{
+					var keys = Hotkeys.Parse(config.Hotkey);
+					hotkeys.AddHotKey(keys, ()=> ShowPassword(config.CopyToClipboard, config.TypeUsername, config.TypePassword));
+				}
 			}
 			catch (Exception e) when (e is ArgumentException || e is Hotkeys.HotkeyException)
 			{
@@ -218,7 +223,7 @@ namespace PassWinmenu
 				switch (args.ClickedItem.Text)
 				{
 					case "Decrypt Password":
-						ShowPassword();
+						ShowPassword(true,false,false);
 						break;
 					case "Update Password Store":
 						Task.Run((Action)UpdatePasswordStore);
@@ -305,11 +310,11 @@ namespace PassWinmenu
 		/// <summary>
 		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
 		/// </summary>
-		private void ShowPassword()
+		private void ShowPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
 		{
 			if (InvokeRequired)
 			{
-				Invoke((MethodInvoker)ShowPassword);
+				Invoke((ShowPasswordDelegate)ShowPassword, copyToClipboard, typeUsername, typePassword);
 			}
 
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
@@ -333,19 +338,22 @@ namespace PassWinmenu
 				{
 					password = password.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).First();
 				}
-				if (ConfigManager.Config.Output.CopyToClipboard)
+				if (copyToClipboard)
 				{
 					CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
 					RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 				}
-				if (ConfigManager.Config.Output.TypePassword)
+				if (typeUsername)
 				{
-					if (ConfigManager.Config.Output.TypeUsername)
-					{
-						// Enter the username and press Tab.
-						EnterText(Path.GetFileName(result).Replace(".gpg", ""));
-						SendKeys.Send("{TAB}");
-					}
+					// Enter the username and press Tab.
+					EnterText(Path.GetFileName(result).Replace(".gpg", ""));
+					
+				}
+				if (typePassword)
+				{
+					// If a username has also been entered, press Tab to switch to the password field.
+					if(typeUsername) SendKeys.Send("{TAB}");
+
 					EnterText(password);
 				}
 

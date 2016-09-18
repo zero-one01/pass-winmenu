@@ -11,7 +11,6 @@ namespace PassWinmenu.Configuration
 			set { passwordStore = Environment.ExpandEnvironmentVariables(value); }
 		}
 
-		public string Hotkey { get; set; } = "ctrl alt p";
 		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";
 		public string GpgPath { get; set; } = "gpg";
 		public string GitPath { get; set; } = "git";
@@ -19,16 +18,36 @@ namespace PassWinmenu.Configuration
 		public string DirectorySeparator { get; set; } = "/";
 		public StyleConfig Style { get; set; } = new StyleConfig();
 		public OutputConfig Output { get; set; } = new OutputConfig();
+		public HotkeyConfig[] Hotkeys { get; set; } =
+		{
+			new HotkeyConfig
+			{
+				Hotkey = "ctrl alt p",
+				CopyToClipboard = true
+			},
+			new HotkeyConfig
+			{
+				Hotkey = "ctrl alt shift p",
+				CopyToClipboard = true,
+				TypeUsername = true,
+				TypePassword = true
+			}
+		};
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
 	}
 
 	internal class OutputConfig
 	{
-		public bool CopyToClipboard { get; set; } = true;
-		public bool TypePassword { get; set; } = false;
-		public bool TypeUsername { get; set; } = false;
 		public bool DeadKeys { get; set; } = false;
+	}
+
+	internal class HotkeyConfig
+	{
+		public string Hotkey { get; set; }
+		public bool CopyToClipboard { get; set; }
+		public bool TypeUsername { get; set; }
+		public bool TypePassword { get; set; }
 	}
 
 	internal class StyleConfig
