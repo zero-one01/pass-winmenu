@@ -35,13 +35,15 @@ namespace PassWinmenu.ExternalPrograms
 				UseShellExecute = false,
 				CreateNoWindow = true,
 				RedirectStandardOutput = true,
+				RedirectStandardError = true,
 				StandardOutputEncoding = Encoding.UTF8
 			});
 			proc.WaitForExit();
 			var result = proc.StandardOutput.ReadToEnd();
+			var error = proc.StandardError.ReadToEnd();
 			if (proc.ExitCode != 0)
 			{
-				throw new GpgException(proc.ExitCode, result);
+				throw new GpgException(proc.ExitCode, result, error);
 			}
 			return result;
 		}
@@ -72,12 +74,14 @@ namespace PassWinmenu.ExternalPrograms
 	{
 		public int ExitCode { get; }
 		public string GpgOutput { get; }
+		public string GpgError { get; }
 		public override string Message { get; }
 
-		public GpgException(int exitCode, string output)
+		public GpgException(int exitCode, string output, string error)
 		{
 			ExitCode = exitCode;
 			GpgOutput = output;
+			GpgError = error;
 			Message = "GPG exited with code " + exitCode;
 		}
 	}
