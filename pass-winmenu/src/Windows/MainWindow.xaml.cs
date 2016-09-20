@@ -77,7 +77,7 @@ namespace PassWinmenu.Windows
 				WrapPanel.Children.Add(SearchBox);
 			}
 
-
+			SearchBox.CaretBrush = BrushFromColourString(style.CaretColour);
 			SearchBox.Background = BrushFromColourString(style.Search.BackgroundColour);
 			SearchBox.Foreground = BrushFromColourString(style.Search.TextColour);
 			SearchBox.BorderThickness = new Thickness(style.Search.BorderWidth);
@@ -103,6 +103,18 @@ namespace PassWinmenu.Windows
 					Foreground = BrushFromColourString(style.Options.TextColour),
 					Padding = new Thickness(0, 0, 0, 2),
 					Margin = new Thickness(7, 0, 7, 0)
+				};
+				label.MouseLeftButtonUp += (sender, args) =>
+				{
+					if (label == Selected)
+					{
+						Success = true;
+						Close();
+					}
+					else
+					{
+						Select(label);
+					}
 				};
 				Options.Add(label);
 				WrapPanel.Children.Add(label);
