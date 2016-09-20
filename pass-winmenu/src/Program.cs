@@ -361,36 +361,44 @@ namespace PassWinmenu
 			// If the user cancels their selection, the password decryption should be cancelled too.
 			if (selection == null) return;
 
-			var result = shortNames[selection];
+			var selectedFile = shortNames[selection];
+			string password;
 			try
 			{
-				var password = gpg.Decrypt(result);
-				if (ConfigManager.Config.FirstLineOnly)
-				{
-					password = password.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None).First();
-				}
-				if (copyToClipboard)
-				{
-					CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
-					RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
-				}
-				if (typeUsername)
-				{
-					// Enter the username and press Tab.
-					EnterText(Path.GetFileName(result).Replace(".gpg", ""));
-				}
-				if (typePassword)
-				{
-					// If a username has also been entered, press Tab to switch to the password field.
-					if (typeUsername) SendKeys.Send("{TAB}");
-
-					EnterText(password);
-				}
+				password = gpg.Decrypt(selectedFile);
 			}
 			catch (GpgException e)
 			{
-				// Not the most descriptive of error messages, but it'll have to do for now.
-				RaiseNotification($"Password decryption failed. GPG returned exit code {e.ExitCode}", ToolTipIcon.Error);
+				if (string.IsNullOrEmpty(e.GpgError))
+				{
+					RaiseNotification($"Password decryption failed. GPG returned exit code {e.ExitCode}", ToolTipIcon.Error);
+				}
+				else
+				{
+					RaiseNotification($"Password decryption failed:\n" + e.GpgError, ToolTipIcon.Error);
+				}
+				return;
+			}
+
+			if (ConfigManager.Config.FirstLineOnly)
+			{
+				password = password.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).First();
+			}
+			if (copyToClipboard)
+			{
+				CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
+				RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+			}
+			if (typeUsername)
+			{
+				EnterText(Path.GetFileName(selectedFile).Replace(".gpg", ""));
+			}
+			if (typePassword)
+			{
+				// If a username has also been entered, press Tab to switch to the password field.
+				if (typeUsername) SendKeys.Send("{TAB}");
+
+				EnterText(password);
 			}
 		}
 
