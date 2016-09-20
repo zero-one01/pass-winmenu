@@ -89,11 +89,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\ExtensionMethods\StringExtensions.cs" />
     <Compile Include="src\Hotkeys.cs" />
     <Compile Include="src\NativeMethods.cs" />
     <Compile Include="src\Configuration\Config.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
-    <Compile Include="src\ExtensionMethods.cs" />
+    <Compile Include="src\ExtensionMethods\ScreenExtensions.cs" />
     <Compile Include="src\ExternalPrograms\Git.cs" />
     <Compile Include="src\ExternalPrograms\GPG.cs" />
     <Compile Include="src\Program.cs">

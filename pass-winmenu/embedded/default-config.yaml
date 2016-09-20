@@ -36,20 +36,36 @@ output:
     dead-keys: false
 
 # Here you can assign different hotkeys to different input methods.
+# Each hotkey is mapped to an action, which can be either 'decrypt-password'
+# or 'add-password'. Actions can be further configured using the 'options'
+# variable. Valid options for 'decrypt-password' are:
+# - copy-to-clipboard: (boolean)
+# - type-username: (boolean)
+# - type-password: (boolean)
+# The 'add-password' action has no configurable options.
+#
 # The default configuration has one hotkey for copying the password to your
 # clipboard, and one hotkey for automatically entering your username and
 # password into the topmost window.
 hotkeys:
   - 
     hotkey: 'ctrl alt p'
-    copy-to-clipboard: true
-    type-username: false
-    type-password: false
+    action: 'decrypt-password'
+    options:
+        copy-to-clipboard: true
+        type-username: false
+        type-password: false
   - 
     hotkey: 'ctrl alt shift p'
-    copy-to-clipboard: true
-    type-username: true
-    type-password: true
+    action: 'decrypt-password'
+    options:
+        copy-to-clipboard: true
+        type-username: true
+        type-password: true
+# Example configuration of an 'add password' hotkey. Uncomment to enable.
+#  - 
+#    hotkey: 'ctrl alt o'
+#    action: 'add-password'
 
 # All colour strings must be formatted as hexadecimal ARGB strings,
 # such as #AA00FF44. To 'unset' a colour, a fully transparent colour

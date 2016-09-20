@@ -36,7 +36,16 @@ namespace PassWinmenu
 
 		public Program()
 		{
-			ConfigManager.Load("pass-winmenu.yaml");
+			var result = ConfigManager.Load("pass-winmenu.yaml");
+			switch (result)
+			{
+				case ConfigManager.LoadResult.ParseFailure:
+					RaiseNotification($"The configuration file could not be loaded (Parse Error).\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
+					break;
+				case ConfigManager.LoadResult.FileCreationFailure:
+					RaiseNotification($"A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
+					break;
+			}
 
 			// Try to reload the config file when the user edits it.
 			configWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), "pass-winmenu.yaml");
@@ -51,10 +60,28 @@ namespace PassWinmenu
 			hotkeys = new Hotkeys(Handle);
 			try
 			{
-				foreach (var config in ConfigManager.Config.Hotkeys)
+				foreach (var hotkey in ConfigManager.Config.Hotkeys)
 				{
-					var keys = Hotkeys.Parse(config.Hotkey);
-					hotkeys.AddHotKey(keys, ()=> ShowPassword(config.CopyToClipboard, config.TypeUsername, config.TypePassword));
+					var keys = Hotkeys.Parse(hotkey.Hotkey);
+					HotkeyAction action;
+					try
+					{
+						action = hotkey.Action;
+					}
+					catch (ArgumentException)
+					{
+						RaiseNotification($"Invalid hotkey configuration in config.yaml.\nThe action \"{hotkey.ActionString}\" is not known.", ToolTipIcon.Error);
+						continue;
+					}
+					switch (action)
+					{
+						case HotkeyAction.DecryptPassword:
+							hotkeys.AddHotKey(keys, () => ShowPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
+							break;
+						case HotkeyAction.AddPassword:
+							hotkeys.AddHotKey(keys, AddPassword);
+							break;
+					}
 				}
 			}
 			catch (Exception e) when (e is ArgumentException || e is Hotkeys.HotkeyException)
@@ -142,7 +169,7 @@ namespace PassWinmenu
 			menu.ShowDialog();
 			if (menu.Success)
 			{
-				return (string)menu.Selected.Content;
+				return (string) menu.Selected.Content;
 			}
 			else
 			{
@@ -232,10 +259,10 @@ namespace PassWinmenu
 				switch (args.ClickedItem.Text)
 				{
 					case "Decrypt Password":
-						ShowPassword(true,false,false);
+						ShowPassword(true, false, false);
 						break;
 					case "Update Password Store":
-						Task.Run((Action)UpdatePasswordStore);
+						Task.Run((Action) UpdatePasswordStore);
 						break;
 					case "Add new Password":
 						AddPassword();
@@ -249,7 +276,6 @@ namespace PassWinmenu
 					case "Quit":
 						Close();
 						break;
-
 				}
 			};
 			icon.ContextMenuStrip = menu;
@@ -297,7 +323,7 @@ namespace PassWinmenu
 			{
 				File.Delete(fullPath);
 			}
-			
+
 			// Copy the newly generated password.
 			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
 			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
@@ -323,17 +349,13 @@ namespace PassWinmenu
 		{
 			if (InvokeRequired)
 			{
-				Invoke((ShowPasswordDelegate)ShowPassword, copyToClipboard, typeUsername, typePassword);
+				Invoke((ShowPasswordDelegate) ShowPassword, copyToClipboard, typeUsername, typePassword);
 			}
 
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
 
 			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
-			var shortNames = passFiles.ToDictionary(
-				file => GetRelativePath(file, ConfigManager.Config.PasswordStore)
-					.Replace("\\", ConfigManager.Config.DirectorySeparator)
-					.Replace(".gpg", ""),
-				file => file);
+			var shortNames = passFiles.ToDictionary(file => GetRelativePath(file, ConfigManager.Config.PasswordStore).Replace("\\", ConfigManager.Config.DirectorySeparator).Replace(".gpg", ""), file => file);
 
 			var selection = OpenMenu(shortNames.Keys);
 			// If the user cancels their selection, the password decryption should be cancelled too.
@@ -345,7 +367,7 @@ namespace PassWinmenu
 				var password = gpg.Decrypt(result);
 				if (ConfigManager.Config.FirstLineOnly)
 				{
-					password = password.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).First();
+					password = password.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None).First();
 				}
 				if (copyToClipboard)
 				{
@@ -356,16 +378,14 @@ namespace PassWinmenu
 				{
 					// Enter the username and press Tab.
 					EnterText(Path.GetFileName(result).Replace(".gpg", ""));
-					
 				}
 				if (typePassword)
 				{
 					// If a username has also been entered, press Tab to switch to the password field.
-					if(typeUsername) SendKeys.Send("{TAB}");
+					if (typeUsername) SendKeys.Send("{TAB}");
 
 					EnterText(password);
 				}
-
 			}
 			catch (GpgException e)
 			{
@@ -387,12 +407,12 @@ namespace PassWinmenu
 				// If dead keys are enabled, insert a space directly after each dead key to prevent
 				// it from being combined with the character following it.
 				// See https://en.wikipedia.org/wiki/Dead_key
-				var deadKeys = new[] { "\"", "'", "`", "~", "^" };
+				var deadKeys = new[] {"\"", "'", "`", "~", "^"};
 				text = deadKeys.Aggregate(text, (current, key) => current.Replace(key, key + " "));
 			}
 
 			// SendKeys.Send expects special characters to be escaped by wrapping them with curly braces.
-			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~'};
+			var specialCharacters = new[] {'{', '}', '[', ']', '(', ')', '+', '^', '%', '~'};
 			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
 		}

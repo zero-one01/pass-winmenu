@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace PassWinmenu
 {
-	internal static class ExtensionMethods
+	internal static class ScreenExtensions
 	{
 		public static double ParseSize(this Screen screen, string value, Direction direction)
 		{

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
+using PassWinmenu.ExtensionMethods;
+using YamlDotNet.Serialization;
 
 namespace PassWinmenu.Configuration
 {
@@ -23,14 +26,22 @@ namespace PassWinmenu.Configuration
 			new HotkeyConfig
 			{
 				Hotkey = "ctrl alt p",
-				CopyToClipboard = true
+				ActionString = "decrypt-password",
+				Options = new HotkeyOptions
+				{
+					CopyToClipboard = true
+				}
 			},
 			new HotkeyConfig
 			{
 				Hotkey = "ctrl alt shift p",
-				CopyToClipboard = true,
-				TypeUsername = true,
-				TypePassword = true
+				ActionString = "decrypt-password",
+				Options = new HotkeyOptions
+				{
+					CopyToClipboard = true,
+					TypeUsername = true,
+					TypePassword = true
+				}
 			}
 		};
 		public bool FirstLineOnly { get; set; } = true;
@@ -42,9 +53,24 @@ namespace PassWinmenu.Configuration
 		public bool DeadKeys { get; set; } = false;
 	}
 
+	internal enum HotkeyAction
+	{
+		DecryptPassword,
+		AddPassword
+	}
+
 	internal class HotkeyConfig
 	{
 		public string Hotkey { get; set; }
+		[YamlIgnore]
+		public HotkeyAction Action => (HotkeyAction)Enum.Parse(typeof(HotkeyAction), ActionString.ToPascalCase(), true);
+		[YamlMember(Alias = "action")]
+		public string ActionString { get; set; }
+		public HotkeyOptions Options { get; set; } = new HotkeyOptions();
+	}
+
+	internal class HotkeyOptions
+	{
 		public bool CopyToClipboard { get; set; }
 		public bool TypeUsername { get; set; }
 		public bool TypePassword { get; set; }
