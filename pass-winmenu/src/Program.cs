@@ -32,11 +32,20 @@ namespace PassWinmenu
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
-		//private readonly int hotkeyId
+		private readonly FileSystemWatcher configWatcher;
 
 		public Program()
 		{
 			ConfigManager.Load("pass-winmenu.yaml");
+
+			// Try to reload the config file when the user edits it.
+			configWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), "pass-winmenu.yaml");
+			configWatcher.Changed += (s,a) =>
+			{
+				ConfigManager.Reload("pass-winmenu.yaml");
+			};
+			configWatcher.EnableRaisingEvents = true;
+
 			CreateNotifyIcon();
 
 			hotkeys = new Hotkeys(Handle);

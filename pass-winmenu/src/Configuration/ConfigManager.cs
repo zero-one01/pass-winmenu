@@ -43,5 +43,22 @@ namespace PassWinmenu.Configuration
 			}
 			return LoadResult.Success;
 		}
+
+		public static void Reload(string fileName)
+		{
+			try
+			{
+				var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention(), ignoreUnmatched: false);
+				using (var reader = File.OpenText(fileName))
+				{
+					var newConfig = deserialiser.Deserialize<Config>(reader);
+					Config = newConfig;
+				}
+			}
+			catch (Exception)
+			{
+				// No need to do anything, we can simply continue using the old configuration.
+			}
+		}
 	}
 }
