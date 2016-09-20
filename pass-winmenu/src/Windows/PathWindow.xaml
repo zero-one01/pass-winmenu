@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PassWinmenu.Windows"
         mc:Ignorable="d"
-        Title="Enter Path..." Height="100" Width="300" ResizeMode="NoResize">
+        Title="Enter Path..." Height="110" Width="300" ResizeMode="NoResize" KeyUp="Window_KeyUp">
 	<Grid>
 		<TextBox x:Name="Path" Height="23" Margin="10,10,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top">
 			<TextBox.Style>

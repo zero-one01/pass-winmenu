@@ -21,6 +21,7 @@ namespace PassWinmenu.Windows
 	{
 		public PasswordWindow()
 		{
+			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			InitializeComponent();
 
 			Password.Text = GeneratePassword();
@@ -52,6 +53,15 @@ namespace PassWinmenu.Windows
 		{
 			DialogResult = false;
 			Close();
+		}
+
+		private void Window_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Escape)
+			{
+				DialogResult = false;
+				Close();
+			}
 		}
 	}
 }

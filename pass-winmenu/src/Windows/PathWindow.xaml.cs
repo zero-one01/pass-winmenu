@@ -21,6 +21,7 @@ namespace PassWinmenu.Windows
 	{
 		public PathWindow()
 		{
+			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			InitializeComponent();
 			Path.Focus();
 
@@ -36,6 +37,15 @@ namespace PassWinmenu.Windows
 		{
 			DialogResult = true;
 			Close();
+		}
+
+		private void Window_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Escape)
+			{
+				DialogResult = false;
+				Close();
+			}
 		}
 	}
 }
