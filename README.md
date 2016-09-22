@@ -22,7 +22,7 @@ Additionally, GPG and Git are required for the application to function correctly
 
 ## Configuration
 
-On first run, the application will generate a pass-winmenu.yaml file 
+On first run, the application will generate a `pass-winmenu.yaml` file 
 (containing all its settings initialised to their default value) in its current directory. 
 Edit the file and restart pass-winmenu to apply the changes.
 
