@@ -75,7 +75,7 @@ style:
     font-size: 14
     font-family: 'Consolas'
     background-colour: '#FF202020'
-	caret-colour: '#FFDDDDDD'
+    caret-colour: '#FFDDDDDD'
     # Offset and dimensions of the menu.
     offset-left: 40%
     offset-top: 40%
