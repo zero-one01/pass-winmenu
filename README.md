@@ -28,4 +28,4 @@ Edit the file and restart pass-winmenu to apply the changes.
 
 ## To do
 
-- Add further Git integration
+- Enable auto-reloading for all config file settings.
