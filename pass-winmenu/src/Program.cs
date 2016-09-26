@@ -248,8 +248,10 @@ namespace PassWinmenu
 			menu.Items.Add(new ToolStripLabel("pass-winmenu v" + version));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password");
-			menu.Items.Add("Update Password Store");
 			menu.Items.Add("Add new Password");
+			menu.Items.Add(new ToolStripSeparator());
+			menu.Items.Add("Push to Remote");
+			menu.Items.Add("Pull from Remote");
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Start with Windows");
 			menu.Items.Add("About");
@@ -261,7 +263,10 @@ namespace PassWinmenu
 					case "Decrypt Password":
 						ShowPassword(true, false, false);
 						break;
-					case "Update Password Store":
+					case "Push to Remote":
+						Task.Run((Action) CommitChanges);
+						break;
+					case "Pull from Remote":
 						Task.Run((Action) UpdatePasswordStore);
 						break;
 					case "Add new Password":
@@ -279,6 +284,30 @@ namespace PassWinmenu
 				}
 			};
 			icon.ContextMenuStrip = menu;
+		}
+
+		private void CommitChanges()
+		{
+			try
+			{
+				var changes = git.Commit();
+				if (changes.Count == 0)
+				{
+					RaiseNotification($"Nothing to commit, remote is already in sync.", ToolTipIcon.Info);
+				}
+				else
+				{
+					RaiseNotification($"Done. Committed changes:\n{string.Join(", ", changes)}.", ToolTipIcon.Info);
+				}
+			}
+			catch (GitException e)
+			{
+				RaiseNotification($"Failed to push your changes. Git returned an error (exit code {e.ExitCode}): {e.GitError}", ToolTipIcon.Error);
+			}
+			catch (Exception e)
+			{
+				RaiseNotification($"Failed to push your changes. An unknown error occurred. Error details:\n{e.GetType().Name}: {e.Message}", ToolTipIcon.Error);
+			}
 		}
 
 		private void AddPassword()
