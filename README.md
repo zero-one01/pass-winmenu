@@ -14,11 +14,12 @@ The password will be decrypted using GPG, and your GPG key passphrase may be req
 The decrypted password will then be copied to your clipboard and/or entered into the active window,
 depending on your `config.yaml` settings.
 
-## Requirements
+## Dependencies
 
 Pass-winmenu is built against .NET Framework 4.5.2, which should already be installed on every version
 of Windows since Windows 7.
 Additionally, GPG and Git are required for the application to function correctly.
+They don't have to be added to your PATH, but the executables must be reachable somehow.
 
 ## Configuration
 
