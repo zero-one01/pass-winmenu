@@ -56,7 +56,9 @@ namespace PassWinmenu.Configuration
 	internal enum HotkeyAction
 	{
 		DecryptPassword,
-		AddPassword
+		AddPassword,
+		GitPull,
+		GitPush
 	}
 
 	internal class HotkeyConfig

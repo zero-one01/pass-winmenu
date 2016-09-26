@@ -81,6 +81,12 @@ namespace PassWinmenu
 						case HotkeyAction.AddPassword:
 							hotkeys.AddHotKey(keys, AddPassword);
 							break;
+							case HotkeyAction.GitPull:
+							hotkeys.AddHotKey(keys, UpdatePasswordStore);
+							break;
+							case HotkeyAction.GitPush:
+							hotkeys.AddHotKey(keys, CommitChanges);
+							break;
 					}
 				}
 			}
