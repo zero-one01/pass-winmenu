@@ -36,13 +36,17 @@ output:
     dead-keys: false
 
 # Here you can assign different hotkeys to different input methods.
-# Each hotkey is mapped to an action, which can be either 'decrypt-password'
-# or 'add-password'. Actions can be further configured using the 'options'
-# variable. Valid options for 'decrypt-password' are:
+# Each hotkey is mapped to an action. Supported actions are:
+# - decrypt-password
+# - add-password
+# - git-pull
+# - git-push
+# Actions can be further configured using the 'options' variable. 
+# Valid options for 'decrypt-password' are:
 # - copy-to-clipboard: (boolean)
 # - type-username: (boolean)
 # - type-password: (boolean)
-# The 'add-password' action has no configurable options.
+# The other actions currently have no no configurable options.
 #
 # The default configuration has one hotkey for copying the password to your
 # clipboard, and one hotkey for automatically entering your username and
