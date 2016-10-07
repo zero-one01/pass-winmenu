@@ -29,4 +29,5 @@ Edit the file and restart pass-winmenu to apply the changes.
 
 ## To do
 
+- Log error details to a log file to assist with bug reports.
 - Enable auto-reloading for all config file settings.
