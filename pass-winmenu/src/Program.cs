@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -66,6 +67,8 @@ namespace PassWinmenu
 					HotkeyAction action;
 					try
 					{
+						// Reading the Action variable will cause it to be parsed from hotkey.ActionString.
+						// If this fails, an ArgumentException is thrown.
 						action = hotkey.Action;
 					}
 					catch (ArgumentException)
@@ -297,14 +300,36 @@ namespace PassWinmenu
 			try
 			{
 				var changes = git.Commit();
-				if (changes.Count == 0)
+
+				var sb = new StringBuilder();
+				if (changes.CommittedFiles.Count == 0)
 				{
-					RaiseNotification($"Nothing to commit, remote is already in sync.", ToolTipIcon.Info);
+					sb.AppendLine($"Nothing to commit (no changes since last pushed commit).");
+					if (changes.Pull.Commits.Count > 1)
+					{
+						sb.AppendLine($"{changes.Pull.Commits.Count} new commits were pulled from remote.");
+					}
+					else if (changes.Pull.Commits.Count == 1)
+					{
+						sb.AppendLine($"1 new commit was pulled from remote.");
+					}
+
+					RaiseNotification(sb.ToString(), ToolTipIcon.Info);
 				}
 				else
 				{
-					RaiseNotification($"Done. Committed changes:\n{string.Join(", ", changes)}.", ToolTipIcon.Info);
+					sb.AppendLine($"Pushed {changes.CommittedFiles.Count} changed file(s) to remote.");
+					if (changes.Pull.Commits.Count > 1)
+					{
+						sb.AppendLine($"Additionally, {changes.Pull.Commits.Count} new commits were pulled from remote.");
+					}
+					else if (changes.Pull.Commits.Count == 1)
+					{
+						sb.AppendLine($"Additionally, 1 new commit was pulled from remote.");
+					}
+					RaiseNotification(sb.ToString(), ToolTipIcon.Info);
 				}
+
 			}
 			catch (GitException e)
 			{
