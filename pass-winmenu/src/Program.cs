@@ -28,7 +28,7 @@ namespace PassWinmenu
 			Quit
 		}
 
-		private const string version = "0.4";
+		private const string version = "0.4.1-git";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
@@ -318,7 +318,7 @@ namespace PassWinmenu
 				}
 				else
 				{
-					sb.AppendLine($"Pushed {changes.CommittedFiles.Count} changed file(s) to remote.");
+					sb.AppendLine($"Pushed {changes.CommittedFiles.Count} changed file{(changes.CommittedFiles.Count > 1 ? "s":"")} to remote.");
 					if (changes.Pull.Commits.Count > 1)
 					{
 						sb.AppendLine($"Additionally, {changes.Pull.Commits.Count} new commits were pulled from remote.");
