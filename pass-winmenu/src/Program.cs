@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -262,6 +263,9 @@ namespace PassWinmenu
 			menu.Items.Add("Push to Remote");
 			menu.Items.Add("Pull from Remote");
 			menu.Items.Add(new ToolStripSeparator());
+			menu.Items.Add("Open Explorer");
+			menu.Items.Add("Open Shell");
+			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Start with Windows");
 			menu.Items.Add("About");
 			menu.Items.Add("Quit");
@@ -283,6 +287,16 @@ namespace PassWinmenu
 						break;
 					case "Start with Windows":
 						CreateShortcut();
+						break;
+					case "Open Explorer":
+						Process.Start(ConfigManager.Config.PasswordStore);
+						break;
+					case "Open Shell":
+						Process.Start(new ProcessStartInfo
+						{
+							FileName = "powershell",
+							WorkingDirectory = ConfigManager.Config.PasswordStore
+						});
 						break;
 					case "About":
 						Process.Start("https://github.com/Baggykiin/pass-winmenu");
