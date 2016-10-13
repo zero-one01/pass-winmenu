@@ -234,6 +234,7 @@ namespace PassWinmenu
 			dynamic shell = Activator.CreateInstance(t);
 			try
 			{
+				// Overwrite any previous links that might exist
 				if (File.Exists(shortcutPath))
 				{
 					File.Delete(shortcutPath);
