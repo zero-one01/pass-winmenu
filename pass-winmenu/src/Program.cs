@@ -29,7 +29,7 @@ namespace PassWinmenu
 			Quit
 		}
 
-		private const string version = "0.4.1-git";
+		private const string version = "0.5-git";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
@@ -195,15 +195,22 @@ namespace PassWinmenu
 		/// <param name="timeout">The amount of time, in seconds, the text should remain on the clipboard.</param>
 		private void CopyToClipboard(string value, double timeout)
 		{
+			// Try to save the current contents of the clipboard and restore them after the password is removed.
+			string previousText = "";
+			if (Clipboard.ContainsText())
+			{
+				previousText = Clipboard.GetText();
+			}
 			Clipboard.SetText(value);
 			Task.Delay(TimeSpan.FromSeconds(timeout)).ContinueWith(_ =>
 			{
 				Invoke((MethodInvoker) (() =>
 				{
-					// Only clear the clipboard if it still contains the text we copied to it.
+					// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
+					// If the clipboard did not previously contain any text, it is simply cleared.
 					if (Clipboard.ContainsText() && Clipboard.GetText() == value)
 					{
-						Clipboard.Clear();
+						Clipboard.SetText(previousText);
 					}
 				}));
 			});
