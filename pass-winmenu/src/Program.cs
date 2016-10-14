@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,22 +18,15 @@ using Clipboard = System.Windows.Clipboard;
 
 namespace PassWinmenu
 {
-	delegate void ShowPasswordDelegate(bool copyToClipboard, bool typeUsername, bool typePassword);
+	internal delegate void DecryptPasswordDelegate(bool copyToClipboard, bool typeUsername, bool typePassword);
 
 	internal class Program : Form
 	{
-		private enum MainThreadAction
-		{
-			ShowSearch,
-			Quit
-		}
-
 		private const string version = "0.5-git";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
-		private readonly FileSystemWatcher configWatcher;
 
 		public Program()
 		{
@@ -50,7 +42,7 @@ namespace PassWinmenu
 			}
 
 			// Try to reload the config file when the user edits it.
-			configWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), "pass-winmenu.yaml");
+			var configWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), "pass-winmenu.yaml");
 			configWatcher.Changed += (s,a) =>
 			{
 				ConfigManager.Reload("pass-winmenu.yaml");
@@ -80,7 +72,7 @@ namespace PassWinmenu
 					switch (action)
 					{
 						case HotkeyAction.DecryptPassword:
-							hotkeys.AddHotKey(keys, () => ShowPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
+							hotkeys.AddHotKey(keys, () => DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
 							break;
 						case HotkeyAction.AddPassword:
 							hotkeys.AddHotKey(keys, AddPassword);
@@ -102,15 +94,17 @@ namespace PassWinmenu
 			}
 			Name = "pass-winmenu (main window)";
 		}
-
+		
 		protected override void WndProc(ref Message m)
 		{
 			base.WndProc(ref m);
+			// Pass window messages on to the hotkey handler.
 			hotkeys?.WndProc(ref m);
 		}
-
+		
 		protected override void SetVisibleCore(bool value)
 		{
+			// Do not allow this window to be made visible.
 			base.SetVisibleCore(false);
 		}
 
@@ -126,13 +120,24 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Opens the menu and displays it to the user, allowing them to choose an option.
+		/// Opens the password menu and displays it to the user, allowing them to choose an option.
 		/// </summary>
 		/// <param name="options">A list of options the user can choose from.</param>
 		/// <returns>One of the values contained in <paramref name="options"/>, or null if no option was chosen.</returns>
-		private string OpenMenu(IEnumerable<string> options)
+		private string ShowPasswordMenu(IEnumerable<string> options)
 		{
-			var menu = new Windows.PasswordSelectionWindow(options, GetMenuConfiguration());
+			MainWindowConfiguration windowConfig;
+			try
+			{
+				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
+			}
+			catch (ConfigurationParseException e)
+			{
+				RaiseNotification(e.Message, ToolTipIcon.Error);
+				return null;
+			}
+
+			var menu = new PasswordSelectionWindow(options, windowConfig);
 			menu.ShowDialog();
 			if (menu.Success)
 			{
@@ -180,6 +185,9 @@ namespace PassWinmenu
 			base.OnFormClosed(e);
 		}
 
+		/// <summary>
+		/// Creates a shortcut to the application, overwriting any existing shortcuts with the same name.
+		/// </summary>
 		private void CreateShortcut()
 		{
 			// Open the startup folder in the default file explorer (usually Windows Explorer).
@@ -215,6 +223,9 @@ namespace PassWinmenu
 			}
 		}
 
+		/// <summary>
+		/// Creates a notification area icon for the application.
+		/// </summary>
 		private void CreateNotifyIcon()
 		{
 			icon.Icon = EmbeddedResources.Icon;
@@ -239,7 +250,7 @@ namespace PassWinmenu
 				switch (args.ClickedItem.Text)
 				{
 					case "Decrypt Password":
-						ShowPassword(true, false, false);
+						DecryptPassword(true, false, false);
 						break;
 					case "Push to Remote":
 						Task.Run((Action) CommitChanges);
@@ -274,6 +285,10 @@ namespace PassWinmenu
 			icon.ContextMenuStrip = menu;
 		}
 
+		/// <summary>
+		/// Commits all local changes and pushes them to remote.
+		/// Also pulls any upcoming changes from remote.
+		/// </summary>
 		private void CommitChanges()
 		{
 			try
@@ -283,14 +298,14 @@ namespace PassWinmenu
 				var sb = new StringBuilder();
 				if (changes.CommittedFiles.Count == 0)
 				{
-					sb.AppendLine($"Nothing to commit (no changes since last pushed commit).");
+					sb.AppendLine("Nothing to commit (no changes since last pushed commit).");
 					if (changes.Pull.Commits.Count > 1)
 					{
 						sb.AppendLine($"{changes.Pull.Commits.Count} new commits were pulled from remote.");
 					}
 					else if (changes.Pull.Commits.Count == 1)
 					{
-						sb.AppendLine($"1 new commit was pulled from remote.");
+						sb.AppendLine("1 new commit was pulled from remote.");
 					}
 
 					RaiseNotification(sb.ToString(), ToolTipIcon.Info);
@@ -304,7 +319,7 @@ namespace PassWinmenu
 					}
 					else if (changes.Pull.Commits.Count == 1)
 					{
-						sb.AppendLine($"Additionally, 1 new commit was pulled from remote.");
+						sb.AppendLine("Additionally, 1 new commit was pulled from remote.");
 					}
 					RaiseNotification(sb.ToString(), ToolTipIcon.Info);
 				}
@@ -320,66 +335,24 @@ namespace PassWinmenu
 			}
 		}
 
-		private MainWindowConfiguration GetMenuConfiguration()
-		{
-			Screen selectedScreen;
-			if (ConfigManager.Config.FollowCursor)
-			{
-				// Find the screen that currently contains the mouse cursor.
-				selectedScreen = Screen.AllScreens.First(screen => screen.Bounds.Contains(Cursor.Position));
-			}
-			else
-			{
-				selectedScreen = Screen.PrimaryScreen;
-			}
-
-			double left, top, width, height;
-			try
-			{
-				// The menu position may either be specified in pixels or percentage values.
-				// ParseSize takes care of parsing both into a double (representing pixel values).
-				left = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetLeft, Direction.Horizontal);
-				top = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetTop, Direction.Vertical);
-			}
-			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
-			{
-				RaiseNotification($"Unable to parse the menu position from the config file (reason: {e.Message})", ToolTipIcon.Error);
-				return null;
-			}
-			try
-			{
-				width = selectedScreen.ParseSize(ConfigManager.Config.Style.Width, Direction.Horizontal);
-				height = selectedScreen.ParseSize(ConfigManager.Config.Style.Height, Direction.Vertical);
-			}
-			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
-			{
-				RaiseNotification($"Unable to parse the menu dimensions from the config file (reason: {e.Message})", ToolTipIcon.Error);
-				return null;
-			}
-
-			System.Windows.Controls.Orientation orientation;
-
-			if (!Enum.TryParse(ConfigManager.Config.Style.Orientation, true, out orientation))
-			{
-				RaiseNotification($"Unable to parse the menu orientation from the config file.", ToolTipIcon.Error);
-				return null;
-			}
-
-			return new MainWindowConfiguration
-			{
-				Dimensions = new Vector(width, height),
-				Position = new Vector(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top),
-				Orientation = orientation
-			};
-		}
-
+		/// <summary>
+		/// Adds a new password to the password store.
+		/// </summary>
 		private void AddPassword()
 		{
-			//var pathWindow = new PathWindow();
-			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore, GetMenuConfiguration());
+			MainWindowConfiguration windowConfig;
+			try
+			{
+				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
+			}
+			catch (ConfigurationParseException e)
+			{
+				RaiseNotification(e.Message, ToolTipIcon.Error);
+				return;
+			}
 
-			var passwordWindow = new PasswordWindow();
-
+			// Ask the user where the password file should be placed.
+			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore, windowConfig);
 			pathWindow.ShowDialog();
 			if (!pathWindow.Success)
 			{
@@ -387,6 +360,8 @@ namespace PassWinmenu
 			}
 			var path = pathWindow.GetSelection();
 
+			// Display the password generation window.
+			var passwordWindow = new PasswordWindow();
 			passwordWindow.ShowDialog();
 			if (passwordWindow.DialogResult == null || !passwordWindow.DialogResult.Value)
 			{
@@ -400,6 +375,8 @@ namespace PassWinmenu
 			// Ensure the file's parent directory exists.
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
+			// TODO: send the password directly to GPG instead of asking it to encrypt a file
+			// Write the password to a plaintext file.
 			using (var writer = new StreamWriter(File.OpenWrite(fullPath)))
 			{
 				writer.Write(password);
@@ -415,6 +392,8 @@ namespace PassWinmenu
 			}
 			finally
 			{
+				// Regardless of whether encrypting it was successful or not,
+				// the plaintext file should always be deleted.
 				File.Delete(fullPath);
 			}
 
@@ -423,6 +402,9 @@ namespace PassWinmenu
 			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 		}
 
+		/// <summary>
+		/// Updates the password store so it's in sync with remote again.
+		/// </summary>
 		private void UpdatePasswordStore()
 		{
 			try
@@ -430,7 +412,7 @@ namespace PassWinmenu
 				var result = git.Update();
 				RaiseNotification(result, ToolTipIcon.Info);
 			}
-			catch (GitException e)
+			catch (GitException)
 			{
 				RaiseNotification("Failed to update the password store.\nYou might have to update it manually.", ToolTipIcon.Error);
 			}
@@ -439,11 +421,12 @@ namespace PassWinmenu
 		/// <summary>
 		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
 		/// </summary>
-		private void ShowPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
+		private void DecryptPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
 		{
+			// We need to be on the main thread for this.
 			if (InvokeRequired)
 			{
-				Invoke((ShowPasswordDelegate) ShowPassword, copyToClipboard, typeUsername, typePassword);
+				Invoke((DecryptPasswordDelegate) DecryptPassword, copyToClipboard, typeUsername, typePassword);
 			}
 
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
@@ -451,7 +434,7 @@ namespace PassWinmenu
 			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
 			var shortNames = passFiles.ToDictionary(file => GetRelativePath(file, ConfigManager.Config.PasswordStore).Replace("\\", ConfigManager.Config.DirectorySeparator).Replace(".gpg", ""), file => file);
 
-			var selection = OpenMenu(shortNames.Keys);
+			var selection = ShowPasswordMenu(shortNames.Keys);
 			// If the user cancels their selection, the password decryption should be cancelled too.
 			if (selection == null) return;
 
@@ -469,10 +452,11 @@ namespace PassWinmenu
 				}
 				else
 				{
-					RaiseNotification($"Password decryption failed:\n" + e.GpgError, ToolTipIcon.Error);
+					RaiseNotification("Password decryption failed:\n" + e.GpgError, ToolTipIcon.Error);
 				}
 				return;
 			}
+			var extraContent = Regex.Match(password, @".*?(?:\r\n|\n)(.*)", RegexOptions.Singleline).Groups[1].Value;
 
 			if (ConfigManager.Config.FirstLineOnly)
 			{
@@ -485,7 +469,7 @@ namespace PassWinmenu
 			}
 			if (typeUsername)
 			{
-				EnterText(Path.GetFileName(selectedFile).Replace(".gpg", ""));
+				EnterText(GetUsername(selectedFile, extraContent));
 			}
 			if (typePassword)
 			{
@@ -494,6 +478,11 @@ namespace PassWinmenu
 
 				EnterText(password);
 			}
+		}
+
+		private string GetUsername(string passwordFile, string contents)
+		{
+			return Path.GetFileName(passwordFile).Replace(".gpg", "");
 		}
 
 		/// <summary>
