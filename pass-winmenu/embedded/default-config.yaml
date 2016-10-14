@@ -1,6 +1,6 @@
 # This is the default configuration file for pass-winmenu.
 # If your password store is is located at %userprofile%\.password-store
-# and GPG and git are accessible from your PATH, this settings file will work
+# and GPG and Git are accessible from your PATH, this settings file will work
 # out of the box. Otherwise, you'll have to tweak it a bit.
 
 # All values in this file are set to pass-winmenu's default settings,
@@ -13,7 +13,7 @@ password-file-match: '.*\.gpg$'
 # Path to the GPG executable. Can be either a command name (if GPG is added
 # to your PATH) or an absolute directory.
 gpg-path: 'gpg'
-# Path to the git executable.
+# Path to the Git executable.
 git-path: 'git'
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30
@@ -43,10 +43,10 @@ output:
 # - git-push
 # Actions can be further configured using the 'options' variable. 
 # Valid options for 'decrypt-password' are:
-# - copy-to-clipboard: (boolean)
-# - type-username: (boolean)
-# - type-password: (boolean)
-# The other actions currently have no no configurable options.
+# - copy-to-clipboard: (true/false)
+# - type-username: (true/false)
+# - type-password: (true/false)
+# The other actions currently have no configurable options.
 #
 # The default configuration has one hotkey for copying the password to your
 # clipboard, and one hotkey for automatically entering your username and
@@ -74,6 +74,7 @@ hotkeys:
 # If you have added a hotkey where pass-winmenu enters a username and
 # a password, you can choose here how you want the application to determine
 # the correct username. Uncomment whichever method you prefer to enable it.
+# Make sure the other methods are commented out!
 username-detection:
     # Use the filename of the password file as the username
 #    method: 'filename'
