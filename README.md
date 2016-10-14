@@ -24,7 +24,7 @@ They don't have to be added to your PATH, but the executables must be reachable 
 ## Configuration
 
 On first run, the application will generate a `pass-winmenu.yaml` file 
-(containing all its settings initialised to their default value) in its current directory. 
+(containing all its settings initialised to their default values) in its current directory. 
 Edit the file and restart pass-winmenu to apply the changes.
 
 ## To do
