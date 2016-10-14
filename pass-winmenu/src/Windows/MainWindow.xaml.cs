@@ -144,12 +144,12 @@ namespace PassWinmenu.Windows
 			{
 				if (label == Selected)
 				{
-					Success = true;
-					Close();
+					HandleSelect();
 				}
 				else
 				{
 					Select(label);
+					HandleSelectionChange(label);
 				}
 			};
 			return label;
@@ -269,7 +269,7 @@ namespace PassWinmenu.Windows
 			
 		}
 
-		protected abstract void HandleEnterKey();
+		protected abstract void HandleSelect();
 
 		private void SearchBox_OnPreviewKeyDown(object sender, KeyEventArgs e)
 		{
@@ -314,7 +314,7 @@ namespace PassWinmenu.Windows
 					break;
 				case Key.Enter:
 					e.Handled = true;
-					HandleEnterKey();
+					HandleSelect();
 					break;
 				case Key.Escape:
 					e.Handled = true;

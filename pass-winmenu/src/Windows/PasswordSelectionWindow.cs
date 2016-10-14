@@ -53,7 +53,7 @@ namespace PassWinmenu.Windows
 			}
 		}
 
-		protected override void HandleEnterKey()
+		protected override void HandleSelect()
 		{
 			Success = true;
 			Close();

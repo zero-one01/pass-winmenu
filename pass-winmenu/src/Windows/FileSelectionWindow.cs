@@ -51,9 +51,9 @@ namespace PassWinmenu.Windows
 			RedrawLabels(completions);
 		}
 
-		protected override void HandleEnterKey()
+		protected override void HandleSelect()
 		{
-			// If enter is pressed on a suggestion, put that suggestion in the searchbox.
+			// If a suggestion is selected, put that suggestion in the searchbox.
 			if (Options.IndexOf(Selected) > 0)
 			{
 				var selection = GetSelection();
