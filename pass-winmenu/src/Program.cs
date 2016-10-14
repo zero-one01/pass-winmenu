@@ -392,8 +392,7 @@ namespace PassWinmenu
 			}
 			finally
 			{
-				// Regardless of whether encrypting it was successful or not,
-				// the plaintext file should always be deleted.
+				// Irrespective of whether encryption succeeds, the file must be deleted.
 				File.Delete(fullPath);
 			}
 
@@ -456,6 +455,7 @@ namespace PassWinmenu
 				}
 				return;
 			}
+			// The extra content begins after the first line.
 			var extraContent = Regex.Match(password, @".*?(?:\r\n|\n)(.*)", RegexOptions.Singleline).Groups[1].Value;
 
 			if (ConfigManager.Config.FirstLineOnly)
@@ -467,22 +467,52 @@ namespace PassWinmenu
 				CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
 				RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 			}
+			var usernameEntered = false;
 			if (typeUsername)
 			{
-				EnterText(GetUsername(selectedFile, extraContent));
+				var username = GetUsername(selectedFile, extraContent);
+				if (username != null)
+				{
+					EnterText(username);
+					usernameEntered = true;
+				}
 			}
 			if (typePassword)
 			{
 				// If a username has also been entered, press Tab to switch to the password field.
-				if (typeUsername) SendKeys.Send("{TAB}");
+				if (usernameEntered) SendKeys.Send("{TAB}");
 
 				EnterText(password);
 			}
 		}
 
+		/// <summary>
+		/// Attepts to retrieve the username from a password file.
+		/// </summary>
+		/// <param name="passwordFile">The name of the password file.</param>
+		/// <param name="contents">The extra content of the password file.</param>
+		/// <returns>A string containing the username if the password file contains one, null if no username was found.</returns>
 		private string GetUsername(string passwordFile, string contents)
 		{
-			return Path.GetFileName(passwordFile).Replace(".gpg", "");
+			var options = ConfigManager.Config.UsernameDetection.Options;
+			switch (ConfigManager.Config.UsernameDetection.Method)
+			{
+				case UsernameDetectionMethod.FileName:
+					return Path.GetFileName(passwordFile).Replace(".gpg", "");
+				case UsernameDetectionMethod.LineNumber:
+					var extraLines = contents.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None);
+					var lineNumber = options.LineNumber - 2;
+					if(lineNumber <= 1) RaiseNotification("Failed to read username from password file: username-detection.options.line-number must be set to 2 or higher.", ToolTipIcon.Warning);
+					return lineNumber < extraLines.Length ? extraLines[lineNumber] : null;
+				case UsernameDetectionMethod.Regex:
+					var rgxOptions = options.RegexOptions.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
+					rgxOptions = rgxOptions | (options.RegexOptions.Multiline ? RegexOptions.Multiline : RegexOptions.None);
+					rgxOptions = rgxOptions | (options.RegexOptions.Singleline ? RegexOptions.Singleline : RegexOptions.None);
+					var match = Regex.Match(contents, options.Regex, rgxOptions);
+					return match.Groups["username"].Success ? match.Groups["username"].Value : null;
+				default:
+					throw new ArgumentOutOfRangeException("username-detection.method", "Invalid username detection method.");
+			}
 		}
 
 		/// <summary>

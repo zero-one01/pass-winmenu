@@ -44,6 +44,7 @@ namespace PassWinmenu.Configuration
 				}
 			}
 		};
+		public UsernameDetectionConfig UsernameDetection { get; set; } = new UsernameDetectionConfig();
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
 	}
@@ -51,6 +52,36 @@ namespace PassWinmenu.Configuration
 	internal class OutputConfig
 	{
 		public bool DeadKeys { get; set; } = false;
+	}
+
+	internal class UsernameDetectionConfig
+	{
+		[YamlIgnore]
+		public UsernameDetectionMethod Method => (UsernameDetectionMethod) Enum.Parse(typeof (UsernameDetectionMethod), MethodString.ToPascalCase(), true);
+		[YamlMember(Alias = "method")]
+		public string MethodString { get; set; } = "regex";
+		public UsernameDetectionOptions Options { get; set; } = new UsernameDetectionOptions();
+	}
+
+	internal class UsernameDetectionOptions
+	{
+		public int LineNumber { get; set; } = 2;
+		public string Regex { get; set; } = @"^[Uu]sername: ((?<username>.*)\r|(?<username>.*))$";
+		public UsernameDetectionRegexOptions RegexOptions { get; set; } = new UsernameDetectionRegexOptions();
+	}
+
+	internal class UsernameDetectionRegexOptions
+	{
+		public bool IgnoreCase { get; set; } = false;
+		public bool Multiline { get; set; } = true;
+		public bool Singleline { get; set; } = false;
+	}
+
+	internal enum UsernameDetectionMethod
+	{
+		FileName,
+		LineNumber,
+		Regex
 	}
 
 	internal enum HotkeyAction

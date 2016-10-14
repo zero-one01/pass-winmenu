@@ -79,7 +79,8 @@ username-detection:
 #    method: 'filename'
 
     # Read the text on a specified line in the password file and use that
-    # as the username.
+    # as the username. Note that reading line number 1 (the password line)
+    # is not supported.
 #    method: 'line-number'
 #    options:
 #        line-number: 2
@@ -90,10 +91,10 @@ username-detection:
     # capturing group.
     method: 'regex'
     options:
-        regex: '^Username: (?\<username>.*)$'
+        regex: '^[Uu]sername: ((?<username>.*)\r|(?<username>.*))$'
         regex-options:
             ignore-case: false
-            multiline: false
+            multiline: true
             singleline: false
 
 # All colour strings must be formatted as hexadecimal ARGB strings,
