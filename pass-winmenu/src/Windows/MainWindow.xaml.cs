@@ -131,7 +131,8 @@ namespace PassWinmenu.Windows
 				Background = BrushFromColourString(StyleConfig.Options.BackgroundColour),
 				Foreground = BrushFromColourString(StyleConfig.Options.TextColour),
 				Padding = new Thickness(0, 0, 0, 2),
-				Margin = new Thickness(7, 0, 7, 0)
+				Margin = new Thickness(7, 0, 7, 0),
+				Cursor = Cursors.Hand
 			};
 			label.MouseLeftButtonUp += (sender, args) =>
 			{
@@ -144,6 +145,8 @@ namespace PassWinmenu.Windows
 					Select(label);
 					HandleSelectionChange(label);
 				}
+				// Return focus to the searchbox so the user can continue typing immediately.
+				SearchBox.Focus();
 			};
 			return label;
 		}
