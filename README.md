@@ -26,10 +26,3 @@ They don't have to be added to your PATH, but the executables must be reachable 
 On first run, the application will generate a `pass-winmenu.yaml` file 
 (containing all its settings initialised to their default values) in its current directory. 
 Edit the file and restart pass-winmenu to apply the changes.
-
-## To do
-
-- Log error details to a log file to assist with bug reports.
-- Enable auto-reloading for all config file settings.
-- Allow entering extra content on password creation.
-- Allow editing of password files.
