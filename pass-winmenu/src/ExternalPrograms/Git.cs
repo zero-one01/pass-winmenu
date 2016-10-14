@@ -148,7 +148,7 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				return $"Fast-forwarded master to {match.Groups[1].Value}";
 			}
-			else if (Regex.IsMatch(pull, @"Already up to date\.") || Regex.IsMatch(pull, @"Current branch .* is up to date\."))
+			else if (Regex.IsMatch(pull, @"Already up-to-date\.") || Regex.IsMatch(pull, @"Current branch .* is up to date\."))
 			{
 				return "The password store is already up to date.";
 			}
