@@ -50,7 +50,7 @@ namespace PassWinmenu.Windows
 		protected override void HandleSelect()
 		{
 			// If a suggestion is selected, put that suggestion in the searchbox.
-			if (Options.IndexOf(Selected) > 0)
+			if (Options.IndexOf(Selected) > 0 || string.IsNullOrEmpty(SearchBox.Text))
 			{
 				var selection = GetSelection();
 				if (selection.EndsWith(".gpg"))
