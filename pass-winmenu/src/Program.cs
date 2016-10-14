@@ -351,6 +351,8 @@ namespace PassWinmenu
 				return;
 			}
 			var password = passwordWindow.Password.Text;
+			var extraContent = passwordWindow.ExtraContent.Text.Replace(Environment.NewLine, "\n");
+			var fullPassword = $"{password}\n{extraContent}";
 
 			// Build up the full path to the password file. GetFullPath ensures that
 			// all directory separators match.
@@ -363,7 +365,7 @@ namespace PassWinmenu
 			{
 				try
 				{
-					gpg.Encrypt(password, reader.ReadLine(), fullPath);
+					gpg.Encrypt(fullPassword, reader.ReadLine(), fullPath);
 				}
 				catch (GpgException e)
 				{
