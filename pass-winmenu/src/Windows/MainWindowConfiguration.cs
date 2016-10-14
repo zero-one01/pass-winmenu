@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using PassWinmenu.Configuration;
@@ -47,7 +44,7 @@ namespace PassWinmenu.Windows
 				throw new ConfigurationParseException($"Unable to parse the menu dimensions from the config file (reason: {e.Message})", e);
 			}
 
-			System.Windows.Controls.Orientation orientation;
+			Orientation orientation;
 
 			if (!Enum.TryParse(config.Style.Orientation, true, out orientation))
 			{

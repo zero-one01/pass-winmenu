@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using PassWinmenu.Configuration;
 
 namespace PassWinmenu.Windows
 {
-	class PasswordSelectionWindow : MainWindow
+	internal class PasswordSelectionWindow : MainWindow
 	{
 		public PasswordSelectionWindow(IEnumerable<string> options, MainWindowConfiguration configuration) : base(configuration)
 		{

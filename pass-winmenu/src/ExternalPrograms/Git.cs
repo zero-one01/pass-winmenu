@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -20,6 +19,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// Initialises the wrapper.
 		/// </summary>
 		/// <param name="executable">The name of the git executable. Can be a full filename or the name of an executable contained in %PATH%.</param>
+		/// <param name="repository">The repository git should operate on.</param>
 		public Git(string executable, string repository)
 		{
 			this.executable = executable;
@@ -56,7 +56,7 @@ namespace PassWinmenu.ExternalPrograms
 
 		public PullResult Pull()
 		{
-			var fetch = RunGit("fetch");
+			RunGit("fetch");
 
 			var head = RunGit("rev-parse --abbrev-ref HEAD").Replace("\n", string.Empty);
 			var remote = RunGit("rev-parse --abbrev-ref --symbolic-full-name @{u}").Replace("\n", string.Empty);
@@ -299,8 +299,8 @@ namespace PassWinmenu.ExternalPrograms
 
 	internal class Commit
 	{
-		public string Message { get; private set; }
-		public List<GitFile> Files { get; private set; }
+		public string Message { get; }
+		public List<GitFile> Files { get; }
 
 		public Commit(string message, List<GitFile> files)
 		{
@@ -317,8 +317,8 @@ namespace PassWinmenu.ExternalPrograms
 
 	internal class GitFile
 	{
-		public string Name { get; private set; }
-		public GitFileStatus Status { get; private set; }
+		public string Name { get; }
+		public GitFileStatus Status { get; }
 
 		public GitFile(string name, GitFileStatus status)
 		{

@@ -38,7 +38,7 @@ namespace PassWinmenu.Configuration
 				return LoadResult.NewFileCreated;
 			}
 
-			var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention(), ignoreUnmatched: false);
+			var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention());
 			using (var reader = File.OpenText(fileName))
 			{
 				try
@@ -57,7 +57,7 @@ namespace PassWinmenu.Configuration
 		{
 			try
 			{
-				var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention(), ignoreUnmatched: false);
+				var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention());
 				using (var reader = File.OpenText(fileName))
 				{
 					var newConfig = deserialiser.Deserialize<Config>(reader);

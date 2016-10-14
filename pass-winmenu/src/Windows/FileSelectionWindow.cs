@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using PassWinmenu.Configuration;
 
 namespace PassWinmenu.Windows
 {
-	class FileSelectionWindow : MainWindow
+	internal class FileSelectionWindow : MainWindow
 	{
-		private DirectoryAutocomplete autocomplete;
-		private string baseDirectory;
+		private readonly DirectoryAutocomplete autocomplete;
+		private readonly string baseDirectory;
 
 		public FileSelectionWindow(string baseDirectory, MainWindowConfiguration configuration) : base(configuration)
 		{
@@ -26,7 +22,7 @@ namespace PassWinmenu.Windows
 		private void RedrawLabels(IEnumerable<string> options)
 		{
 			ClearLabels();
-			bool first = true;
+			var first = true;
 			foreach (var option in options)
 			{
 				var label = CreateLabel(option);

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,7 +15,7 @@ namespace PassWinmenu.Windows
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	internal abstract partial class MainWindow : Window
+	internal abstract partial class MainWindow
 	{
 		protected readonly List<Label> Options = new List<Label>();
 		/// <summary>
@@ -39,11 +36,7 @@ namespace PassWinmenu.Windows
 		/// <summary>
 		/// Initialises the window with the provided options.
 		/// </summary>
-		/// <param name="options">A list of options the user should choose from.</param>
-		/// <param name="position">A vector representing the position of the top-left corner of the window.</param>
-		/// <param name="dimensions">A vector representing the width and height of the window.</param>
-		/// <param name="orientation">The orientation along which the options will be shown.</param>
-		public MainWindow(MainWindowConfiguration configuration)
+		protected MainWindow(MainWindowConfiguration configuration)
 		{
 			StyleConfig = ConfigManager.Config.Style;
 			InitializeComponent();

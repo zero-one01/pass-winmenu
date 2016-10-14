@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PassWinmenu
 {
-	class DirectoryAutocomplete
+	internal class DirectoryAutocomplete
 	{
-		private string baseDirectory;
+		private readonly string baseDirectory;
 
 		public DirectoryAutocomplete(string baseDirectory)
 		{

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace PassWinmenu.ExtensionMethods
 {
@@ -30,7 +26,7 @@ namespace PassWinmenu.ExtensionMethods
 		/// </returns>
 		public static string ToCamelCase(this string str)
 		{
-			return ToCamelOrPascalCase(str, new Func<char, char>(char.ToLowerInvariant));
+			return ToCamelOrPascalCase(str, char.ToLowerInvariant);
 		}
 
 		/// <summary>
@@ -44,7 +40,7 @@ namespace PassWinmenu.ExtensionMethods
 		/// </returns>
 		public static string ToPascalCase(this string str)
 		{
-			return ToCamelOrPascalCase(str, new Func<char, char>(char.ToUpperInvariant));
+			return ToCamelOrPascalCase(str, char.ToUpperInvariant);
 		}
 
 		/// <summary>
@@ -58,7 +54,7 @@ namespace PassWinmenu.ExtensionMethods
 		public static string FromCamelCase(this string str, string separator)
 		{
 			str = char.ToLower(str[0]).ToString() + str.Substring(1);
-			str = Regex.Replace(ToCamelCase(str), "(?<char>[A-Z])", (MatchEvaluator)(match => separator + match.Groups["char"].Value.ToLowerInvariant()));
+			str = Regex.Replace(ToCamelCase(str), "(?<char>[A-Z])", match => separator + match.Groups["char"].Value.ToLowerInvariant());
 			return str;
 		}
 	}

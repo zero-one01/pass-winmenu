@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,7 +12,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
-using System.Windows;
 using PassWinmenu.Windows;
 using Application = System.Windows.Forms.Application;
 using Clipboard = System.Windows.Clipboard;
@@ -37,10 +35,10 @@ namespace PassWinmenu
 			switch (result)
 			{
 				case ConfigManager.LoadResult.ParseFailure:
-					RaiseNotification($"The configuration file could not be loaded (Parse Error).\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
+					RaiseNotification("The configuration file could not be loaded (Parse Error).\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
 					break;
 				case ConfigManager.LoadResult.FileCreationFailure:
-					RaiseNotification($"A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
+					RaiseNotification("A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
 					break;
 				case ConfigManager.LoadResult.NewFileCreated:
 					MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.");

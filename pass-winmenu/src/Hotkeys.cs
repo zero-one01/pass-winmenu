@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -11,7 +9,7 @@ namespace PassWinmenu
 {
 	internal class Hotkeys
 	{
-		private int hotkeyIdCounter = 0;
+		private int hotkeyIdCounter;
 		private readonly Dictionary<int, Action> hotkeyActions = new Dictionary<int, Action>();
 		private readonly IntPtr handle;
 
