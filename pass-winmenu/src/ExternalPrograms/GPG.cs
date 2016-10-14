@@ -24,11 +24,12 @@ namespace PassWinmenu.ExternalPrograms
 		/// Runs GPG with the given arguments, and returns everything it prints to its standard output.
 		/// </summary>
 		/// <param name="arguments">The arguments to be passed to GPG.</param>
+		/// <param name="stdin">A text string to be sent to GPG's standard input.</param>
 		/// <returns>A (UTF-8 decoded) string containing the text returned by GPG.</returns>
 		/// <exception cref="GpgException">Thrown when GPG returns a non-zero exit code.</exception>
-		private string RunGPG(string arguments)
+		private string RunGPG(string arguments, string stdin=null)
 		{
-			var proc = Process.Start(new ProcessStartInfo
+			var info = new ProcessStartInfo
 			{
 				FileName = executable,
 				Arguments = arguments,
@@ -37,8 +38,19 @@ namespace PassWinmenu.ExternalPrograms
 				RedirectStandardOutput = true,
 				RedirectStandardError = true,
 				StandardOutputEncoding = Encoding.UTF8
-			});
+			};
+			if (stdin != null)
+			{
+				info.RedirectStandardInput = true;
+			}
+			var proc = Process.Start(info);
+			if (stdin != null)
+			{
+				proc.StandardInput.Write(stdin);
+				proc.StandardInput.Close();
+			}
 			proc.WaitForExit();
+
 			var result = proc.StandardOutput.ReadToEnd();
 			var error = proc.StandardError.ReadToEnd();
 			if (proc.ExitCode != 0)
@@ -62,11 +74,13 @@ namespace PassWinmenu.ExternalPrograms
 		/// <summary>
 		/// Encrypt a file with GPG.
 		/// </summary>
-		/// <param name="file">The path to the file to be encrypted.</param>
+		/// <param name="data">The text to be encrypted</param>
+		/// <param name="recipient"></param>
+		/// <param name="outputFile"></param>
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
-		public void Encrypt(string file)
+		public void Encrypt(string data, string recipient, string outputFile)
 		{
-			RunGPG($"--default-recipient-self --encrypt \"{file}\"");
+			RunGPG($"--recipient \"{recipient}\"  --output \"{outputFile}.gpg\" --encrypt", data);
 		}
 	}
 	

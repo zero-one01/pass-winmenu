@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -233,55 +235,25 @@ namespace PassWinmenu
 			var menu = new ContextMenuStrip();
 			menu.Items.Add(new ToolStripLabel("pass-winmenu v" + version));
 			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Decrypt Password");
-			menu.Items.Add("Add new Password");
+			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
+			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)AddPassword));
+			menu.Items.Add(new ToolStripSeparator()); 
+			menu.Items.Add("Push to Remote", null, (sender, args) => Task.Run((Action)CommitChanges));
+			menu.Items.Add("Pull from Remote", null, (sender, args) => Task.Run((Action)UpdatePasswordStore));
 			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Push to Remote");
-			menu.Items.Add("Pull from Remote");
-			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Open Explorer");
-			menu.Items.Add("Open Shell");
-			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Start with Windows");
-			menu.Items.Add("About");
-			menu.Items.Add("Quit");
-			menu.ItemClicked += (sender, args) =>
+			menu.Items.Add("Open Explorer", null, (sender, args) => Process.Start(ConfigManager.Config.PasswordStore));
+			menu.Items.Add("Open Shell", null, (sender, args) =>
 			{
-				switch (args.ClickedItem.Text)
+				Process.Start(new ProcessStartInfo
 				{
-					case "Decrypt Password":
-						DecryptPassword(true, false, false);
-						break;
-					case "Push to Remote":
-						Task.Run((Action) CommitChanges);
-						break;
-					case "Pull from Remote":
-						Task.Run((Action) UpdatePasswordStore);
-						break;
-					case "Add new Password":
-						AddPassword();
-						break;
-					case "Start with Windows":
-						CreateShortcut();
-						break;
-					case "Open Explorer":
-						Process.Start(ConfigManager.Config.PasswordStore);
-						break;
-					case "Open Shell":
-						Process.Start(new ProcessStartInfo
-						{
-							FileName = "powershell",
-							WorkingDirectory = ConfigManager.Config.PasswordStore
-						});
-						break;
-					case "About":
-						Process.Start("https://github.com/Baggykiin/pass-winmenu");
-						break;
-					case "Quit":
-						Close();
-						break;
-				}
-			};
+					FileName = "powershell",
+					WorkingDirectory = ConfigManager.Config.PasswordStore
+				});
+			});
+			menu.Items.Add(new ToolStripSeparator());
+			menu.Items.Add("Start with Windows", null, (sender, args) => CreateShortcut());
+			menu.Items.Add("About", null, (sender, args) => Process.Start("https://github.com/Baggykiin/pass-winmenu"));
+			menu.Items.Add("Quit", null, (sender, args) => Close());
 			icon.ContextMenuStrip = menu;
 		}
 
@@ -340,6 +312,12 @@ namespace PassWinmenu
 		/// </summary>
 		private void AddPassword()
 		{
+			if (InvokeRequired)
+			{
+				Invoke((MethodInvoker) AddPassword);
+				return;
+			}
+
 			MainWindowConfiguration windowConfig;
 			try
 			{
@@ -375,26 +353,20 @@ namespace PassWinmenu
 			// Ensure the file's parent directory exists.
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-			// TODO: send the password directly to GPG instead of asking it to encrypt a file
-			// Write the password to a plaintext file.
-			using (var writer = new StreamWriter(File.OpenWrite(fullPath)))
+			// .gpg-id contains the key ID of the key we should encrypt the password for.
+			using (var reader = new StreamReader(Path.Combine (ConfigManager.Config.PasswordStore, ".gpg-id")))
 			{
-				writer.Write(password);
+				try
+				{
+					gpg.Encrypt(password, reader.ReadLine(), fullPath);
+				}
+				catch (GpgException e)
+				{
+					RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
+					return;
+				}
 			}
-			try
-			{
-				new GPG(ConfigManager.Config.GpgPath).Encrypt(fullPath);
-			}
-			catch (GpgException e)
-			{
-				RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
-				return;
-			}
-			finally
-			{
-				// Irrespective of whether encryption succeeds, the file must be deleted.
-				File.Delete(fullPath);
-			}
+
 
 			// Copy the newly generated password.
 			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
@@ -426,6 +398,7 @@ namespace PassWinmenu
 			if (InvokeRequired)
 			{
 				Invoke((DecryptPasswordDelegate) DecryptPassword, copyToClipboard, typeUsername, typePassword);
+				return;
 			}
 
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
@@ -580,11 +553,11 @@ namespace PassWinmenu
 			Application.Run(new Program());
 		}
 
-		protected override void OnClosed(EventArgs e)
+		protected override void OnClosing(CancelEventArgs e)
 		{
+			icon.Visible = false;
 			icon.Dispose();
-			//HotKeyManager.UnregisterHotKey(hotkeyId);
-			base.OnClosed(e);
+			hotkeys.DisposeHotkeys();
 		}
 	}
 }
