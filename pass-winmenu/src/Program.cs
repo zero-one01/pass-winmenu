@@ -23,7 +23,7 @@ namespace PassWinmenu
 
 	internal class Program : Form
 	{
-		private const string version = "0.5-git";
+		private const string version = "1.0-rc";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
