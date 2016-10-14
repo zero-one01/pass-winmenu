@@ -31,3 +31,5 @@ Edit the file and restart pass-winmenu to apply the changes.
 
 - Log error details to a log file to assist with bug reports.
 - Enable auto-reloading for all config file settings.
+- Allow entering extra content on password creation.
+- Allow editing of password files.
