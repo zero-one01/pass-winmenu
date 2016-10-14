@@ -89,6 +89,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExtensionMethods\StringExtensions.cs" />
     <Compile Include="src\Hotkeys.cs" />
     <Compile Include="src\NativeMethods.cs" />
@@ -101,6 +102,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="src\EmbeddedResources.cs" />
+    <Compile Include="src\Windows\FileSelectionWindow.cs" />
+    <Compile Include="src\Windows\MainWindowConfiguration.cs" />
+    <Compile Include="src\Windows\PasswordSelectionWindow.cs" />
     <Compile Include="src\Windows\PasswordWindow.xaml.cs">
       <DependentUpon>PasswordWindow.xaml</DependentUpon>
     </Compile>

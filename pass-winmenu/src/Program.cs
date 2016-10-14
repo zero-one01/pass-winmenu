@@ -132,54 +132,11 @@ namespace PassWinmenu
 		/// <returns>One of the values contained in <paramref name="options"/>, or null if no option was chosen.</returns>
 		private string OpenMenu(IEnumerable<string> options)
 		{
-			Screen selectedScreen;
-			if (ConfigManager.Config.FollowCursor)
-			{
-				// Find the screen that currently contains the mouse cursor.
-				selectedScreen = Screen.AllScreens.First(screen => screen.Bounds.Contains(Cursor.Position));
-			}
-			else
-			{
-				selectedScreen = Screen.PrimaryScreen;
-			}
-
-			double left, top, width, height;
-			try
-			{
-				// The menu position may either be specified in pixels or percentage values.
-				// ParseSize takes care of parsing both into a double (representing pixel values).
-				left = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetLeft, Direction.Horizontal);
-				top = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetTop, Direction.Vertical);
-			}
-			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
-			{
-				RaiseNotification($"Unable to parse the menu position from the config file (reason: {e.Message})", ToolTipIcon.Error);
-				return null;
-			}
-			try
-			{
-				width = selectedScreen.ParseSize(ConfigManager.Config.Style.Width, Direction.Horizontal);
-				height = selectedScreen.ParseSize(ConfigManager.Config.Style.Height, Direction.Vertical);
-			}
-			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
-			{
-				RaiseNotification($"Unable to parse the menu dimensions from the config file (reason: {e.Message})", ToolTipIcon.Error);
-				return null;
-			}
-
-			System.Windows.Controls.Orientation orientation;
-
-			if (!Enum.TryParse(ConfigManager.Config.Style.Orientation, true, out orientation))
-			{
-				RaiseNotification($"Unable to parse the menu orientation from the config file.", ToolTipIcon.Error);
-				return null;
-			}
-
-			var menu = new Windows.MainWindow(options, new Vector(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top), new Vector(width, height), orientation);
+			var menu = new Windows.PasswordSelectionWindow(options, GetMenuConfiguration());
 			menu.ShowDialog();
 			if (menu.Success)
 			{
-				return (string) menu.Selected.Content;
+				return menu.GetSelection();
 			}
 			else
 			{
@@ -363,17 +320,72 @@ namespace PassWinmenu
 			}
 		}
 
+		private MainWindowConfiguration GetMenuConfiguration()
+		{
+			Screen selectedScreen;
+			if (ConfigManager.Config.FollowCursor)
+			{
+				// Find the screen that currently contains the mouse cursor.
+				selectedScreen = Screen.AllScreens.First(screen => screen.Bounds.Contains(Cursor.Position));
+			}
+			else
+			{
+				selectedScreen = Screen.PrimaryScreen;
+			}
+
+			double left, top, width, height;
+			try
+			{
+				// The menu position may either be specified in pixels or percentage values.
+				// ParseSize takes care of parsing both into a double (representing pixel values).
+				left = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetLeft, Direction.Horizontal);
+				top = selectedScreen.ParseSize(ConfigManager.Config.Style.OffsetTop, Direction.Vertical);
+			}
+			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
+			{
+				RaiseNotification($"Unable to parse the menu position from the config file (reason: {e.Message})", ToolTipIcon.Error);
+				return null;
+			}
+			try
+			{
+				width = selectedScreen.ParseSize(ConfigManager.Config.Style.Width, Direction.Horizontal);
+				height = selectedScreen.ParseSize(ConfigManager.Config.Style.Height, Direction.Vertical);
+			}
+			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
+			{
+				RaiseNotification($"Unable to parse the menu dimensions from the config file (reason: {e.Message})", ToolTipIcon.Error);
+				return null;
+			}
+
+			System.Windows.Controls.Orientation orientation;
+
+			if (!Enum.TryParse(ConfigManager.Config.Style.Orientation, true, out orientation))
+			{
+				RaiseNotification($"Unable to parse the menu orientation from the config file.", ToolTipIcon.Error);
+				return null;
+			}
+
+			return new MainWindowConfiguration
+			{
+				Dimensions = new Vector(width, height),
+				Position = new Vector(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top),
+				Orientation = orientation
+			};
+		}
+
 		private void AddPassword()
 		{
-			var pathWindow = new PathWindow();
+			//var pathWindow = new PathWindow();
+			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore, GetMenuConfiguration());
+
 			var passwordWindow = new PasswordWindow();
 
 			pathWindow.ShowDialog();
-			if (pathWindow.DialogResult == null || !pathWindow.DialogResult.Value)
+			if (!pathWindow.Success)
 			{
 				return;
 			}
-			var path = pathWindow.Path.Text;
+			var path = pathWindow.GetSelection();
 
 			passwordWindow.ShowDialog();
 			if (passwordWindow.DialogResult == null || !passwordWindow.DialogResult.Value)

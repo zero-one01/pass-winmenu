@@ -18,23 +18,23 @@ namespace PassWinmenu.Windows
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : Window
+	internal abstract partial class MainWindow : Window
 	{
-		private readonly List<Label> Options = new List<Label>();
+		protected readonly List<Label> Options = new List<Label>();
 		/// <summary>
 		/// The label that is currently selected.
 		/// </summary>
-		public Label Selected { get; private set; }
+		public Label Selected { get; protected set; }
 		/// <summary>
 		/// True if the user has chosen one of the options, false otherwise.
 		/// </summary>
-		public bool Success { get; private set; }
+		public bool Success { get; protected set; }
 
 
 		private bool isClosing;
 		private bool firstActivation = true;
 
-		private readonly StyleConfig style;
+		protected readonly StyleConfig StyleConfig;
 
 		/// <summary>
 		/// Initialises the window with the provided options.
@@ -43,12 +43,12 @@ namespace PassWinmenu.Windows
 		/// <param name="position">A vector representing the position of the top-left corner of the window.</param>
 		/// <param name="dimensions">A vector representing the width and height of the window.</param>
 		/// <param name="orientation">The orientation along which the options will be shown.</param>
-		public MainWindow(IEnumerable<string> options, Vector position, Vector dimensions, Orientation orientation)
+		public MainWindow(MainWindowConfiguration configuration)
 		{
-			style = ConfigManager.Config.Style;
+			StyleConfig = ConfigManager.Config.Style;
 			InitializeComponent();
 
-			if (orientation == Orientation.Vertical)
+			if (configuration.Orientation == Orientation.Vertical)
 			{
 				WrapPanel.Orientation = Orientation.Vertical;
 				// In order to prevent its content from wrapping, the WrapPanel should be added to a ScrollViewer.
@@ -77,104 +77,98 @@ namespace PassWinmenu.Windows
 				WrapPanel.Children.Add(SearchBox);
 			}
 
-			SearchBox.CaretBrush = BrushFromColourString(style.CaretColour);
-			SearchBox.Background = BrushFromColourString(style.Search.BackgroundColour);
-			SearchBox.Foreground = BrushFromColourString(style.Search.TextColour);
-			SearchBox.BorderThickness = new Thickness(style.Search.BorderWidth);
-			SearchBox.BorderBrush = BrushFromColourString(style.Search.BorderColour);
-			SearchBox.FontSize = style.FontSize;
-			SearchBox.FontFamily = new FontFamily(style.FontFamily);
+			SearchBox.CaretBrush = BrushFromColourString(StyleConfig.CaretColour);
+			SearchBox.Background = BrushFromColourString(StyleConfig.Search.BackgroundColour);
+			SearchBox.Foreground = BrushFromColourString(StyleConfig.Search.TextColour);
+			SearchBox.BorderThickness = new Thickness(StyleConfig.Search.BorderWidth);
+			SearchBox.BorderBrush = BrushFromColourString(StyleConfig.Search.BorderColour);
+			SearchBox.FontSize = StyleConfig.FontSize;
+			SearchBox.FontFamily = new FontFamily(StyleConfig.FontFamily);
 
-			Background = BrushFromColourString(style.BackgroundColour);
+			Background = BrushFromColourString(StyleConfig.BackgroundColour);
 
-			Left = position.X;
-			Top = position.Y;
-			Width = dimensions.X;
-			Height = dimensions.Y;
-
-			foreach (var option in options)
-			{
-				var label = new Label
-				{
-					Content = option,
-					FontSize = style.FontSize,
-					FontFamily = new FontFamily(style.FontFamily),
-					Background = BrushFromColourString(style.Options.BackgroundColour),
-					Foreground = BrushFromColourString(style.Options.TextColour),
-					Padding = new Thickness(0, 0, 0, 2),
-					Margin = new Thickness(7, 0, 7, 0)
-				};
-				label.MouseLeftButtonUp += (sender, args) =>
-				{
-					if (label == Selected)
-					{
-						Success = true;
-						Close();
-					}
-					else
-					{
-						Select(label);
-					}
-				};
-				Options.Add(label);
-				WrapPanel.Children.Add(label);
-			}
-
-			Select(Options.First());
+			Left = configuration.Position.X;
+			Top = configuration.Position.Y;
+			Width = configuration.Dimensions.X;
+			Height = configuration.Dimensions.Y;
 		}
 
 		/// <summary>
 		/// Handles text input in the textbox.
 		/// </summary>
-		private void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
-		{
-			// We split on spaces to allow the user to quickly search for a certain term, as it allows them
-			// to search, for example, for reddit.com/username by entering "re us"
-			var terms = SearchBox.Text.ToLower(CultureInfo.CurrentCulture).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-			var firstSelectionFound = false;
-			foreach (var option in Options)
-			{
-				var content = (string)option.Content;
-				var lContent = content.ToLower(CultureInfo.CurrentCulture);
-
-				// The option is only a match if it contains every term in the terms array.
-				if (terms.All(term => lContent.Contains(term)))
-				{
-					// The first matched item should be pre-selected for convenience.
-					if (!firstSelectionFound)
-					{
-						firstSelectionFound = true;
-						Select(option);
-					}
-					option.Visibility = Visibility.Visible;
-				}
-				else
-				{
-					option.Visibility = Visibility.Collapsed;
-				}
-			}
-		}
+		protected abstract void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e);
 
 		/// <summary>
 		/// Selects a label; deselecting the previously selected label.
 		/// </summary>
 		/// <param name="label">The label to be selected. If this value is null, the selected label will not be changed.</param>
-		private void Select(Label label)
+		protected void Select(Label label)
 		{
 			if (label == null) return;
 
 			if (Selected != null)
 			{
-				Selected.Background = BrushFromColourString(style.Options.BackgroundColour);
-				Selected.Foreground = BrushFromColourString(style.Options.TextColour);
-				Selected.BorderThickness = new Thickness(style.Options.BorderWidth);
+				Selected.Background = BrushFromColourString(StyleConfig.Options.BackgroundColour);
+				Selected.Foreground = BrushFromColourString(StyleConfig.Options.TextColour);
+				Selected.BorderThickness = new Thickness(StyleConfig.Options.BorderWidth);
 			}
 			Selected = label;
-			Selected.Background = BrushFromColourString(style.Selection.BackgroundColour);
-			Selected.Foreground = BrushFromColourString(style.Selection.TextColour);
-			Selected.BorderThickness = new Thickness(style.Selection.BorderWidth);
+			Selected.Background = BrushFromColourString(StyleConfig.Selection.BackgroundColour);
+			Selected.Foreground = BrushFromColourString(StyleConfig.Selection.TextColour);
+			Selected.BorderThickness = new Thickness(StyleConfig.Selection.BorderWidth);
 			Selected.BringIntoView();
+		}
+
+		/// <summary>
+		/// Returns the text on the currently selected label.
+		/// </summary>
+		/// <returns></returns>
+		public string GetSelection()
+		{
+			return (string)Selected.Content;
+		}
+
+		protected Label CreateLabel(string content)
+		{
+			var label = new Label
+			{
+				Content = content,
+				FontSize = StyleConfig.FontSize,
+				FontFamily = new FontFamily(StyleConfig.FontFamily),
+				Background = BrushFromColourString(StyleConfig.Options.BackgroundColour),
+				Foreground = BrushFromColourString(StyleConfig.Options.TextColour),
+				Padding = new Thickness(0, 0, 0, 2),
+				Margin = new Thickness(7, 0, 7, 0)
+			};
+			label.MouseLeftButtonUp += (sender, args) =>
+			{
+				if (label == Selected)
+				{
+					Success = true;
+					Close();
+				}
+				else
+				{
+					Select(label);
+				}
+			};
+			return label;
+		}
+
+		protected void AddLabel(Label label)
+		{
+			Options.Add(label);
+			WrapPanel.Children.Add(label);
+		}
+
+		protected void ClearLabels()
+		{
+			Selected = null;
+			foreach (var label in Options)
+			{
+				WrapPanel.Children.Remove(label);
+			}
+			Options.Clear();
 		}
 
 		/// <summary>
@@ -192,7 +186,7 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		/// <param name="colour">A hexadecimal colour code string (such as #AAFF00FF)</param>
 		/// <returns>A SolidColorBrush created from a Colour object created from the colour code.</returns>
-		private static SolidColorBrush BrushFromColourString(string colour)
+		protected static SolidColorBrush BrushFromColourString(string colour)
 		{
 			return new SolidColorBrush(ColourFromString(colour));
 		}
@@ -264,6 +258,19 @@ namespace PassWinmenu.Windows
 			}
 		}
 
+		protected void SetSearchBoxText(string text)
+		{
+			SearchBox.Text = text;
+			SearchBox.CaretIndex = text.Length;
+		}
+
+		protected virtual void HandleSelectionChange(Label selection)
+		{
+			
+		}
+
+		protected abstract void HandleEnterKey();
+
 		private void SearchBox_OnPreviewKeyDown(object sender, KeyEventArgs e)
 		{
 			var selectionIndex = Options.IndexOf(Selected);
@@ -272,27 +279,42 @@ namespace PassWinmenu.Windows
 				case Key.Left:
 					e.Handled = true;
 					if (selectionIndex > 0)
-						Select(FindPrevious(selectionIndex));
+					{
+						var label = FindPrevious(selectionIndex);
+						Select(label);
+						HandleSelectionChange(label);
+					}
 					break;
 				case Key.Right:
 					e.Handled = true;
 					if (selectionIndex < Options.Count - 1)
-						Select(FindNext(selectionIndex));
+					{
+						var label = FindNext(selectionIndex);
+						Select(label);
+						HandleSelectionChange(label);
+					}
 					break;
 				case Key.Up:
 					e.Handled = true;
 					if (selectionIndex > 0)
-						Select(FindPrevious(selectionIndex));
+					{
+						var label = FindPrevious(selectionIndex);
+						Select(label);
+						HandleSelectionChange(label);
+					}
 					break;
 				case Key.Down:
 					e.Handled = true;
 					if (selectionIndex < Options.Count - 1)
-						Select(FindNext(selectionIndex));
+					{
+						var label = FindNext(selectionIndex);
+						Select(label);
+						HandleSelectionChange(label);
+					}
 					break;
 				case Key.Enter:
 					e.Handled = true;
-					Success = true;
-					Close();
+					HandleEnterKey();
 					break;
 				case Key.Escape:
 					e.Handled = true;

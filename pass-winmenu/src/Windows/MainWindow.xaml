@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="pass-winmenu (menu)" Width="500" WindowStartupLocation="Manual" Left="0" Top="0" AllowsTransparency="True" WindowStyle="None"
-        ResizeMode="NoResize" Height="30">
+        ResizeMode="NoResize" Height="30" x:ClassModifier="internal">
 	<Grid Name="Grid">
 		<TextBox x:Name="SearchBox"
 		         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
