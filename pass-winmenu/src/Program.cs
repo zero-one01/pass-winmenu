@@ -17,6 +17,7 @@ using System.Windows;
 using PassWinmenu.Windows;
 using Application = System.Windows.Forms.Application;
 using Clipboard = System.Windows.Clipboard;
+using MessageBox = System.Windows.MessageBox;
 
 namespace PassWinmenu
 {
@@ -41,6 +42,12 @@ namespace PassWinmenu
 				case ConfigManager.LoadResult.FileCreationFailure:
 					RaiseNotification($"A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
 					break;
+				case ConfigManager.LoadResult.NewFileCreated:
+					MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.");
+					Close();
+					Application.Exit();
+					Environment.Exit(0);
+					return;
 			}
 
 			// Try to reload the config file when the user edits it.
