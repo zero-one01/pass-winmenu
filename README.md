@@ -27,7 +27,10 @@ Its simplicity and modularity offer many advantages:
 - The password files are always encrypted and can only be decrypted with your private GPG key,
   which is secured by a passphrase. If someone gains access to your password files, they're useless
   even if said person additionally managed to get hold of your GPG keys.
-  
+
+Unfortunately, while there are many Linux integrations available, Windows integrations are more scarce,
+and since there were none I was happy with, I made my own.
+
 ## Usage
 
 Bring up the password menu with the keyboard shortcut `Ctrl Alt P`.
