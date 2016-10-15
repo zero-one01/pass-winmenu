@@ -43,6 +43,12 @@ The password will be decrypted using GPG, and your GPG key passphrase may be req
 The decrypted password will then be copied to your clipboard and/or entered into the active window,
 depending on your `config.yaml` settings.
 
+## Configuration
+
+Many configuration options are available to make pass-winmenu act according to your preferences.
+See [here](https://github.com/Baggykiin/pass-winmenu/blob/master/pass-winmenu/embedded/default-config.yaml)
+for an annotated list.
+
 ## Dependencies
 
 Pass-winmenu is built against .NET Framework 4.5.2, which should already be installed on every version
