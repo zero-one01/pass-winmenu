@@ -28,8 +28,10 @@ Its simplicity and modularity offer many advantages:
   which is secured by a passphrase. If someone gains access to your password files, they're useless
   even if said person additionally managed to get hold of your GPG keys.
 
-Unfortunately, while there are many Linux integrations available, Windows integrations are more scarce,
-and since there were none I was happy with, I made my own.
+Unfortunately, while there are many Linux integrations available, Windows integrations are more scarce.
+
+I wasn't happy with the existing ones, so I created my own, focusing on easy, keyboard-friendly
+interaction and a minimal interface that stays out of your way.
 
 ## Usage
 
