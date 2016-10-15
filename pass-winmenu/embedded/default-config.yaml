@@ -35,8 +35,7 @@ output:
     # correctly.
     dead-keys: false
 
-# Here you can assign different hotkeys to different input methods.
-# Each hotkey is mapped to an action. Supported actions are:
+# Here you can map hotkeys to various actions. Supported actions are:
 # - decrypt-password
 # - add-password
 # - git-pull
