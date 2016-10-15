@@ -18,17 +18,17 @@ Its simplicity and modularity offer many advantages:
   with your file manager.
 - Because the passwords are simply stored in a directory tree, it's easy to synchronise your
   password store using any version control software of your choosing, giving you synchronisation, 
-  file history and redundancy all at the same time (provided you use multiple devices and/or a
+  file history, and redundancy all at the same time (provided you use multiple devices and/or a
   remote VCS server).
 - Widespread availability of VCS software gives you the option to set up your own synchronisation server,
   giving you full control over your passwords.
   Alternatively, you can choose one of the many online version control services (such as GitHub)
   and store your passwords in a private repository.
 - The password files are always encrypted and can only be decrypted with your private GPG key,
-  which is secured by a passphrase. If someone gains access to your password files, they're useless
+  which is secured with a passphrase. If someone gains access to your password files, they're useless
   even if said person additionally managed to get hold of your GPG keys.
 
-Unfortunately, while there are many Linux integrations available, Windows integrations are more scarce.
+Unfortunately, while there are many Linux integrations available, Windows integrations are scarce.
 
 I wasn't happy with the existing ones, so I created my own, focusing on easy, keyboard-friendly
 interaction and a minimal interface that stays out of your way.
@@ -54,7 +54,6 @@ for an annotated list.
 Pass-winmenu is built against .NET Framework 4.5.2, which should already be installed on every version
 of Windows since Windows 7.
 Additionally, GPG and Git are required for the application to function correctly.
-They don't have to be added to your PATH, but the executables must be reachable somehow.
 
 ## Setup
 
@@ -93,9 +92,9 @@ C:\Users\Baggykiin\.password-store> echo "myemail@example.com" | Out-File -Encod
 Now you can point pass-winmenu to your password store.
 On first run, pass-winmenu will generate a `pass-winmenu.yaml` file 
 (containing all its settings initialised to their default values) in its current directory and exit.
-Open the file, read through it, edit the settings as necessary and save it before
+Open the file, read through it, edit the settings as necessary, and save it before
 starting the application again. You should now have a working password manager.
 
 To synchronise your passwords, initialise a new Git repository at the root of your password store,
 and connect it to a remote server. GitLab offers free private repositories, and GitHub does too if
-you're a student. Alternatively, you can run your own Git server, of course.
+you're a student. Alternatively, you can of course run your own Git server.
