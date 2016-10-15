@@ -2,7 +2,7 @@
 
 A simple, easy-to-use password manager for Windows.
 
-Based on the Linux password manager [pass](https://www.passwordstore.org), which defines an open standard for password management that's easy to extend and customise to your personal requirements.
+Pass-winmenu follows the philosophy of (and is compatible with) the Linux password manager [pass](https://www.passwordstore.org), which defines an open standard for password management that's easy to extend and customise to your personal requirements.
 
 ![demonstration GIF](https://i.imgur.com/Yf9XBQn.gif)
 
