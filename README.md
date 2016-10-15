@@ -83,7 +83,7 @@ Create an empty directory in which you want to store your passwords.
 `C:\Users\Baggykiin> mkdir .password-store`
 
 Save the email address you used for creating your GPG key into a `.gpg-id` file
-in the root of your password directory.
+in the root of your password directory (Use powershell, not command prompt).
 
 ```
 C:\Users\Baggykiin> cd .password-store
