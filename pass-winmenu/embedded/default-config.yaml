@@ -11,7 +11,7 @@ password-store: '%userprofile%\.password-store'
 # compared. All matching files are considered password files.
 password-file-match: '.*\.gpg$'
 # Path to the GPG executable. Can be either a command name (if GPG is added
-# to your PATH) or an absolute directory.
+# to your PATH environment variable) or a path to your gpg.exe.
 gpg-path: 'gpg'
 # Path to the Git executable.
 git-path: 'git'
