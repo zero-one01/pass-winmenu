@@ -11,8 +11,8 @@ Pass-winmenu follows the philosophy of (and is compatible with) the Linux passwo
 [Pass (https://www.passwordstore.org)](https://www.passwordstore.org) stores passwords as GPG-encrypted files organised into a directory structure.
 Its simplicity and modularity offer many advantages:
 
-- Cryptography is handled by GPG (Don't roll your own cryptography)
-- GPG gives you a lot of control over the keys and algorithms used to encrypt your files
+- Cryptography is handled by GPG (Don't roll your own cryptography).
+- GPG gives you a lot of control over the keys and algorithms used to encrypt your files.
 - The use of GPG makes it easy for other applications (such as password managers) to interact
   with your password store.
 - The directory structure for passwords is intuitive and allows you to organise your passwords
