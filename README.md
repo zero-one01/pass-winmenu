@@ -37,7 +37,7 @@ interaction and a minimal interface that stays out of your way.
 
 Bring up the password menu with the keyboard shortcut `Ctrl Alt P`.
 The password menu allows you to quickly browse through your passwords and select the right one.
-Select the password by double-clicking it, or by using the arrow keys and pressing Enter.
+Select the right password file by double-clicking it, or by using the arrow keys and pressing Enter.
 
 The password will be decrypted using GPG, and your GPG key passphrase may be requested through pinentry.
 The decrypted password will then be copied to your clipboard and/or entered into the active window,
