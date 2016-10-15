@@ -1,13 +1,13 @@
 # pass-winmenu
 
-A simple, easy-to-use Windows interface for [pass](https://www.passwordstore.org/),
+A simple, easy-to-use Windows interface for [pass](https://www.passwordstore.org),
 built on open standards.
 
 ![demonstration GIF](https://i.imgur.com/Yf9XBQn.gif)
 
 ## Introduction
 
-Pass stores passwords as GPG-encrypted files organised into a directory structure.
+[Pass (https://www.passwordstore.org)](https://www.passwordstore.org) stores passwords as GPG-encrypted files organised into a directory structure.
 Its simplicity and modularity offer many advantages:
 
 - Cryptography is handled by GPG (Don't roll your own cryptography)
