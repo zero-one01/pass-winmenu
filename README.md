@@ -1,7 +1,8 @@
 # pass-winmenu
 
-A simple, easy-to-use Windows interface for [pass](https://www.passwordstore.org),
-built on open standards.
+A simple, easy-to-use password manager for Windows.
+
+Based on [pass](https://www.passwordstore.org), built on open standards.
 
 ![demonstration GIF](https://i.imgur.com/Yf9XBQn.gif)
 
