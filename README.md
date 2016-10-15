@@ -60,7 +60,11 @@ Additionally, GPG and Git are required for the application to function correctly
 Installing pass-winmenu is as easy as dropping the executable anywhere you want and running it.
 
 You'll need to install GPG and Git if you don't have them installed yet.
-Install them to any location of your choosing. Don't forget to add them to your PATH!
+Install them to any location of your choosing. Make sure they're added to your PATH!
+
+By default, GPG should add itself to your PATH without you having to do anything.
+Git will do so as well if you select the `Use Git from the Windows Command Prompt` option
+during installation.
 
 #### Download links:
 
@@ -75,18 +79,30 @@ If you've never used GPG before, you can generate a new key:
 
 `C:\Users\Baggykiin> gpg --gen-key`
 
+Follow the instructions to generate your GPG keys. If it asks you what kind of keys
+you want to generate, don't pick any of the `sign only` options, as they don't
+include an encryption key, which is required for encrypting passwords.
+The default, RSA and RSA, is recommended.
+
+When it asks you for an email address, remember that address, as you'll need to enter
+it again in a bit.
+
+Finally, you'll be asked to enter a passphrase. Make sure this is a very secure,
+unique passphrase, as it can be used to decrypt all your passwords, but don't
+make it *too* hard  to enter, since you'll need to enter it regularly.
+
 ### Creating a new password store:
 
 Create an empty directory in which you want to store your passwords.
 
-`C:\Users\Baggykiin> mkdir .password-store`
+`mkdir .password-store`
 
 Save the email address you used for creating your GPG key into a `.gpg-id` file
 in the root of your password directory (Use powershell, not command prompt).
 
 ```
-C:\Users\Baggykiin> cd .password-store
-C:\Users\Baggykiin\.password-store> echo "myemail@example.com" | Out-File -Encoding utf8 .gpg-id
+cd .password-store
+echo "myemail@example.com" | Out-File -Encoding utf8 .gpg-id
 ```
 
 Now you can point pass-winmenu to your password store.
@@ -95,6 +111,40 @@ On first run, pass-winmenu will generate a `pass-winmenu.yaml` file
 Open the file, read through it, edit the settings as necessary, and save it before
 starting the application again. You should now have a working password manager.
 
-To synchronise your passwords, initialise a new Git repository at the root of your password store,
-and connect it to a remote server. GitLab offers free private repositories, and GitHub does too if
+To synchronise your passwords, initialise a new Git repository at the root of your password store:
+```
+git init
+git add -A
+git commit -m "Initialise password repository"
+```
+
+You'll also need a remote Git server. GitLab offers free private repositories, and GitHub does too if
 you're a student. Alternatively, you can of course run your own Git server.
+
+Add an empty repository on your Git provider of choice, then connect your password store to it.
+Depending on where you're hosting your repository, it might differ a bit, but you'll usually
+have to do something like this:
+
+```
+git remote add origin https://github.com/yourusername/password-store.git
+git push --set-upstream origin master
+```
+
+### Accessing an existing password store on a different host
+
+If you already have a password store and you want to access it from another computer, you'll have
+to import your GPG keys on it. Follow the above instructions for installing GPG and Git, then export
+your GPG keys on the machine where you already have a working password store:
+
+`gpg --export-secret-key -a youremailaddress@example.com > private.key`
+
+Copy the `private.key` file to the machine on which you're setting up your password store, and import it.
+
+`gpg --import private.key`
+
+Clone your password repository
+
+`git clone https://github.com/yourusername/password-store.git`
+
+Then run pass-winmenu, edit the generated `pass-winmenu.yaml` configuration file as necessary,
+and start it again.
