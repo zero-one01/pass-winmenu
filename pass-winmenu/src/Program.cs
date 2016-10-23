@@ -8,7 +8,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -19,11 +21,9 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace PassWinmenu
 {
-	internal delegate void DecryptPasswordDelegate(bool copyToClipboard, bool typeUsername, bool typePassword);
-
 	internal class Program : Form
 	{
-		private const string version = "1.0";
+		private const string version = "1.0.1";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
@@ -170,7 +170,8 @@ namespace PassWinmenu
 			{
 				previousText = Clipboard.GetText();
 			}
-			Clipboard.SetText(value);
+			//Clipboard.SetText(value);
+			Clipboard.SetDataObject(value);
 			Task.Delay(TimeSpan.FromSeconds(timeout)).ContinueWith(_ =>
 			{
 				Invoke((MethodInvoker) (() =>
@@ -242,6 +243,7 @@ namespace PassWinmenu
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
 			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)AddPassword));
+			menu.Items.Add("Edit Password File", null, (sender, args) => Task.Run(() => EditPassword()));
 			menu.Items.Add(new ToolStripSeparator()); 
 			menu.Items.Add("Push to Remote", null, (sender, args) => Task.Run((Action)CommitChanges));
 			menu.Items.Add("Pull from Remote", null, (sender, args) => Task.Run((Action)UpdatePasswordStore));
@@ -359,25 +361,29 @@ namespace PassWinmenu
 			var fullPath = Path.GetFullPath(Path.Combine(ConfigManager.Config.PasswordStore, path));
 			// Ensure the file's parent directory exists.
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-
-			// .gpg-id contains the key ID of the key we should encrypt the password for.
-			using (var reader = new StreamReader(Path.Combine (ConfigManager.Config.PasswordStore, ".gpg-id")))
+			
+			try
 			{
-				try
-				{
-					gpg.Encrypt(fullPassword, reader.ReadLine(), fullPath);
-				}
-				catch (GpgException e)
-				{
-					RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
-					return;
-				}
+				gpg.Encrypt(fullPassword, GetGpgId(), fullPath + ".gpg");
+			}
+			catch (GpgException e)
+			{
+				RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
+				return;
 			}
 
 
 			// Copy the newly generated password.
 			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
 			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+		}
+
+		private string GetGpgId()
+		{
+			using (var reader = new StreamReader(Path.Combine(ConfigManager.Config.PasswordStore, ".gpg-id")))
+			{
+				return reader.ReadLine();
+			}
 		}
 
 		/// <summary>
@@ -396,6 +402,23 @@ namespace PassWinmenu
 			}
 		}
 
+		private string RequestPasswordFile()
+		{
+			if (InvokeRequired)
+			{
+				return (string)Invoke((Func<string>) RequestPasswordFile);
+			}
+			// Find GPG-encrypted password files
+			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
+			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
+			var shortNames = passFiles.ToDictionary(file => GetRelativePath(Path.GetFullPath(file), Path.GetFullPath(ConfigManager.Config.PasswordStore)).Replace("\\", ConfigManager.Config.DirectorySeparator).Replace(".gpg", ""), file => file);
+
+			var selection = ShowPasswordMenu(shortNames.Keys);
+			if (selection == null) return null;
+			var selectedFile = shortNames[selection];
+			return selectedFile;
+		}
+
 		/// <summary>
 		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
 		/// </summary>
@@ -404,20 +427,14 @@ namespace PassWinmenu
 			// We need to be on the main thread for this.
 			if (InvokeRequired)
 			{
-				Invoke((DecryptPasswordDelegate) DecryptPassword, copyToClipboard, typeUsername, typePassword);
+				Invoke((Action<bool,bool,bool>) DecryptPassword, copyToClipboard, typeUsername, typePassword);
 				return;
 			}
 
-			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
-
-			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
-			var shortNames = passFiles.ToDictionary(file => GetRelativePath(file, ConfigManager.Config.PasswordStore).Replace("\\", ConfigManager.Config.DirectorySeparator).Replace(".gpg", ""), file => file);
-
-			var selection = ShowPasswordMenu(shortNames.Keys);
+			var selectedFile = RequestPasswordFile();
 			// If the user cancels their selection, the password decryption should be cancelled too.
-			if (selection == null) return;
+			if (selectedFile == null) return;
 
-			var selectedFile = shortNames[selection];
 			string password;
 			try
 			{
@@ -464,6 +481,71 @@ namespace PassWinmenu
 
 				EnterText(password);
 			}
+		}
+
+		private void EditPassword()
+		{
+			var selectedFile = RequestPasswordFile();
+			if (selectedFile == null) return;
+			var plaintextFile = gpg.DecryptToFile(selectedFile);
+
+			var startTime = DateTime.Now;
+
+			// Open the file in the user's default editor
+			var proc = Process.Start(plaintextFile);
+
+			// Wait for the text file to be written to
+			while (File.GetLastWriteTime(plaintextFile) < startTime)
+			{
+				Thread.Sleep(1000);
+				if ((DateTime.Now - startTime).Hours >= 2)
+				{
+					try
+					{
+						File.Delete(plaintextFile);
+					}
+					catch (IOException){}
+					return;
+				}
+			}
+			// Wait for the file to be closed
+			bool inUse = true;
+			while (inUse)
+			{
+				try
+				{
+					var stream = File.Open(plaintextFile, FileMode.Open, FileAccess.Read, FileShare.None);
+					inUse = false;
+					stream.Close();
+				}
+				catch (IOException)
+				{
+					Thread.Sleep(1000);
+				}
+				if ((DateTime.Now - startTime).Hours >= 2)
+				{
+					try
+					{
+						File.Delete(plaintextFile);
+					}
+					catch (IOException) { }
+					return;
+				}
+			}
+
+			var result = MessageBox.Show($"Do you want to encrypt and save your changes to {Path.GetFileName(selectedFile)}?", "Edit password file", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+			if (result != MessageBoxResult.Yes)
+			{
+				File.Delete(plaintextFile);
+			}
+			else
+			{
+				File.Delete(selectedFile);
+				gpg.EncryptFile(plaintextFile, selectedFile, GetGpgId());
+				File.Delete(plaintextFile);
+			}
+
 		}
 
 		/// <summary>

@@ -71,6 +71,22 @@ namespace PassWinmenu.ExternalPrograms
 			return RunGPG($"--decrypt \"{file}\"");
 		}
 
+		public string DecryptToFile(string encryptedFile)
+		{
+			// Ensure the plaintext file does not overwrite the input file
+			string textFile;
+			if (encryptedFile.EndsWith(".gpg"))
+			{
+				textFile = encryptedFile.Substring(0, encryptedFile.Length - 4) + ".txt";
+			}
+			else
+			{
+				textFile = encryptedFile + ".txt";
+			}
+			RunGPG($"--output {textFile} --decrypt \"{encryptedFile}\"");
+			return textFile;
+		}
+
 		/// <summary>
 		/// Encrypt a file with GPG.
 		/// </summary>
@@ -80,7 +96,12 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void Encrypt(string data, string recipient, string outputFile)
 		{
-			RunGPG($"--recipient \"{recipient}\"  --output \"{outputFile}.gpg\" --encrypt", data);
+			RunGPG($"--recipient \"{recipient}\"  --output \"{outputFile}\" --encrypt", data);
+		}
+
+		public void EncryptFile(string inputFile, string outputFile, string recipient)
+		{
+			RunGPG($"--recipient \"{recipient}\"  --output \"{outputFile}\" --encrypt {inputFile}");
 		}
 	}
 	
