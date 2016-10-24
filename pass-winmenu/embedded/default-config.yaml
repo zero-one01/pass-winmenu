@@ -11,7 +11,7 @@ password-store: '%userprofile%\.password-store'
 # compared. All matching files are considered password files.
 password-file-match: '.*\.gpg$'
 # Path to the GPG executable. Can be either a command name (if GPG is added
-# to your PATH) or an absolute directory.
+# to your PATH environment variable) or a path to your gpg.exe.
 gpg-path: 'gpg'
 # Path to the Git executable.
 git-path: 'git'
@@ -35,8 +35,7 @@ output:
     # correctly.
     dead-keys: false
 
-# Here you can assign different hotkeys to different input methods.
-# Each hotkey is mapped to an action. Supported actions are:
+# Here you can map hotkeys to various actions. Supported actions are:
 # - decrypt-password
 # - add-password
 # - git-pull
@@ -98,6 +97,7 @@ username-detection:
             multiline: true
             singleline: false
 
+# Style settings.
 # All colour strings must be formatted as hexadecimal ARGB strings,
 # such as #AA00FF44. To 'unset' a colour, a fully transparent colour
 # can be used, which is any colour starting with #00.
