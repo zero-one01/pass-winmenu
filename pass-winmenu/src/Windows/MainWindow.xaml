@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="pass-winmenu (menu)" Width="500" WindowStartupLocation="Manual" Left="0" Top="0" AllowsTransparency="True" WindowStyle="None"
-        ResizeMode="NoResize" Height="30" x:ClassModifier="internal">
+        Title="pass-winmenu (menu)"
+        Width="500" Height="30" Left="0" Top="0" ResizeMode="NoResize" 
+        WindowStartupLocation="Manual"  AllowsTransparency="True" WindowStyle="None"
+        x:ClassModifier="internal">
 	<Grid Name="Grid">
 		<TextBox x:Name="SearchBox"
 		         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
@@ -17,4 +19,13 @@
 
 		</WrapPanel>
 	</Grid>
+	<Window.Triggers>
+		<EventTrigger RoutedEvent="Window.Loaded">
+			<BeginStoryboard>
+				<Storyboard>
+					<DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.15" FillBehavior="HoldEnd"></DoubleAnimation>
+				</Storyboard>
+			</BeginStoryboard>
+		</EventTrigger>
+	</Window.Triggers>
 </Window>
