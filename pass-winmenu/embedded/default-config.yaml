@@ -15,6 +15,11 @@ password-file-match: '.*\.gpg$'
 gpg-path: 'gpg'
 # Path to the Git executable.
 git-path: 'git'
+# Gpg-agent can have a pretty long startup time on Windows. This option allows
+# the gpg-agent to be started alongside pass-winmenu so it'll be ready when
+# you need it. If this causes pinentry to show up when pass-winmenu starts, 
+# you should set this to false.
+preload-gpg-agent: true
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30
 # The directory separator that will be used to separate directories and files

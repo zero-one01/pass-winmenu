@@ -23,7 +23,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.0.1-git-2";
+		private const string version = "1.0.1-git-3";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
@@ -50,11 +50,19 @@ namespace PassWinmenu
 
 			// Try to reload the config file when the user edits it.
 			var configWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), "pass-winmenu.yaml");
-			configWatcher.Changed += (s,a) =>
+			configWatcher.Changed += (s, a) =>
 			{
 				ConfigManager.Reload("pass-winmenu.yaml");
 			};
 			configWatcher.EnableRaisingEvents = true;
+
+			if (ConfigManager.Config.PreloadGpgAgent)
+			{
+				// Running GPG with these arguments will start the gpg-agent,
+				// but it will also cause GPG to throw an error, which we can
+				// safely ignore.
+				Task.Run(() => gpg.RunGPG("--passphrase \"1\" --batch -ce"));
+			}
 
 			CreateNotifyIcon();
 
