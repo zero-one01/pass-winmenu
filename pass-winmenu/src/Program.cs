@@ -92,10 +92,10 @@ namespace PassWinmenu
 						case HotkeyAction.AddPassword:
 							hotkeys.AddHotKey(keys, AddPassword);
 							break;
-							case HotkeyAction.GitPull:
+						case HotkeyAction.GitPull:
 							hotkeys.AddHotKey(keys, UpdatePasswordStore);
 							break;
-							case HotkeyAction.GitPush:
+						case HotkeyAction.GitPush:
 							hotkeys.AddHotKey(keys, CommitChanges);
 							break;
 					}
@@ -109,14 +109,14 @@ namespace PassWinmenu
 			}
 			Name = "pass-winmenu (main window)";
 		}
-		
+
 		protected override void WndProc(ref Message m)
 		{
 			base.WndProc(ref m);
 			// Pass window messages on to the hotkey handler.
 			hotkeys?.WndProc(ref m);
 		}
-		
+
 		protected override void SetVisibleCore(bool value)
 		{
 			// Do not allow this window to be made visible.
@@ -182,15 +182,15 @@ namespace PassWinmenu
 			Clipboard.SetDataObject(value);
 			Task.Delay(TimeSpan.FromSeconds(timeout)).ContinueWith(_ =>
 			{
-				Invoke((MethodInvoker) (() =>
-				{
+				Invoke((MethodInvoker)(() =>
+			   {
 					// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
 					// If the clipboard did not previously contain any text, it is simply cleared.
 					if (Clipboard.ContainsText() && Clipboard.GetText() == value)
-					{
-						Clipboard.SetText(previousText);
-					}
-				}));
+				   {
+					   Clipboard.SetText(previousText);
+				   }
+			   }));
 			});
 		}
 
@@ -252,7 +252,7 @@ namespace PassWinmenu
 			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
 			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)AddPassword));
 			menu.Items.Add("Edit Password File", null, (sender, args) => Task.Run(() => EditPassword()));
-			menu.Items.Add(new ToolStripSeparator()); 
+			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Push to Remote", null, (sender, args) => Task.Run((Action)CommitChanges));
 			menu.Items.Add("Pull from Remote", null, (sender, args) => Task.Run((Action)UpdatePasswordStore));
 			menu.Items.Add(new ToolStripSeparator());
@@ -299,7 +299,7 @@ namespace PassWinmenu
 				}
 				else
 				{
-					sb.AppendLine($"Pushed {changes.CommittedFiles.Count} changed file{(changes.CommittedFiles.Count > 1 ? "s":"")} to remote.");
+					sb.AppendLine($"Pushed {changes.CommittedFiles.Count} changed file{(changes.CommittedFiles.Count > 1 ? "s" : "")} to remote.");
 					if (changes.Pull.Commits.Count > 1)
 					{
 						sb.AppendLine($"Additionally, {changes.Pull.Commits.Count} new commits were pulled from remote.");
@@ -329,7 +329,7 @@ namespace PassWinmenu
 		{
 			if (InvokeRequired)
 			{
-				Invoke((MethodInvoker) AddPassword);
+				Invoke((MethodInvoker)AddPassword);
 				return;
 			}
 
@@ -369,7 +369,7 @@ namespace PassWinmenu
 			var fullPath = Path.GetFullPath(Path.Combine(ConfigManager.Config.PasswordStore, path));
 			// Ensure the file's parent directory exists.
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-			
+
 			try
 			{
 				gpg.Encrypt(fullPassword, GetGpgId(), fullPath + ".gpg");
@@ -414,7 +414,7 @@ namespace PassWinmenu
 		{
 			if (InvokeRequired)
 			{
-				return (string)Invoke((Func<string>) RequestPasswordFile);
+				return (string)Invoke((Func<string>)RequestPasswordFile);
 			}
 			// Find GPG-encrypted password files
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
@@ -435,7 +435,7 @@ namespace PassWinmenu
 			// We need to be on the main thread for this.
 			if (InvokeRequired)
 			{
-				Invoke((Action<bool,bool,bool>) DecryptPassword, copyToClipboard, typeUsername, typePassword);
+				Invoke((Action<bool, bool, bool>)DecryptPassword, copyToClipboard, typeUsername, typePassword);
 				return;
 			}
 
@@ -512,7 +512,7 @@ namespace PassWinmenu
 					{
 						File.Delete(plaintextFile);
 					}
-					catch (IOException){}
+					catch (IOException) { }
 					return;
 				}
 			}
@@ -570,9 +570,9 @@ namespace PassWinmenu
 				case UsernameDetectionMethod.FileName:
 					return Path.GetFileName(passwordFile).Replace(".gpg", "");
 				case UsernameDetectionMethod.LineNumber:
-					var extraLines = contents.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None);
+					var extraLines = contents.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 					var lineNumber = options.LineNumber - 2;
-					if(lineNumber <= 1) RaiseNotification("Failed to read username from password file: username-detection.options.line-number must be set to 2 or higher.", ToolTipIcon.Warning);
+					if (lineNumber <= 1) RaiseNotification("Failed to read username from password file: username-detection.options.line-number must be set to 2 or higher.", ToolTipIcon.Warning);
 					return lineNumber < extraLines.Length ? extraLines[lineNumber] : null;
 				case UsernameDetectionMethod.Regex:
 					var rgxOptions = options.RegexOptions.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
@@ -598,12 +598,12 @@ namespace PassWinmenu
 				// If dead keys are enabled, insert a space directly after each dead key to prevent
 				// it from being combined with the character following it.
 				// See https://en.wikipedia.org/wiki/Dead_key
-				var deadKeys = new[] {"\"", "'", "`", "~", "^"};
+				var deadKeys = new[] { "\"", "'", "`", "~", "^" };
 				text = deadKeys.Aggregate(text, (current, key) => current.Replace(key, key + " "));
 			}
 
 			// SendKeys.Send expects special characters to be escaped by wrapping them with curly braces.
-			var specialCharacters = new[] {'{', '}', '[', ']', '(', ')', '+', '^', '%', '~'};
+			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~' };
 			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
 		}
