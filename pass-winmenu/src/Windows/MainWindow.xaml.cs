@@ -84,6 +84,8 @@ namespace PassWinmenu.Windows
 			Top = configuration.Position.Y;
 			Width = configuration.Dimensions.X;
 			Height = configuration.Dimensions.Y;
+			BorderBrush = BrushFromColourString(StyleConfig.BorderColour);
+			BorderThickness = new Thickness(1);
 		}
 
 		/// <summary>

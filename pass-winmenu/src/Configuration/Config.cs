@@ -43,9 +43,15 @@ namespace PassWinmenu.Configuration
 				}
 			}
 		};
+		public PasswordGenerationConfig PasswordGeneration { get; set; } = new PasswordGenerationConfig();
 		public UsernameDetectionConfig UsernameDetection { get; set; } = new UsernameDetectionConfig();
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
+	}
+
+	internal class PasswordGenerationConfig
+	{
+		public string DefaultUsername { get; set; } = "";
 	}
 
 	internal class OutputConfig
@@ -117,6 +123,7 @@ namespace PassWinmenu.Configuration
 		public double FontSize { get; set; } = 14;
 		public string FontFamily { get; set; } = "Consolas";
 		public string BackgroundColour { get; set; } = "#FF202020";
+		public string BorderColour { get; set; } = "#FFD88900";
 		public string CaretColour { get; set; } = "#FFDDDDDD";
 		// These have to be strings, because they need to support percentage values.
 		public string OffsetLeft { get; set; } = "40%";

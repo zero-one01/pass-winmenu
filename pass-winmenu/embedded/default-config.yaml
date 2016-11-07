@@ -70,6 +70,12 @@ hotkeys:
 #    hotkey: 'ctrl alt o'
 #    action: 'add-password'
 
+password-generation:
+    # Default username to put behind the 'Username:' section in the extra
+    # content. Set to '$filename' to use the name of the password file as
+    # the default username.
+    default-username: ''
+
 # If you have added a hotkey where pass-winmenu enters a username and
 # a password, you can choose here how you want the application to determine
 # the correct username. Uncomment whichever method you prefer to enable it.
@@ -106,6 +112,7 @@ style:
     font-size: 14
     font-family: 'Consolas'
     background-colour: '#FF202020'
+    border-colour: '#FFD88900'
     caret-colour: '#FFDDDDDD'
     # Offset and dimensions of the menu.
     offset-left: 40%

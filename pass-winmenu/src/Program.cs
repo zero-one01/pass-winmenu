@@ -23,7 +23,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.0.1-git-1";
+		private const string version = "1.0.1-git-2";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly Hotkeys hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
@@ -346,7 +346,7 @@ namespace PassWinmenu
 			var path = pathWindow.GetSelection();
 
 			// Display the password generation window.
-			var passwordWindow = new PasswordWindow();
+			var passwordWindow = new PasswordWindow(Path.GetFileName(path));
 			passwordWindow.ShowDialog();
 			if (passwordWindow.DialogResult == null || !passwordWindow.DialogResult.Value)
 			{

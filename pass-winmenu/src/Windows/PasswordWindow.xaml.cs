@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using PassWinmenu.Configuration;
 
 namespace PassWinmenu.Windows
 {
@@ -15,10 +16,17 @@ namespace PassWinmenu.Windows
 		private bool allowUpper = true;
 		private bool allowWhitespace = true;
 
-		public PasswordWindow()
+		public PasswordWindow(string filename)
 		{
 			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			InitializeComponent();
+
+			var username = ConfigManager.Config.PasswordGeneration.DefaultUsername;
+			if (username == "$filename")
+			{
+				username = filename;
+			}
+			ExtraContent.Text = $"Username: {username}\n";
 
 			RegeneratePassword();
 			Password.Focus();
