@@ -502,46 +502,7 @@ namespace PassWinmenu
 			// Open the file in the user's default editor
 			var proc = Process.Start(plaintextFile);
 
-			// Wait for the text file to be written to
-			while (File.GetLastWriteTime(plaintextFile) < startTime)
-			{
-				Thread.Sleep(1000);
-				if ((DateTime.Now - startTime).Hours >= 2)
-				{
-					try
-					{
-						File.Delete(plaintextFile);
-					}
-					catch (IOException) { }
-					return;
-				}
-			}
-			// Wait for the file to be closed
-			bool inUse = true;
-			while (inUse)
-			{
-				try
-				{
-					var stream = File.Open(plaintextFile, FileMode.Open, FileAccess.Read, FileShare.None);
-					inUse = false;
-					stream.Close();
-				}
-				catch (IOException)
-				{
-					Thread.Sleep(1000);
-				}
-				if ((DateTime.Now - startTime).Hours >= 2)
-				{
-					try
-					{
-						File.Delete(plaintextFile);
-					}
-					catch (IOException) { }
-					return;
-				}
-			}
-
-			var result = MessageBox.Show($"Do you want to encrypt and save your changes to {Path.GetFileName(selectedFile)}?", "Edit password file", MessageBoxButton.YesNo, MessageBoxImage.Question);
+			var result = MessageBox.Show("Please keep this window open until you're done editing the password file.\nThen click Yes to save your changes, or No to discard them.", $"Save changes to {Path.GetFileName(selectedFile)}?", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
 			if (result != MessageBoxResult.Yes)
 			{
