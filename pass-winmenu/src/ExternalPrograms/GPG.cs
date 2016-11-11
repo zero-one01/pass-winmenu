@@ -27,7 +27,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// <param name="stdin">A text string to be sent to GPG's standard input.</param>
 		/// <returns>A (UTF-8 decoded) string containing the text returned by GPG.</returns>
 		/// <exception cref="GpgException">Thrown when GPG returns a non-zero exit code.</exception>
-		private string RunGPG(string arguments, string stdin=null)
+		internal string RunGPG(string arguments, string stdin=null)
 		{
 			var info = new ProcessStartInfo
 			{

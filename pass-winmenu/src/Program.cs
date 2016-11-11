@@ -553,7 +553,6 @@ namespace PassWinmenu
 				gpg.EncryptFile(plaintextFile, selectedFile, GetGpgId());
 				File.Delete(plaintextFile);
 			}
-
 		}
 
 		/// <summary>
