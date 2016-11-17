@@ -415,6 +415,10 @@ namespace PassWinmenu
 			}
 		}
 
+		/// <summary>
+		/// Asks the user to choose a password file.
+		/// </summary>
+		/// <returns>The path to the chosen password file, or null if the user didn't choose anything.</returns>
 		private string RequestPasswordFile()
 		{
 			if (InvokeRequired)
