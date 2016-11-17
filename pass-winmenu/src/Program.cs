@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.Windows;
@@ -23,9 +24,9 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.0.1-git-3";
+		private const string version = "1.1-git1";
 		private readonly NotifyIcon icon = new NotifyIcon();
-		private readonly Hotkeys hotkeys;
+		private readonly HotkeyManager hotkeys;
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
 
@@ -48,13 +49,7 @@ namespace PassWinmenu
 					return;
 			}
 
-			// Try to reload the config file when the user edits it.
-			var configWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), "pass-winmenu.yaml");
-			configWatcher.Changed += (s, a) =>
-			{
-				ConfigManager.Reload("pass-winmenu.yaml");
-			};
-			configWatcher.EnableRaisingEvents = true;
+
 
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
@@ -65,13 +60,36 @@ namespace PassWinmenu
 			}
 
 			CreateNotifyIcon();
+			hotkeys = AssignHotkeys();
+			
+			Name = "pass-winmenu (main window)";
+		}
 
-			hotkeys = new Hotkeys(Handle);
+		protected override void WndProc(ref Message m)
+		{
+			base.WndProc(ref m);
+			// Pass window messages on to the hotkey handler.
+			hotkeys?.HandleWndProc(ref m);
+		}
+
+		protected override void SetVisibleCore(bool value)
+		{
+			// Do not allow this window to be made visible.
+			base.SetVisibleCore(false);
+		}
+
+		/// <summary>
+		/// Loads keybindings from the configuration file and registers them with Windows.
+		/// </summary>
+		private HotkeyManager AssignHotkeys()
+		{
+			HotkeyManager hotkeyManager = null;
 			try
 			{
+				hotkeyManager = new HotkeyManager(Handle);
 				foreach (var hotkey in ConfigManager.Config.Hotkeys)
 				{
-					var keys = Hotkeys.Parse(hotkey.Hotkey);
+					var keys = KeyCombination.Parse(hotkey.Hotkey);
 					HotkeyAction action;
 					try
 					{
@@ -87,40 +105,27 @@ namespace PassWinmenu
 					switch (action)
 					{
 						case HotkeyAction.DecryptPassword:
-							hotkeys.AddHotKey(keys, () => DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
+							hotkeyManager.AddHotKey(keys, () => DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
 							break;
 						case HotkeyAction.AddPassword:
-							hotkeys.AddHotKey(keys, AddPassword);
+							hotkeyManager.AddHotKey(keys, AddPassword);
 							break;
 						case HotkeyAction.GitPull:
-							hotkeys.AddHotKey(keys, UpdatePasswordStore);
+							hotkeyManager.AddHotKey(keys, UpdatePasswordStore);
 							break;
 						case HotkeyAction.GitPush:
-							hotkeys.AddHotKey(keys, CommitChanges);
+							hotkeyManager.AddHotKey(keys, CommitChanges);
 							break;
 					}
 				}
 			}
-			catch (Exception e) when (e is ArgumentException || e is Hotkeys.HotkeyException)
+			catch (Exception e) when (e is ArgumentException || e is HotkeyException)
 			{
 				RaiseNotification(e.Message, ToolTipIcon.Error);
 				Application.Exit();
 				Environment.Exit(1);
 			}
-			Name = "pass-winmenu (main window)";
-		}
-
-		protected override void WndProc(ref Message m)
-		{
-			base.WndProc(ref m);
-			// Pass window messages on to the hotkey handler.
-			hotkeys?.WndProc(ref m);
-		}
-
-		protected override void SetVisibleCore(bool value)
-		{
-			// Do not allow this window to be made visible.
-			base.SetVisibleCore(false);
+			return hotkeyManager;
 		}
 
 		/// <summary>
