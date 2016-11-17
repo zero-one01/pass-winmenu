@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace PassWinmenu
+namespace PassWinmenu.Hotkeys
 {
 	internal static class NativeMethods
 	{
