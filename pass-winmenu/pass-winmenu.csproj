@@ -94,7 +94,7 @@
     <Compile Include="src\Hotkeys\HotkeyException.cs" />
     <Compile Include="src\Hotkeys\HotkeyManager.cs" />
     <Compile Include="src\Hotkeys\KeyCombination.cs" />
-    <Compile Include="src\NativeMethods.cs" />
+    <Compile Include="src\Hotkeys\NativeMethods.cs" />
     <Compile Include="src\Configuration\Config.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
     <Compile Include="src\ExtensionMethods\ScreenExtensions.cs" />
@@ -104,6 +104,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="src\EmbeddedResources.cs" />
+    <Compile Include="src\StartupLink.cs" />
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
     <Compile Include="src\Windows\MainWindowConfiguration.cs" />
     <Compile Include="src\Windows\PasswordSelectionWindow.cs" />

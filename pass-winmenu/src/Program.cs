@@ -27,6 +27,7 @@ namespace PassWinmenu
 		private const string version = "1.1-git1";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
+		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
 		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
 
@@ -207,44 +208,6 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Creates a shortcut to the application, overwriting any existing shortcuts with the same name.
-		/// </summary>
-		private void CreateShortcut()
-		{
-			// Open the startup folder in the default file explorer (usually Windows Explorer).
-			Process.Start(Environment.GetFolderPath(Environment.SpecialFolder.Startup));
-
-			var shortcutPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "pass-winmenu.lnk");
-
-			var t = Type.GetTypeFromCLSID(new Guid("72C24DD5-D70A-438B-8A42-98424B88AFB8")); //Windows Script Host Shell Object
-			dynamic shell = Activator.CreateInstance(t);
-			try
-			{
-				// Overwrite any previous links that might exist
-				if (File.Exists(shortcutPath))
-				{
-					File.Delete(shortcutPath);
-				}
-				var lnk = shell.CreateShortcut(shortcutPath);
-				try
-				{
-					lnk.TargetPath = Assembly.GetExecutingAssembly().Location;
-					lnk.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-					lnk.IconLocation = "shell32.dll, 1";
-					lnk.Save();
-				}
-				finally
-				{
-					Marshal.FinalReleaseComObject(lnk);
-				}
-			}
-			finally
-			{
-				Marshal.FinalReleaseComObject(shell);
-			}
-		}
-
-		/// <summary>
 		/// Creates a notification area icon for the application.
 		/// </summary>
 		private void CreateNotifyIcon()
@@ -271,7 +234,19 @@ namespace PassWinmenu
 				});
 			});
 			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Start with Windows", null, (sender, args) => CreateShortcut());
+			var startWithWindows = new ToolStripMenuItem("Start with Windows")
+			{
+				Checked = startupLink.Exists
+			};
+			startWithWindows.Click += (sender, args) =>
+			{
+				string target = Assembly.GetExecutingAssembly().Location;
+				string workingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+				startupLink.Toggle(target, workingDirectory);
+				startWithWindows.Checked = startupLink.Exists;
+			};
+
+			menu.Items.Add(startWithWindows);
 			menu.Items.Add("About", null, (sender, args) => Process.Start("https://github.com/Baggykiin/pass-winmenu"));
 			menu.Items.Add("Quit", null, (sender, args) => Close());
 			icon.ContextMenuStrip = menu;
