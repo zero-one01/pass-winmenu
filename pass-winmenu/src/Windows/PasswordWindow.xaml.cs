@@ -46,7 +46,7 @@ namespace PassWinmenu.Windows
 				    || (char.IsNumber(ch) && allowNumbers)
 				    || (char.IsLower(ch) && allowLower)
 				    || (char.IsUpper(ch) && allowUpper)
-					|| (char.IsWhiteSpace(ch) && allowWhitespace))
+				    || (char.IsWhiteSpace(ch) && allowWhitespace))
 				{
 					chars[i++] = ch;
 				}

@@ -61,7 +61,7 @@ namespace PassWinmenu
 
 			CreateNotifyIcon();
 			hotkeys = AssignHotkeys();
-			
+
 			Name = "pass-winmenu (main window)";
 		}
 
@@ -188,14 +188,14 @@ namespace PassWinmenu
 			Task.Delay(TimeSpan.FromSeconds(timeout)).ContinueWith(_ =>
 			{
 				Invoke((MethodInvoker)(() =>
-			   {
+				{
 					// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
 					// If the clipboard did not previously contain any text, it is simply cleared.
 					if (Clipboard.ContainsText() && Clipboard.GetText() == value)
-				   {
-					   Clipboard.SetText(previousText);
-				   }
-			   }));
+					{
+						Clipboard.SetText(previousText);
+					}
+				}));
 			});
 		}
 
@@ -502,10 +502,8 @@ namespace PassWinmenu
 			if (selectedFile == null) return;
 			var plaintextFile = gpg.DecryptToFile(selectedFile);
 
-			var startTime = DateTime.Now;
-
 			// Open the file in the user's default editor
-			var proc = Process.Start(plaintextFile);
+			Process.Start(plaintextFile);
 
 			var result = MessageBox.Show("Please keep this window open until you're done editing the password file.\nThen click Yes to save your changes, or No to discard them.", $"Save changes to {Path.GetFileName(selectedFile)}?", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
