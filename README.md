@@ -78,7 +78,9 @@ Git: https://git-scm.com/downloads
 If you already have a GPG key, you may want to consider importing it and using that.
 If you've never used GPG before, you can generate a new key:
 
-`C:\Users\Baggykiin> gpg --gen-key`
+```
+powershell> gpg --gen-key
+```
 
 Follow the instructions to generate your GPG keys. If it asks you what kind of keys
 you want to generate, don't pick any of the `sign only` options, as they don't
@@ -94,16 +96,17 @@ make it *too* hard  to enter, since you'll need to enter it regularly.
 
 ### Creating a new password store:
 
-Create an empty directory in which you want to store your passwords.
-
-`mkdir .password-store`
+Determine in which directory you want to store your passwords.
+By default, pass-winmenu will assume it's `%USERPROFILE%\.password-store`.
+If you want to use that directory, create it:
+```
+powershell> mkdir $HOME\.password-store
+```
 
 Save the email address you used for creating your GPG key into a `.gpg-id` file
-in the root of your password directory (Use powershell, not command prompt).
-
+in the root of your password directory.
 ```
-cd .password-store
-echo "myemail@example.com" | Out-File -Encoding utf8 .gpg-id
+powershell> echo "myemail@example.com" | Out-File -Encoding utf8 $HOME\.password-store\.gpg-id
 ```
 
 Now you can point pass-winmenu to your password store.
@@ -114,9 +117,10 @@ starting the application again. You should now have a working password manager.
 
 To synchronise your passwords, initialise a new Git repository at the root of your password store:
 ```
-git init
-git add -A
-git commit -m "Initialise password repository"
+powershell> cd $HOME\.password-store
+powershell> git init
+powershell> git add -A
+powershell> git commit -m "Initialise password repository"
 ```
 
 You'll also need a remote Git server. GitLab offers free private repositories, and GitHub does too if
@@ -127,8 +131,8 @@ Depending on where you're hosting your repository, it might differ a bit, but yo
 have to do something like this:
 
 ```
-git remote add origin https://github.com/yourusername/password-store.git
-git push --set-upstream origin master
+powershell> git remote add origin https://github.com/yourusername/password-store.git
+powershell> git push --set-upstream origin master
 ```
 
 ### Accessing an existing password store on a different host
@@ -137,15 +141,21 @@ If you already have a password store and you want to access it from another comp
 to import your GPG keys on it. Follow the above instructions for installing GPG and Git, then export
 your GPG keys on the machine where you already have a working password store:
 
-`gpg --export-secret-key -a youremailaddress@example.com > private.key`
+```
+powershell> gpg --export-secret-key -a youremailaddress@example.com > private.key
+```
 
 Copy the `private.key` file to the machine on which you're setting up your password store, and import it.
 
-`gpg --import private.key`
+```
+powershell> gpg --import private.key
+```
 
 Clone your password repository
 
-`git clone https://github.com/yourusername/password-store.git`
+```
+powershell> git clone https://github.com/yourusername/password-store.git
+```
 
 Then run pass-winmenu, edit the generated `pass-winmenu.yaml` configuration file as necessary,
 and start it again.
