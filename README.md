@@ -159,3 +159,9 @@ powershell> git clone https://github.com/yourusername/password-store.git $HOME/.
 
 Then run pass-winmenu, edit the generated `pass-winmenu.yaml` configuration file as necessary,
 and start it again.
+
+## Cross-platform support
+
+Check out https://www.passwordstore.org/ if you're looking for implementations for other operating systems.
+
+In addition to pass-winmenu, I personally also use [Android Password Store](https://github.com/zeapo/Android-Password-Store) for Android, and [a dmenu script](https://baggyk.in/p/passmenu.sh) for Linux, which I've adapted from [this script](https://git.zx2c4.com/password-store/tree/contrib/dmenu).
