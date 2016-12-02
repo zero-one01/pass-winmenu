@@ -154,7 +154,7 @@ powershell> gpg --import private.key
 Clone your password repository
 
 ```
-powershell> git clone https://github.com/yourusername/password-store.git
+powershell> git clone https://github.com/yourusername/password-store.git $HOME/.password-store
 ```
 
 Then run pass-winmenu, edit the generated `pass-winmenu.yaml` configuration file as necessary,
