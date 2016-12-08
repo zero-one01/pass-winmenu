@@ -71,7 +71,7 @@ hotkeys:
         copy-to-clipboard: true
         type-username: true
         type-password: true
-# Example configuration of an 'add password' hotkey. Uncomment to enable.
+    # Example configuration of an 'add password' hotkey. Uncomment to enable.
 #  - 
 #    hotkey: 'ctrl alt o'
 #    action: 'add-password'
