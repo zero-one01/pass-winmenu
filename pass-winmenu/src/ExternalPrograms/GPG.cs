@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace PassWinmenu.ExternalPrograms
@@ -71,6 +72,12 @@ namespace PassWinmenu.ExternalPrograms
 			return RunGPG($"--decrypt \"{file}\"");
 		}
 
+		/// <summary>
+		/// Decrypt a file to a plaintext file with GPG.
+		/// </summary>
+		/// <param name="encryptedFile">The path to the file to be decrypted.</param>
+		/// <returns>The path to the generated plaintext file.</returns>
+		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
 		public string DecryptToFile(string encryptedFile)
 		{
 			// Ensure the plaintext file does not overwrite the input file
@@ -88,20 +95,29 @@ namespace PassWinmenu.ExternalPrograms
 		}
 
 		/// <summary>
-		/// Encrypt a file with GPG.
+		/// Encrypt a string with GPG.
 		/// </summary>
-		/// <param name="data">The text to be encrypted</param>
-		/// <param name="recipient"></param>
-		/// <param name="outputFile"></param>
+		/// <param name="data">The text to be encrypted.</param>
+		/// <param name="outputFile">The path to the output file.</param>
+		/// <param name="recipient">The GPG ID of the recipient.</param>
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
-		public void Encrypt(string data, string recipient, string outputFile)
+		public void Encrypt(string data, string outputFile, params string[] recipients)
 		{
-			RunGPG($"--recipient \"{recipient}\"  --output \"{outputFile}\" --encrypt", data);
+			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
+			RunGPG($"{recipientsString} --output \"{outputFile}\" --encrypt", data);
 		}
 
-		public void EncryptFile(string inputFile, string outputFile, string recipient)
+		/// <summary>
+		/// Encrypt a file with GPG.
+		/// </summary>
+		/// <param name="inputFile">The path to the file to be encrypted.</param>
+		/// <param name="outputFile">The path to the output file.</param>
+		/// <param name="recipient">The GPG ID of the recipient.</param>
+		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
+		public void EncryptFile(string inputFile, string outputFile, params string[] recipients)
 		{
-			RunGPG($"--recipient \"{recipient}\"  --output \"{outputFile}\" --encrypt {inputFile}");
+			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
+			RunGPG($"{recipientsString}  --output \"{outputFile}\" --encrypt {inputFile}");
 		}
 	}
 	

@@ -13,6 +13,8 @@ using System.Windows.Forms;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
+using PassWinmenu.Utilities;
+using PassWinmenu.Utilities.ExtensionMethods;
 using PassWinmenu.Windows;
 using YamlDotNet.Core;
 using Application = System.Windows.Forms.Application;
@@ -23,7 +25,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.1-git1";
+		private const string version = "1.1-git2";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
@@ -400,7 +402,7 @@ namespace PassWinmenu
 
 			try
 			{
-				gpg.Encrypt(fullPassword, GetGpgId(), fullPath + ".gpg");
+				gpg.Encrypt(fullPassword, fullPath + ".gpg", GetGpgIds(Path.GetDirectoryName(fullPath)));
 			}
 			catch (GpgException e)
 			{
@@ -414,12 +416,41 @@ namespace PassWinmenu
 			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 		}
 
-		private string GetGpgId()
+		/// <summary>
+		/// Searches the given directory tree for a gpg-id file.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns>An array of GPG ids taken from the first .gpg-id file that is encountered.</returns>
+		private static string[] GetGpgIds(string path)
 		{
-			using (var reader = new StreamReader(Path.Combine(ConfigManager.Config.PasswordStore, ".gpg-id")))
+			// Ensure the path does not contain any trailing slashes
+			path = Helpers.NormaliseDirectory(path);
+			var startDir = File.GetAttributes(path).HasFlag(FileAttributes.Directory)
+				? new DirectoryInfo(path)
+				: new FileInfo(path).Directory;
+
+			var pwStoreDir = File.GetAttributes(ConfigManager.Config.PasswordStore).HasFlag(FileAttributes.Directory)
+				? new DirectoryInfo(path)
+				: new FileInfo(path).Directory;
+
+			// Ensure the password file directory is actually located in the password store.
+			if (!pwStoreDir.IsParentOf(startDir))
 			{
-				return reader.ReadLine();
+				throw new ArgumentException("The given directory is not a subdirectory of the password store.");
 			}
+			// Walk down from the topmost directory, 
+			// stopping as soon as we encounter a .gpg-id file.
+			var current = startDir;
+			while (!current.ContainsFile(".gpg-id"))
+			{
+				if (current.Parent == null || current.PathEquals(pwStoreDir))
+				{
+					return null;
+				}
+				current = current.Parent;
+			}
+
+			return File.ReadAllLines(Path.Combine(current.FullName, ".gpg-id"));
 		}
 
 		/// <summary>
@@ -546,7 +577,7 @@ namespace PassWinmenu
 			else
 			{
 				File.Delete(selectedFile);
-				gpg.EncryptFile(plaintextFile, selectedFile, GetGpgId());
+				gpg.EncryptFile(plaintextFile, selectedFile, GetGpgIds(selectedFile));
 				File.Delete(plaintextFile);
 			}
 		}
