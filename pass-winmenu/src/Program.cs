@@ -111,6 +111,9 @@ namespace PassWinmenu
 						case HotkeyAction.AddPassword:
 							hotkeyManager.AddHotKey(keys, AddPassword);
 							break;
+						case HotkeyAction.EditPassword:
+							hotkeyManager.AddHotKey(keys, EditPassword);
+							break;
 						case HotkeyAction.GitPull:
 							hotkeyManager.AddHotKey(keys, UpdatePasswordStore);
 							break;

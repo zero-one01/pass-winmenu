@@ -43,6 +43,7 @@ output:
 # Here you can map hotkeys to various actions. Supported actions are:
 # - decrypt-password
 # - add-password
+# - edit-password
 # - git-pull
 # - git-push
 # Actions can be further configured using the 'options' variable. 

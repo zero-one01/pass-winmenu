@@ -94,6 +94,7 @@ namespace PassWinmenu.Configuration
 	{
 		DecryptPassword,
 		AddPassword,
+		EditPassword,
 		GitPull,
 		GitPush
 	}
