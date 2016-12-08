@@ -90,14 +90,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\DirectoryAutocomplete.cs" />
-    <Compile Include="src\ExtensionMethods\StringExtensions.cs" />
+    <Compile Include="src\Utilities\ExtensionMethods\DirectoryInfoExtensions.cs" />
+    <Compile Include="src\Utilities\ExtensionMethods\StringExtensions.cs" />
     <Compile Include="src\Hotkeys\HotkeyException.cs" />
     <Compile Include="src\Hotkeys\HotkeyManager.cs" />
     <Compile Include="src\Hotkeys\KeyCombination.cs" />
     <Compile Include="src\Hotkeys\NativeMethods.cs" />
     <Compile Include="src\Configuration\Config.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
-    <Compile Include="src\ExtensionMethods\ScreenExtensions.cs" />
+    <Compile Include="src\Utilities\ExtensionMethods\ScreenExtensions.cs" />
     <Compile Include="src\ExternalPrograms\Git.cs" />
     <Compile Include="src\ExternalPrograms\GPG.cs" />
     <Compile Include="src\Program.cs">
@@ -105,6 +106,7 @@
     </Compile>
     <Compile Include="src\EmbeddedResources.cs" />
     <Compile Include="src\StartupLink.cs" />
+    <Compile Include="src\Utilities\Helpers.cs" />
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
     <Compile Include="src\Windows\MainWindowConfiguration.cs" />
     <Compile Include="src\Windows\PasswordSelectionWindow.cs" />

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace PassWinmenu
+namespace PassWinmenu.Utilities.ExtensionMethods
 {
 	internal static class ScreenExtensions
 	{

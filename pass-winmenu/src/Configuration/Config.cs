@@ -1,5 +1,7 @@
 ﻿using System;
-using PassWinmenu.ExtensionMethods;
+using System.IO;
+using PassWinmenu.Utilities;
+using PassWinmenu.Utilities.ExtensionMethods;
 using YamlDotNet.Serialization;
 
 namespace PassWinmenu.Configuration
@@ -10,7 +12,11 @@ namespace PassWinmenu.Configuration
 		public string PasswordStore
 		{
 			get { return passwordStore; }
-			set { passwordStore = Environment.ExpandEnvironmentVariables(value); }
+			set
+			{
+				var expanded = Environment.ExpandEnvironmentVariables(value);
+				passwordStore = Helpers.NormaliseDirectory(expanded);
+			}
 		}
 
 		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";

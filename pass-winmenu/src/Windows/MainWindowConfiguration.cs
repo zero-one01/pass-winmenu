@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using PassWinmenu.Configuration;
+using PassWinmenu.Utilities.ExtensionMethods;
 using Orientation = System.Windows.Controls.Orientation;
 
 namespace PassWinmenu.Windows
