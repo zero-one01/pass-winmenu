@@ -532,7 +532,12 @@ namespace PassWinmenu
 			// Open the file in the user's default editor
 			Process.Start(plaintextFile);
 
-			var result = MessageBox.Show("Please keep this window open until you're done editing the password file.\nThen click Yes to save your changes, or No to discard them.", $"Save changes to {Path.GetFileName(selectedFile)}?", MessageBoxButton.YesNo, MessageBoxImage.Information);
+			var result = MessageBox.Show(
+				"Please keep this window open until you're done editing the password file.\n" +
+				"Then click Yes to save your changes, or No to discard them.",
+				$"Save changes to {Path.GetFileName(selectedFile)}?",
+				MessageBoxButton.YesNo,
+				MessageBoxImage.Information);
 
 			if (result != MessageBoxResult.Yes)
 			{

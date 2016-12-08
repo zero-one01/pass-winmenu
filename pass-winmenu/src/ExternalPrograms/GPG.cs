@@ -77,11 +77,11 @@ namespace PassWinmenu.ExternalPrograms
 			string textFile;
 			if (encryptedFile.EndsWith(".gpg"))
 			{
-				textFile = encryptedFile.Substring(0, encryptedFile.Length - 4) + ".txt";
+				textFile = encryptedFile.Substring(0, encryptedFile.Length - 4) + ".plaintext.txt";
 			}
 			else
 			{
-				textFile = encryptedFile + ".txt";
+				textFile = encryptedFile + ".plaintext.txt";
 			}
 			RunGPG($"--output {textFile} --decrypt \"{encryptedFile}\"");
 			return textFile;
