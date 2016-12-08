@@ -77,10 +77,20 @@ hotkeys:
 #    action: 'add-password'
 
 password-generation:
-    # Default username to put behind the 'Username:' section in the extra
-    # content. Set to '$filename' to use the name of the password file as
-    # the default username.
-    default-username: ''
+    # This template allows you to alter the default extra content that's
+    # added to new password files. Note that this is a multiline string;
+    # any leading spaces will be ignored.
+    # A few variables can be inserted into the string:
+    #  - $filename (The name of the password file, without .gpg extension
+    #               and without its path.)
+    #  - $date     (The current date, formatted as yyyy-MM-dd)
+    #  - $time     (The current time, formatted as HH:mm:ss)
+    default-content: |
+        Username: 
+    # Example configuration (uncomment to enable):
+#    default-content: |
+#        Username: $filename
+#        Created: $date $time
 
 # If you have added a hotkey where pass-winmenu enters a username and
 # a password, you can choose here how you want the application to determine

@@ -52,7 +52,8 @@ namespace PassWinmenu.Configuration
 
 	internal class PasswordGenerationConfig
 	{
-		public string DefaultUsername { get; set; } = "";
+		public string DefaultUsername { get; set; } = null;
+		public string DefaultContent { get; set; } = "Username: \n";
 	}
 
 	internal class OutputConfig
