@@ -5,10 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -16,6 +14,7 @@ using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.Windows;
+using YamlDotNet.Core;
 using Application = System.Windows.Forms.Application;
 using Clipboard = System.Windows.Clipboard;
 using MessageBox = System.Windows.MessageBox;
@@ -33,37 +32,83 @@ namespace PassWinmenu
 
 		public Program()
 		{
-			var result = ConfigManager.Load("pass-winmenu.yaml");
+			CreateNotifyIcon();
+			LoadConfigFile();
+			hotkeys = AssignHotkeys();
+			Name = "pass-winmenu (main window)";
+
+			if (ConfigManager.Config.PreloadGpgAgent)
+			{
+				Task.Run(() =>
+				{
+					try
+					{
+						// This is just a hack to force GPG to start its agent. It's a nonsensical
+						// command that will cause GPG to complain and return a nonzero exit code,
+						// causing an exception to be thrown which we don't care about,
+						// since we only run the command for its side effects.
+						gpg.RunGPG("--passphrase \"1\" --batch -ce");
+					}
+					catch (GpgException) { }
+				});
+			}
+		}
+
+		private void LoadConfigFile()
+		{
+			ConfigManager.LoadResult result;
+			try
+			{
+				result = ConfigManager.Load("pass-winmenu.yaml");
+			}
+			catch (Exception e) when (e.InnerException != null)
+			{
+				MessageBox.Show(
+					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
+					"Unable to load configuration file.",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				Exit();
+				return;
+			}
+			catch (SemanticErrorException e)
+			{
+				MessageBox.Show(
+					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
+					"Unable to load configuration file.",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				Exit();
+				return;
+			}
+			catch (YamlException e)
+			{
+				MessageBox.Show(
+					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
+					"Unable to load configuration file.",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error);
+				Exit();
+				return;
+			}
+
 			switch (result)
 			{
-				case ConfigManager.LoadResult.ParseFailure:
-					RaiseNotification("The configuration file could not be loaded (Parse Error).\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
-					break;
 				case ConfigManager.LoadResult.FileCreationFailure:
 					RaiseNotification("A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
 					break;
 				case ConfigManager.LoadResult.NewFileCreated:
 					MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.");
-					Close();
-					Application.Exit();
-					Environment.Exit(0);
+					Exit();
 					return;
 			}
+		}
 
-
-
-			if (ConfigManager.Config.PreloadGpgAgent)
-			{
-				// Running GPG with these arguments will start the gpg-agent,
-				// but it will also cause GPG to throw an error, which we can
-				// safely ignore.
-				Task.Run(() => gpg.RunGPG("--passphrase \"1\" --batch -ce"));
-			}
-
-			CreateNotifyIcon();
-			hotkeys = AssignHotkeys();
-
-			Name = "pass-winmenu (main window)";
+		private void Exit()
+		{
+			Close();
+			Application.Exit();
+			Environment.Exit(0);
 		}
 
 		protected override void WndProc(ref Message m)

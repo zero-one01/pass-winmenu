@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -13,7 +12,6 @@ namespace PassWinmenu.Configuration
 		public enum LoadResult
 		{
 			Success,
-			ParseFailure,
 			FileCreationFailure,
 			NewFileCreated
 		}
@@ -41,14 +39,7 @@ namespace PassWinmenu.Configuration
 			var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention());
 			using (var reader = File.OpenText(fileName))
 			{
-				try
-				{
-					Config = deserialiser.Deserialize<Config>(reader);
-				}
-				catch (Exception e) when(e is SemanticErrorException || e is YamlException)
-				{
-					return LoadResult.ParseFailure;
-				}
+				Config = deserialiser.Deserialize<Config>(reader);
 			}
 			return LoadResult.Success;
 		}
