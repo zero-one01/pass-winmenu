@@ -115,7 +115,12 @@ On first run, pass-winmenu will generate a `pass-winmenu.yaml` file
 Open the file, read through it, edit the settings as necessary, and save it before
 starting the application again. You should now have a working password manager.
 
-To synchronise your passwords, initialise a new Git repository at the root of your password store:
+If you want to access your passwords on multiple devices, you have several options.
+What follows are the instructions for setting up Git, but all software 
+able to synchronise directories will work: Git, SVN, Dropbox, Google Drive, ownCloud, network shares, bittorrent sync...
+
+
+To synchronise your passwords using Git, initialise a new Git repository at the root of your password store:
 ```
 powershell> cd $HOME\.password-store
 powershell> git init
