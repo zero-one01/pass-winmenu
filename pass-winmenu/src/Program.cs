@@ -25,7 +25,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.2";
+		private const string version = "1.2.1";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
@@ -577,7 +577,7 @@ namespace PassWinmenu
 			else
 			{
 				File.Delete(selectedFile);
-				gpg.EncryptFile(plaintextFile, selectedFile, GetGpgIds(selectedFile));
+				gpg.EncryptFile(plaintextFile, selectedFile, GetGpgIds(Path.GetDirectoryName(selectedFile)));
 				File.Delete(plaintextFile);
 			}
 		}
