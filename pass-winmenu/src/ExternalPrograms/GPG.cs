@@ -99,10 +99,11 @@ namespace PassWinmenu.ExternalPrograms
 		/// </summary>
 		/// <param name="data">The text to be encrypted.</param>
 		/// <param name="outputFile">The path to the output file.</param>
-		/// <param name="recipient">The GPG ID of the recipient.</param>
+		/// <param name="recipients">An array of GPG ids for which the file should be encrypted.</param>
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void Encrypt(string data, string outputFile, params string[] recipients)
 		{
+			if(recipients == null) recipients = new string[0];
 			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 			RunGPG($"{recipientsString} --output \"{outputFile}\" --encrypt", data);
 		}
@@ -112,10 +113,11 @@ namespace PassWinmenu.ExternalPrograms
 		/// </summary>
 		/// <param name="inputFile">The path to the file to be encrypted.</param>
 		/// <param name="outputFile">The path to the output file.</param>
-		/// <param name="recipient">The GPG ID of the recipient.</param>
+		/// <param name="recipients">An array of GPG ids for which the file should be encrypted.</param>
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void EncryptFile(string inputFile, string outputFile, params string[] recipients)
 		{
+			if(recipients == null) recipients = new string[0];
 			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 			RunGPG($"{recipientsString}  --output \"{outputFile}\" --encrypt {inputFile}");
 		}
