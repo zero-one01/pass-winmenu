@@ -429,9 +429,7 @@ namespace PassWinmenu
 				? new DirectoryInfo(path)
 				: new FileInfo(path).Directory;
 
-			var pwStoreDir = File.GetAttributes(ConfigManager.Config.PasswordStore).HasFlag(FileAttributes.Directory)
-				? new DirectoryInfo(path)
-				: new FileInfo(path).Directory;
+			var pwStoreDir = new DirectoryInfo(ConfigManager.Config.PasswordStore);
 
 			// Ensure the password file directory is actually located in the password store.
 			if (!pwStoreDir.IsParentOf(startDir))
