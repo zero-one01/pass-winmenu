@@ -41,18 +41,10 @@ namespace PassWinmenu
 
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
-				Task.Run(() =>
-				{
-					try
-					{
-						// This is just a hack to force GPG to start its agent. It's a nonsensical
-						// command that will cause GPG to complain and return a nonzero exit code,
-						// causing an exception to be thrown which we don't care about,
-						// since we only run the command for its side effects.
-						gpg.RunGPG("--passphrase \"1\" --batch -ce");
-					}
-					catch (GpgException) { }
-				});
+				// This command will return a list of private keys managed by GPG.
+				// To get this list, GPG has to start its gpg-agent.
+				// Since we only care about this side effect, we discard the output.
+				Task.Run(() => gpg.RunGPG("--list-secret-keys"));
 			}
 		}
 
