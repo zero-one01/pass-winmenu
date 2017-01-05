@@ -76,22 +76,11 @@ namespace PassWinmenu.ExternalPrograms
 		/// Decrypt a file to a plaintext file with GPG.
 		/// </summary>
 		/// <param name="encryptedFile">The path to the file to be decrypted.</param>
-		/// <returns>The path to the generated plaintext file.</returns>
+		/// <param name="outputFile">The path where the decrypted file should be placed.</param>
 		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
-		public string DecryptToFile(string encryptedFile)
+		public void DecryptToFile(string encryptedFile, string outputFile)
 		{
-			// Ensure the plaintext file does not overwrite the input file
-			string textFile;
-			if (encryptedFile.EndsWith(".gpg"))
-			{
-				textFile = encryptedFile.Substring(0, encryptedFile.Length - 4) + ".plaintext.txt";
-			}
-			else
-			{
-				textFile = encryptedFile + ".plaintext.txt";
-			}
-			RunGPG($"--output {textFile} --decrypt \"{encryptedFile}\"");
-			return textFile;
+			RunGPG($"--output {outputFile} --decrypt \"{encryptedFile}\"");
 		}
 
 		/// <summary>

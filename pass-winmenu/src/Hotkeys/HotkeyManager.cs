@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace PassWinmenu.Hotkeys
 {
-	internal class HotkeyManager
+	internal class HotkeyManager : IDisposable
 	{
 		private int hotkeyIdCounter;
 		private readonly Dictionary<int, Action> hotkeyActions = new Dictionary<int, Action>();
@@ -58,17 +58,6 @@ namespace PassWinmenu.Hotkeys
 		}
 
 		/// <summary>
-		/// Unregisters all hotkeys.
-		/// </summary>
-		public void DisposeHotkeys()
-		{
-			foreach (var key in hotkeyActions.Keys)
-			{
-				NativeMethods.UnregisterHotKey(handle, key);
-			}
-		}
-
-		/// <summary>
 		/// WndProc handler. This must be called from the WndProc handler of the
 		/// window to which the hotkeys are registered.
 		/// </summary>
@@ -81,6 +70,14 @@ namespace PassWinmenu.Hotkeys
 				//var modifier = (ModifierKey)((int)message.LParam & 0xFFFF);
 				var id = message.WParam.ToInt32();
 				hotkeyActions[id]();
+			}
+		}
+
+		public void Dispose()
+		{
+			foreach (var key in hotkeyActions.Keys)
+			{
+				NativeMethods.UnregisterHotKey(handle, key);
 			}
 		}
 	}

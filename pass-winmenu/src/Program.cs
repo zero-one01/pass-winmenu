@@ -14,7 +14,6 @@ using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.Utilities;
-using PassWinmenu.Utilities.ExtensionMethods;
 using PassWinmenu.Windows;
 using YamlDotNet.Core;
 using Application = System.Windows.Forms.Application;
@@ -25,12 +24,13 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.2.1";
+		private const string version = "1.3-dev";
+		private const string encryptedFileExtension = ".gpg";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
-		private readonly GPG gpg = new GPG(ConfigManager.Config.GpgPath);
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
+		private PasswordManager passwordManager;
 
 		public Program()
 		{
@@ -39,6 +39,8 @@ namespace PassWinmenu
 			hotkeys = AssignHotkeys();
 			Name = "pass-winmenu (main window)";
 
+			var gpg = new GPG(ConfigManager.Config.GpgPath);
+			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, encryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
 				// This command will return a list of private keys managed by GPG.
@@ -165,8 +167,7 @@ namespace PassWinmenu
 			catch (Exception e) when (e is ArgumentException || e is HotkeyException)
 			{
 				RaiseNotification(e.Message, ToolTipIcon.Error);
-				Application.Exit();
-				Environment.Exit(1);
+				Exit();
 			}
 			return hotkeyManager;
 		}
@@ -183,7 +184,7 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Opens the password menu and displays it to the user, allowing them to choose an option.
+		/// Opens the password menu and displays it to the user, allowing them to choose an existing password file.
 		/// </summary>
 		/// <param name="options">A list of options the user can choose from.</param>
 		/// <returns>One of the values contained in <paramref name="options"/>, or null if no option was chosen.</returns>
@@ -210,6 +211,29 @@ namespace PassWinmenu
 			{
 				return null;
 			}
+		}
+
+		private string ShowFileSelectionWindow()
+		{
+			MainWindowConfiguration windowConfig;
+			try
+			{
+				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
+			}
+			catch (ConfigurationParseException e)
+			{
+				RaiseNotification(e.Message, ToolTipIcon.Error);
+				return null;
+			}
+
+			// Ask the user where the password file should be placed.
+			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore, windowConfig);
+			pathWindow.ShowDialog();
+			if (!pathWindow.Success)
+			{
+				return null;
+			}
+			return pathWindow.GetSelection();
 		}
 
 		/// <summary>
@@ -242,11 +266,11 @@ namespace PassWinmenu
 			});
 		}
 
-		protected override void OnFormClosed(FormClosedEventArgs e)
+		protected override void Dispose(bool disposing)
 		{
-			// Unregister all hotkeys before closing the form.
-			hotkeys.DisposeHotkeys();
-			base.OnFormClosed(e);
+			icon.Dispose();
+			hotkeys.Dispose();
+			base.Dispose(disposing);
 		}
 
 		/// <summary>
@@ -354,29 +378,10 @@ namespace PassWinmenu
 				Invoke((MethodInvoker)AddPassword);
 				return;
 			}
-
-			MainWindowConfiguration windowConfig;
-			try
-			{
-				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
-			}
-			catch (ConfigurationParseException e)
-			{
-				RaiseNotification(e.Message, ToolTipIcon.Error);
-				return;
-			}
-
-			// Ask the user where the password file should be placed.
-			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore, windowConfig);
-			pathWindow.ShowDialog();
-			if (!pathWindow.Success)
-			{
-				return;
-			}
-			var path = pathWindow.GetSelection();
+			var passwordFileName = ShowFileSelectionWindow();
 
 			// Display the password generation window.
-			var passwordWindow = new PasswordWindow(Path.GetFileName(path));
+			var passwordWindow = new PasswordWindow(Path.GetFileName(passwordFileName));
 			passwordWindow.ShowDialog();
 			if (passwordWindow.DialogResult == null || !passwordWindow.DialogResult.Value)
 			{
@@ -384,63 +389,19 @@ namespace PassWinmenu
 			}
 			var password = passwordWindow.Password.Text;
 			var extraContent = passwordWindow.ExtraContent.Text.Replace(Environment.NewLine, "\n");
-			var fullPassword = $"{password}\n{extraContent}";
-
-			// Build up the full path to the password file. GetFullPath ensures that
-			// all directory separators match.
-			var fullPath = Path.GetFullPath(Path.Combine(ConfigManager.Config.PasswordStore, path));
-			// Ensure the file's parent directory exists.
-			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
 			try
 			{
-				gpg.Encrypt(fullPassword, fullPath + ".gpg", GetGpgIds(Path.GetDirectoryName(fullPath)));
+				passwordManager.EncryptPassword(new PasswordFileContent(password, extraContent), passwordFileName);
 			}
 			catch (GpgException e)
 			{
 				RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
 				return;
 			}
-
-
 			// Copy the newly generated password.
 			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
 			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
-		}
-
-		/// <summary>
-		/// Searches the given directory tree for a gpg-id file.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns>An array of GPG ids taken from the first .gpg-id file that is encountered.</returns>
-		private static string[] GetGpgIds(string path)
-		{
-			// Ensure the path does not contain any trailing slashes
-			path = Helpers.NormaliseDirectory(path);
-			var startDir = File.GetAttributes(path).HasFlag(FileAttributes.Directory)
-				? new DirectoryInfo(path)
-				: new FileInfo(path).Directory;
-
-			var pwStoreDir = new DirectoryInfo(ConfigManager.Config.PasswordStore);
-
-			// Ensure the password file directory is actually located in the password store.
-			if (!pwStoreDir.IsParentOf(startDir))
-			{
-				throw new ArgumentException("The given directory is not a subdirectory of the password store.");
-			}
-			// Walk down from the topmost directory, 
-			// stopping as soon as we encounter a .gpg-id file.
-			var current = startDir;
-			while (!current.ContainsFile(".gpg-id"))
-			{
-				if (current.Parent == null || current.PathEquals(pwStoreDir))
-				{
-					return null;
-				}
-				current = current.Parent;
-			}
-
-			return File.ReadAllLines(Path.Combine(current.FullName, ".gpg-id"));
 		}
 
 		/// <summary>
@@ -462,7 +423,10 @@ namespace PassWinmenu
 		/// <summary>
 		/// Asks the user to choose a password file.
 		/// </summary>
-		/// <returns>The path to the chosen password file, or null if the user didn't choose anything.</returns>
+		/// <returns>
+		/// The path to the chosen password file (relative to the password directory),
+		/// or null if the user didn't choose anything.
+		/// </returns>
 		private string RequestPasswordFile()
 		{
 			if (InvokeRequired)
@@ -471,13 +435,13 @@ namespace PassWinmenu
 			}
 			// Find GPG-encrypted password files
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
-			// We should display relative paths to the user, so we'll use a dictionary to map these relative paths to absolute paths.
-			var shortNames = passFiles.ToDictionary(file => GetRelativePath(Path.GetFullPath(file), Path.GetFullPath(ConfigManager.Config.PasswordStore)).Replace("\\", ConfigManager.Config.DirectorySeparator).Replace(".gpg", ""), file => file);
+			var relativeNames = passFiles.Select(p => Helpers.GetRelativePath(p, ConfigManager.Config.PasswordStore));
+			// Build a dictionary mapping display names to relative paths
+			var displayNameMap = relativeNames.ToDictionary(val => val.Replace(encryptedFileExtension, "").Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
 
-			var selection = ShowPasswordMenu(shortNames.Keys);
-			if (selection == null) return null;
-			var selectedFile = shortNames[selection];
-			return selectedFile;
+			var selection = ShowPasswordMenu(displayNameMap.Keys);
+			if (selection == null) return selection;
+			return displayNameMap[selection];
 		}
 
 		/// <summary>
@@ -496,10 +460,10 @@ namespace PassWinmenu
 			// If the user cancels their selection, the password decryption should be cancelled too.
 			if (selectedFile == null) return;
 
-			string password;
+			PasswordFileContent passFile;
 			try
 			{
-				password = gpg.Decrypt(selectedFile);
+				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.FirstLineOnly);
 			}
 			catch (GpgException e)
 			{
@@ -513,25 +477,24 @@ namespace PassWinmenu
 				}
 				return;
 			}
-			// The extra content begins after the first line.
-			var extraContent = Regex.Match(password, @".*?(?:\r\n|\n)(.*)", RegexOptions.Singleline).Groups[1].Value;
-
-			if (ConfigManager.Config.FirstLineOnly)
+			catch (Exception e)
 			{
-				password = password.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).First();
+				RaiseNotification($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}", ToolTipIcon.Error);
+				return;
 			}
+			
 			if (copyToClipboard)
 			{
-				CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
+				CopyToClipboard(passFile.Password, ConfigManager.Config.ClipboardTimeout);
 				RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 			}
 			var usernameEntered = false;
 			if (typeUsername)
 			{
-				var username = GetUsername(selectedFile, extraContent);
+				var username = GetUsername(selectedFile, passFile.ExtraContent);
 				if (username != null)
 				{
-					EnterText(username);
+					EnterText(username, ConfigManager.Config.Output.DeadKeys);
 					usernameEntered = true;
 				}
 			}
@@ -540,7 +503,7 @@ namespace PassWinmenu
 				// If a username has also been entered, press Tab to switch to the password field.
 				if (usernameEntered) SendKeys.Send("{TAB}");
 
-				EnterText(password);
+				EnterText(passFile.Password, ConfigManager.Config.Output.DeadKeys);
 			}
 		}
 
@@ -548,7 +511,7 @@ namespace PassWinmenu
 		{
 			var selectedFile = RequestPasswordFile();
 			if (selectedFile == null) return;
-			var plaintextFile = gpg.DecryptToFile(selectedFile);
+			var plaintextFile = passwordManager.DecryptFile(selectedFile);
 
 			// Open the file in the user's default editor
 			Process.Start(plaintextFile);
@@ -567,7 +530,7 @@ namespace PassWinmenu
 			else
 			{
 				File.Delete(selectedFile);
-				gpg.EncryptFile(plaintextFile, selectedFile, GetGpgIds(Path.GetDirectoryName(selectedFile)));
+				passwordManager.EncryptFile(plaintextFile);
 				File.Delete(plaintextFile);
 			}
 		}
@@ -576,17 +539,17 @@ namespace PassWinmenu
 		/// Attepts to retrieve the username from a password file.
 		/// </summary>
 		/// <param name="passwordFile">The name of the password file.</param>
-		/// <param name="contents">The extra content of the password file.</param>
+		/// <param name="extraContent">The extra content of the password file.</param>
 		/// <returns>A string containing the username if the password file contains one, null if no username was found.</returns>
-		private string GetUsername(string passwordFile, string contents)
+		private string GetUsername(string passwordFile, string extraContent)
 		{
 			var options = ConfigManager.Config.UsernameDetection.Options;
 			switch (ConfigManager.Config.UsernameDetection.Method)
 			{
 				case UsernameDetectionMethod.FileName:
-					return Path.GetFileName(passwordFile).Replace(".gpg", "");
+					return Path.GetFileName(passwordFile).Replace(encryptedFileExtension, "");
 				case UsernameDetectionMethod.LineNumber:
-					var extraLines = contents.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+					var extraLines = extraContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 					var lineNumber = options.LineNumber - 2;
 					if (lineNumber <= 1) RaiseNotification("Failed to read username from password file: username-detection.options.line-number must be set to 2 or higher.", ToolTipIcon.Warning);
 					return lineNumber < extraLines.Length ? extraLines[lineNumber] : null;
@@ -594,7 +557,7 @@ namespace PassWinmenu
 					var rgxOptions = options.RegexOptions.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
 					rgxOptions = rgxOptions | (options.RegexOptions.Multiline ? RegexOptions.Multiline : RegexOptions.None);
 					rgxOptions = rgxOptions | (options.RegexOptions.Singleline ? RegexOptions.Singleline : RegexOptions.None);
-					var match = Regex.Match(contents, options.Regex, rgxOptions);
+					var match = Regex.Match(extraContent, options.Regex, rgxOptions);
 					return match.Groups["username"].Success ? match.Groups["username"].Value : null;
 				default:
 					throw new ArgumentOutOfRangeException("username-detection.method", "Invalid username detection method.");
@@ -607,9 +570,11 @@ namespace PassWinmenu
 		/// then calls SendKeys.Send().
 		/// </summary>
 		/// <param name="text">The text to be sent to the active window.</param>
-		private void EnterText(string text)
+		/// <param name="escapeDeadKeys">Whether dead keys should be escaped or not. 
+		/// If true, inserts a space after every dead key in order to prevent it from being combined with the next character.</param>
+		private void EnterText(string text, bool escapeDeadKeys)
 		{
-			if (ConfigManager.Config.Output.DeadKeys)
+			if (escapeDeadKeys)
 			{
 				// If dead keys are enabled, insert a space directly after each dead key to prevent
 				// it from being combined with the character following it.
@@ -622,25 +587,6 @@ namespace PassWinmenu
 			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~' };
 			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
-		}
-
-		/// <summary>
-		/// Returns the path of a file relative to a specified root directory.
-		/// </summary>
-		/// <param name="filespec">The path to the file for which the relative path should be calculated.</param>
-		/// <param name="directory">The root directory relative to which the relative path should be calculated.</param>
-		/// <returns></returns>
-		private static string GetRelativePath(string filespec, string directory)
-		{
-			var pathUri = new Uri(filespec);
-
-			// The directory URI must end with a directory separator char.
-			if (!directory.EndsWith(Path.DirectorySeparatorChar.ToString()))
-			{
-				directory += Path.DirectorySeparatorChar;
-			}
-			var directoryUri = new Uri(directory);
-			return Uri.UnescapeDataString(directoryUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
 		}
 
 		/// <summary>
@@ -664,13 +610,6 @@ namespace PassWinmenu
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new Program());
-		}
-
-		protected override void OnClosing(CancelEventArgs e)
-		{
-			icon.Visible = false;
-			icon.Dispose();
-			hotkeys.DisposeHotkeys();
 		}
 	}
 }
