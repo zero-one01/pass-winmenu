@@ -22,6 +22,7 @@ namespace PassWinmenu.Configuration
 		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";
 		public string GpgPath { get; set; } = "gpg";
 		public string GitPath { get; set; } = "git";
+		public string GnupghomeOverride { get; set; } = null;
 		public bool PreloadGpgAgent { get; set; } = true;
 		public double ClipboardTimeout { get; set; } = 30;
 		public string DirectorySeparator { get; set; } = "/";

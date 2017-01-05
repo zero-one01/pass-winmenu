@@ -15,6 +15,19 @@ password-file-match: '.*\.gpg$'
 gpg-path: 'gpg'
 # Path to the Git executable.
 git-path: 'git'
+
+# If the GNUPGHOME environment variable is set, GPG will use that path to
+# store its keys and settings. Otherwise, GPG will choose its own location.
+# If you are unable to alter the GNUPGHOME environment variable (or if you
+# have a separate GPG homedir that isn't related to the one used for your
+# password files), you can have pass-winmenu pass along a custom value
+# to GPG. For example, like so:
+#   gnupghome-override: '%userprofile%\.gnupg'
+# This normally shouldn't be necessary.
+#
+# The GNUPGHOME environment variable is not overridden when the value is null.
+gnupghome-override: null
+
 # Gpg-agent can have a pretty long startup time on Windows. This option allows
 # the gpg-agent to be started alongside pass-winmenu so it'll be ready when
 # you need it. If this causes pinentry to show up when pass-winmenu starts, 

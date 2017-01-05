@@ -43,6 +43,10 @@ namespace PassWinmenu.ExternalPrograms
 				RedirectStandardError = true,
 				StandardOutputEncoding = Encoding.UTF8
 			};
+			if (ConfigManager.Config.GnupghomeOverride != null)
+			{
+				info.EnvironmentVariables["GNUPGHOME"] = ConfigManager.Config.GnupghomeOverride;
+			}
 			if (stdin != null)
 			{
 				info.RedirectStandardInput = true;
