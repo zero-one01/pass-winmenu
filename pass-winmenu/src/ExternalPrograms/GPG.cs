@@ -1,7 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using PassWinmenu.Configuration;
+using PassWinmenu.Windows;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -44,7 +47,15 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				info.RedirectStandardInput = true;
 			}
-			var proc = Process.Start(info);
+			Process proc;
+			try
+			{
+				proc = Process.Start(info);
+			}
+			catch (Win32Exception e) when(e.Message == "The system cannot find the file specified")
+			{
+				throw new ConfigurationException("The value for 'gpg-path' in pass-winmenu.yaml is invalid. No GPG executable exists at the specified location.", e);
+			}
 			if (stdin != null)
 			{
 				proc.StandardInput.Write(stdin);

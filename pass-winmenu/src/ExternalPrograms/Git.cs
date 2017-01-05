@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using PassWinmenu.Configuration;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -34,17 +36,26 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when git returns a non-zero exit code.</exception>
 		private string RunGit(string arguments)
 		{
-			var proc = Process.Start(new ProcessStartInfo
+			Process proc;
+			try
 			{
-				FileName = executable,
-				Arguments = arguments,
-				WorkingDirectory = repository,
-				UseShellExecute = false,
-				CreateNoWindow = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				StandardOutputEncoding = Encoding.UTF8
-			});
+				proc = Process.Start(new ProcessStartInfo
+				{
+					FileName = executable,
+					Arguments = arguments,
+					WorkingDirectory = repository,
+					UseShellExecute = false,
+					CreateNoWindow = true,
+					RedirectStandardOutput = true,
+					RedirectStandardError = true,
+					StandardOutputEncoding = Encoding.UTF8
+				});
+			}
+			catch (Win32Exception e) when (e.Message == "The system cannot find the file specified.")
+			{
+				throw new ConfigurationException("The value for 'git-path' in pass-winmenu.yaml is invalid. No GPG executable exists at the specified location.", e);
+			}
+
 			proc.WaitForExit();
 			var result = proc.StandardOutput.ReadToEnd();
 			if (proc.ExitCode != 0)

@@ -60,10 +60,4 @@ namespace PassWinmenu.Windows
 			};
 		}
 	}
-
-	internal class ConfigurationParseException : Exception
-	{
-		public ConfigurationParseException(string message, Exception innerException) : base(message, innerException) { }
-		public ConfigurationParseException(string message) : base(message) { }
-	}
 }

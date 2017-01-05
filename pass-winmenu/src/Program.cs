@@ -399,6 +399,11 @@ namespace PassWinmenu
 				RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
 				return;
 			}
+			catch (ConfigurationException e)
+			{
+				RaiseNotification("Unable to encrypt your password: " + e.Message, ToolTipIcon.Error);
+				return;
+			}
 			// Copy the newly generated password.
 			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
 			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
@@ -475,6 +480,11 @@ namespace PassWinmenu
 				{
 					RaiseNotification("Password decryption failed:\n" + e.GpgError, ToolTipIcon.Error);
 				}
+				return;
+			}
+			catch (ConfigurationException e)
+			{
+				RaiseNotification("Password decryption failed: " + e.Message, ToolTipIcon.Error);
 				return;
 			}
 			catch (Exception e)
