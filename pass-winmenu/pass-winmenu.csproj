@@ -141,6 +141,7 @@
     <EmbeddedResource Include="embedded\pass-winmenu.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\packaged-config.yaml" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
