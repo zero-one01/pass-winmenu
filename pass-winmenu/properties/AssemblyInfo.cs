@@ -6,7 +6,7 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("pass-winmenu")]
-[assembly: AssemblyDescription("A dmenu-inspired Windows interface for pass.")]
+[assembly: AssemblyDescription("An easy-to-use Windows interface for pass.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("pass-winmenu")]
