@@ -268,8 +268,8 @@ namespace PassWinmenu
 
 		protected override void Dispose(bool disposing)
 		{
-			icon.Dispose();
-			hotkeys.Dispose();
+			icon?.Dispose();
+			hotkeys?.Dispose();
 			base.Dispose(disposing);
 		}
 
