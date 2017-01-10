@@ -132,6 +132,23 @@ username-detection:
             multiline: true
             singleline: false
 
+# Notification-related settings.
+notifications:
+    # Set this to false to disable all notifications. Because this suppresses
+    # error notifications as well, it is usually better to disable 
+    # notifications by type, using the 'types' setting below.
+    enabled: true
+    # Send a notification when...
+    types:
+        # ...a password is copied to the clipboard:
+        password-copied: true
+        # ...a new password has been generated:
+        password-generated: true
+        # ...changes are pushed to Git
+        git-push: true
+        # ...changes are pulled from Git
+        git-pull: true
+
 # Style settings.
 # All colour strings must be formatted as hexadecimal ARGB strings,
 # such as #AA00FF44. To 'unset' a colour, a fully transparent colour

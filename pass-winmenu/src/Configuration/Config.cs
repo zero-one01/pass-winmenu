@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
 using YamlDotNet.Serialization;
@@ -53,6 +52,7 @@ namespace PassWinmenu.Configuration
 		};
 		public PasswordGenerationConfig PasswordGeneration { get; set; } = new PasswordGenerationConfig();
 		public UsernameDetectionConfig UsernameDetection { get; set; } = new UsernameDetectionConfig();
+		public NotificationConfig Notifications { get; set; } = new NotificationConfig();
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
 	}
@@ -122,6 +122,20 @@ namespace PassWinmenu.Configuration
 		public bool CopyToClipboard { get; set; }
 		public bool TypeUsername { get; set; }
 		public bool TypePassword { get; set; }
+	}
+
+	internal class NotificationConfig
+	{
+		public bool Enabled { get; set; } = true;
+		public NotificationTypesConfig Types { get; set; } = new NotificationTypesConfig();
+	}
+
+	internal class NotificationTypesConfig
+	{
+		public bool PasswordCopied { get; set; } = true;
+		public bool PasswordGenerated { get; set; } = false;
+		public bool GitPush { get; set; } = true;
+		public bool GitPull { get; set; } = true;
 	}
 
 	internal class StyleConfig

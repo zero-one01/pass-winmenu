@@ -23,7 +23,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.3";
+		private const string version = "1.3.1-dev";
 		private const string encryptedFileExtension = ".gpg";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
@@ -166,14 +166,17 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Presents a notification to the user.
+		/// Presents a notification to the user, provided notifications are enabled.
 		/// </summary>
 		/// <param name="message">The message that should be displayed.</param>
 		/// <param name="tipIcon">The type of icon that should be displayed next to the message.</param>
 		/// <param name="timeout">The time period, in milliseconds, the notification should display.</param>
 		private void RaiseNotification(string message, ToolTipIcon tipIcon, int timeout = 5000)
 		{
-			icon.ShowBalloonTip(timeout, "pass-winmenu", message, tipIcon);
+			if (ConfigManager.Config.Notifications.Enabled)
+			{
+				icon.ShowBalloonTip(timeout, "pass-winmenu", message, tipIcon);
+			}
 		}
 
 		/// <summary>
@@ -354,7 +357,7 @@ namespace PassWinmenu
 						sb.AppendLine("1 new commit was pulled from remote.");
 					}
 
-					RaiseNotification(sb.ToString(), ToolTipIcon.Info);
+					if(ConfigManager.Config.Notifications.Types.GitPush) RaiseNotification(sb.ToString(), ToolTipIcon.Info);
 				}
 				else
 				{
@@ -367,7 +370,7 @@ namespace PassWinmenu
 					{
 						sb.AppendLine("Additionally, 1 new commit was pulled from remote.");
 					}
-					RaiseNotification(sb.ToString(), ToolTipIcon.Info);
+					if (ConfigManager.Config.Notifications.Types.GitPush) RaiseNotification(sb.ToString(), ToolTipIcon.Info);
 				}
 
 			}
@@ -419,7 +422,11 @@ namespace PassWinmenu
 			}
 			// Copy the newly generated password.
 			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
-			RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+
+			if (ConfigManager.Config.Notifications.Types.PasswordGenerated)
+			{
+				RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+			}
 		}
 
 		/// <summary>
@@ -430,7 +437,7 @@ namespace PassWinmenu
 			try
 			{
 				var result = git.Update();
-				RaiseNotification(result, ToolTipIcon.Info);
+				if(ConfigManager.Config.Notifications.Types.GitPull) RaiseNotification(result, ToolTipIcon.Info);
 			}
 			catch (GitException)
 			{
@@ -502,7 +509,10 @@ namespace PassWinmenu
 			if (copyToClipboard)
 			{
 				CopyToClipboard(passFile.Password, ConfigManager.Config.ClipboardTimeout);
-				RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
+				{
+					RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+				}
 			}
 			var usernameEntered = false;
 			if (typeUsername)
