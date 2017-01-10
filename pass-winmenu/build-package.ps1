@@ -1,6 +1,7 @@
 param(
 	[switch]$full,
-	[switch]$package
+	[switch]$package,
+	[switch]$compress
 )
 
 $PKGDIR="bin/Release-Packaged"
@@ -31,7 +32,15 @@ tools/7za.exe x -aos "include/PortableGit.zip" "-o$INCLUDEDIR"
 
 if($package){
 	if(Test-Path "$ZIPDIR"){
+		echo "Removing old package: $ZIPDIR"
 		rm "$ZIPDIR"
 	}
-	tools/7za.exe a "bin/pass-winmenu.zip" "./bin/Release-Packaged/*"
+	cd bin
+	if($compress){
+		../tools/7za.exe a -mm=Deflate -mfb=258 -mpass=15 "pass-winmenu.zip" "Release-Packaged/*"
+	}else{
+		../tools/7za.exe a "pass-winmenu.zip" "Release-Packaged/*"
+	}
+	../tools/7za.exe rn "pass-winmenu.zip" "Release-Packaged" "pass-winmenu"
+	cd ..
 }
