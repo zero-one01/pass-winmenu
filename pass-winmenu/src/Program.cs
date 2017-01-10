@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -24,7 +23,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.3-dev";
+		private const string version = "1.3";
 		private const string encryptedFileExtension = ".gpg";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
@@ -59,31 +58,25 @@ namespace PassWinmenu
 			}
 			catch (Exception e) when (e.InnerException != null)
 			{
-				MessageBox.Show(
+				ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
-					"Unable to load configuration file.",
-					MessageBoxButton.OK,
-					MessageBoxImage.Error);
+					"Unable to load configuration file.");
 				Exit();
 				return;
 			}
 			catch (SemanticErrorException e)
 			{
-				MessageBox.Show(
+				ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
-					"Unable to load configuration file.",
-					MessageBoxButton.OK,
-					MessageBoxImage.Error);
+					"Unable to load configuration file.");
 				Exit();
 				return;
 			}
 			catch (YamlException e)
 			{
-				MessageBox.Show(
+				ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
-					"Unable to load configuration file.",
-					MessageBoxButton.OK,
-					MessageBoxImage.Error);
+					"Unable to load configuration file.");
 				Exit();
 				return;
 			}
@@ -181,6 +174,26 @@ namespace PassWinmenu
 		private void RaiseNotification(string message, ToolTipIcon tipIcon, int timeout = 5000)
 		{
 			icon.ShowBalloonTip(timeout, "pass-winmenu", message, tipIcon);
+		}
+
+		/// <summary>
+		/// Shows an error dialog to the user.
+		/// </summary>
+		/// <param name="message">The error message to be displayed.</param>
+		/// <param name="title">The window title of the error dialog.</param>
+		/// <remarks>
+		/// It might seem a bit inconsistent that some errors are sent as notifications, while others are
+		/// displayed in a MessageBox using the ShowErrorWindow method below.
+		/// The reasoning for this is explained here.
+		/// ShowErrorWindow is used for any error that results from an action initiated by a user and 
+		/// prevents that action for being completed successfully, as well as any error that forces the
+		/// application to exit.
+		/// Any other errors should be sent as notifications, which aren't as intrusive as an error dialog that
+		/// forces you to stop doing whatever you were doing and click OK before you're allowed to continue.
+		/// </remarks>
+		private void ShowErrorWindow(string message, string title = "An error occurred.")
+		{
+			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 
 		/// <summary>
@@ -396,12 +409,12 @@ namespace PassWinmenu
 			}
 			catch (GpgException e)
 			{
-				RaiseNotification($"Unable to encrypt your password. Error details:\n{e.Message} ({e.GpgOutput})", ToolTipIcon.Error);
+				ShowErrorWindow("Unable to encrypt your password: " + e.Format());
 				return;
 			}
 			catch (ConfigurationException e)
 			{
-				RaiseNotification("Unable to encrypt your password: " + e.Message, ToolTipIcon.Error);
+				ShowErrorWindow("Unable to encrypt your password: " + e.Message);
 				return;
 			}
 			// Copy the newly generated password.
@@ -472,27 +485,20 @@ namespace PassWinmenu
 			}
 			catch (GpgException e)
 			{
-				if (string.IsNullOrEmpty(e.GpgError))
-				{
-					RaiseNotification($"Password decryption failed. GPG returned exit code {e.ExitCode}", ToolTipIcon.Error);
-				}
-				else
-				{
-					RaiseNotification("Password decryption failed:\n" + e.GpgError, ToolTipIcon.Error);
-				}
+				ShowErrorWindow("Password decryption failed: " + e.Format());
 				return;
 			}
 			catch (ConfigurationException e)
 			{
-				RaiseNotification("Password decryption failed: " + e.Message, ToolTipIcon.Error);
+				ShowErrorWindow("Password decryption failed: " + e.Message);
 				return;
 			}
 			catch (Exception e)
 			{
-				RaiseNotification($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}", ToolTipIcon.Error);
+				ShowErrorWindow($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}");
 				return;
 			}
-			
+
 			if (copyToClipboard)
 			{
 				CopyToClipboard(passFile.Password, ConfigManager.Config.ClipboardTimeout);

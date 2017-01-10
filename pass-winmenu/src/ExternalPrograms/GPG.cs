@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using PassWinmenu.Configuration;
 using PassWinmenu.Windows;
 
@@ -31,7 +33,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// <param name="stdin">A text string to be sent to GPG's standard input.</param>
 		/// <returns>A (UTF-8 decoded) string containing the text returned by GPG.</returns>
 		/// <exception cref="GpgException">Thrown when GPG returns a non-zero exit code.</exception>
-		internal string RunGPG(string arguments, string stdin=null)
+		internal string RunGPG(string arguments, string stdin = null)
 		{
 			var info = new ProcessStartInfo
 			{
@@ -56,7 +58,7 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				proc = Process.Start(info);
 			}
-			catch (Win32Exception e) when(e.Message == "The system cannot find the file specified")
+			catch (Win32Exception e) when (e.Message == "The system cannot find the file specified")
 			{
 				throw new ConfigurationException("The value for 'gpg-path' in pass-winmenu.yaml is invalid. No GPG executable exists at the specified location.", e);
 			}
@@ -65,7 +67,26 @@ namespace PassWinmenu.ExternalPrograms
 				proc.StandardInput.Write(stdin);
 				proc.StandardInput.Close();
 			}
-			proc.WaitForExit();
+			
+			// The process is taking a while to exit and there is data in stderr,
+			// which means something has probably gone wrong.
+			if (!proc.WaitForExit(1000) && proc.StandardError.Peek() != -1)
+			{
+				var lines = new List<string>();
+				while (proc.StandardError.Peek() > 0)
+				{
+					var t = proc.StandardError.ReadLineAsync();
+					if (t.Wait(500))
+					{
+						lines.Add(t.Result);
+					}
+					else
+					{
+						break;
+					}
+				}
+				throw new GpgException(1, null, string.Join("\n", lines));
+			}
 
 			var result = proc.StandardOutput.ReadToEnd();
 			var error = proc.StandardError.ReadToEnd();
@@ -107,7 +128,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void Encrypt(string data, string outputFile, params string[] recipients)
 		{
-			if(recipients == null) recipients = new string[0];
+			if (recipients == null) recipients = new string[0];
 			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 			RunGPG($"{recipientsString} --output \"{outputFile}\" --encrypt", data);
 		}
@@ -121,12 +142,12 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void EncryptFile(string inputFile, string outputFile, params string[] recipients)
 		{
-			if(recipients == null) recipients = new string[0];
+			if (recipients == null) recipients = new string[0];
 			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 			RunGPG($"{recipientsString}  --output \"{outputFile}\" --encrypt {inputFile}");
 		}
 	}
-	
+
 	internal class GpgException : Exception
 	{
 		public int ExitCode { get; }
@@ -140,6 +161,22 @@ namespace PassWinmenu.ExternalPrograms
 			GpgOutput = output;
 			GpgError = error;
 			Message = "GPG exited with code " + exitCode;
+		}
+
+		public string Format()
+		{
+			if (!string.IsNullOrEmpty(GpgError))
+			{
+				return $"GPG exited with code {ExitCode}.\nError message:\n\n{GpgError}";
+			}
+			else if (!string.IsNullOrEmpty(GpgOutput))
+			{
+				return $"GPG exited with code {ExitCode}.\nOutput:\n\n{GpgOutput}";
+			}
+			else
+			{
+				return $"GPG exited with code {ExitCode}.";
+			}
 		}
 	}
 }
