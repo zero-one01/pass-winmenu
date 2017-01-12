@@ -7,7 +7,7 @@
 # so feel free to delete them from this file; they're only here
 # for your reference.
 password-store: '%userprofile%\.password-store'
-# A regex string against which all filenames in the password directory are 
+# A regex string against which all filenames in the password directory are
 # compared. All matching files are considered password files.
 password-file-match: '.*\.gpg$'
 # Path to the GPG executable. Can be either a command name (if GPG is added
@@ -30,7 +30,7 @@ gnupghome-override: null
 
 # Gpg-agent can have a pretty long startup time on Windows. This option allows
 # the gpg-agent to be started alongside pass-winmenu so it'll be ready when
-# you need it. If this causes pinentry to show up when pass-winmenu starts, 
+# you need it. If this causes pinentry to show up when pass-winmenu starts,
 # you should set this to false.
 preload-gpg-agent: true
 # Amount of time (in seconds) your passwords should remain on the clipboard.
@@ -59,7 +59,7 @@ output:
 # - edit-password
 # - git-pull
 # - git-push
-# Actions can be further configured using the 'options' variable. 
+# Actions can be further configured using the 'options' variable.
 # Valid options for 'decrypt-password' are:
 # - copy-to-clipboard: (true/false)
 # - type-username: (true/false)
@@ -135,7 +135,7 @@ username-detection:
 # Notification-related settings.
 notifications:
     # Set this to false to disable all notifications. Because this suppresses
-    # error notifications as well, it is usually better to disable 
+    # error notifications as well, it is usually better to disable
     # notifications by type, using the 'types' setting below.
     enabled: true
     # Send a notification when...
