@@ -23,6 +23,8 @@ namespace PassWinmenu
 	}
 	internal class PasswordManager
 	{
+		internal const string GpgIdFileName = ".gpg-id";
+
 		private readonly DirectoryInfo passwordStoreDirectory;
 		private readonly GPG gpg;
 		private readonly string encryptedFileExtension;
@@ -36,11 +38,27 @@ namespace PassWinmenu
 			this.gpg = gpg;
 		}
 
+		/// <summary>
+		/// Generates an encrypted password file at the specified path.
+		/// If the path contains directories that do not exist, they will be created automatically.
+		/// </summary>
+		/// <param name="fileContent"></param>
+		/// <param name="path"></param>
 		public void EncryptPassword(PasswordFileContent fileContent, string path)
 		{
 			var fullPath = GetPasswordFilePath(path);
+			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 			gpg.Encrypt($"{fileContent.Password}\n{fileContent.ExtraContent}", fullPath + encryptedFileExtension, GetGpgIds(fullPath));
 		}
+
+		/// <summary>
+		/// Get the content from an encrypted password file.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="passwordOnFirstLine">Should be true if the first line of the file contains the password.
+		/// Any content in the remaining lines will be considered metadata.
+		/// If set to false, the contents of the entire file are considered to be the password.</param>
+		/// <returns></returns>
 		public PasswordFileContent DecryptPassword(string path, bool passwordOnFirstLine)
 		{
 			var fullPath = GetPasswordFilePath(path);
@@ -65,7 +83,7 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Encrypt a file. The path to the encrypted file (plus a .gpg extension)
+		/// Encrypt a file. The path to the unencrypted file (plus a .gpg extension)
 		/// is used to produce the path to the encrypted file.
 		/// </summary>
 		/// <param name="file">An absolute path pointing to the encrypted file.</param>
@@ -116,30 +134,27 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Searches the given directory tree for a gpg-id file.
+		/// Searches the given path for a gpg-id file.
 		/// </summary>
-		/// <param name="path">The top of the directory tree that should be searched.
-		/// May be a filename or a directory name.</param>
-		/// <returns>An array of GPG ids taken from the first .gpg-id file that is encountered.</returns>
+		/// <param name="path">The path that should be searched. This path does not have to point to an
+		/// existing file or directory, but it must be located within the password store.</param>
+		/// <returns>An array of GPG ids taken from the first gpg-id file that is encountered,
+		/// or null if no gpg-id file was found.</returns>
 		private string[] GetGpgIds(string path)
 		{
-			// Ensure the path does not contain any trailing slashes
+			// Ensure the path does not contain any trailing slashes or AltDirectorySeparatorChars
 			path = Helpers.NormaliseDirectory(path);
 
-			// Find the directory closest to the given path
-			var startDir = Directory.Exists(path) 
-				? new DirectoryInfo(path) 
-				: new DirectoryInfo(Path.GetDirectoryName(path));
-
-			// Ensure the password file directory is actually located in the password store.
-			if (!passwordStoreDirectory.IsParentOf(startDir))
+			// Ensure the password file directory is actually located within the password store.
+			if (!passwordStoreDirectory.IsParentOf(path))
 			{
 				throw new ArgumentException("The given directory is not a subdirectory of the password store.");
 			}
-			// Walk down from the topmost directory, 
-			// stopping as soon as we encounter a .gpg-id file.
-			var current = startDir;
-			while (!current.ContainsFile(".gpg-id"))
+
+			// Walk up from the innermost directory, and keep moving up until an existing directory 
+			// containing a gpg-id file is found.
+			var current = new DirectoryInfo(path);
+			while (!current.Exists && !current.ContainsFile(GpgIdFileName))
 			{
 				if (current.Parent == null || current.PathEquals(passwordStoreDirectory))
 				{
@@ -148,7 +163,7 @@ namespace PassWinmenu
 				current = current.Parent;
 			}
 
-			return File.ReadAllLines(Path.Combine(current.FullName, ".gpg-id"));
+			return File.ReadAllLines(Path.Combine(current.FullName, GpgIdFileName));
 		}
 	}
 }

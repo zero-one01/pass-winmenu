@@ -24,6 +24,16 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 		}
 
 		/// <summary>
+		/// Checks whether the current directory is a child of the given directory.
+		/// </summary>
+		/// <returns>True if the current directory is a parent of the given directory,
+		/// or if they're the same directory. False otherwise.</returns>
+		internal static bool IsChildOf(this DirectoryInfo child, string parent)
+		{
+			return IsChildOf(child, new DirectoryInfo(parent));
+		}
+
+		/// <summary>
 		/// Checks whether the current directory is a parent of the given directory.
 		/// </summary>
 		/// <returns>True if the current directory is a parent of the given directory, 
@@ -31,6 +41,16 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 		internal static bool IsParentOf(this DirectoryInfo parent, DirectoryInfo child)
 		{
 			return IsChildOf(child, parent);
+		}
+
+		/// <summary>
+		/// Checks whether the current directory is a parent of the given directory.
+		/// </summary>
+		/// <returns>True if the current directory is a parent of the given directory, 
+		/// or if they're the same directory. False otherwise.</returns>
+		internal static bool IsParentOf(this DirectoryInfo parent, string child)
+		{
+			return IsChildOf(new DirectoryInfo(child), parent);
 		}
 
 		/// <summary>
