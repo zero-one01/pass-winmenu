@@ -19,9 +19,40 @@ namespace PassWinmenu.Configuration
 		}
 
 		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";
-		public string GpgPath { get; set; } = "gpg";
-		public string GitPath { get; set; } = "git";
-		public string GnupghomeOverride { get; set; } = null;
+
+		private string gpgPath = "gpg";
+		public string GpgPath
+		{
+			get { return gpgPath; }
+			set
+			{
+				var expanded = Environment.ExpandEnvironmentVariables(value);
+				gpgPath = Helpers.NormaliseDirectory(expanded);
+			}
+		}
+
+		private string gitPath = "git";
+		public string GitPath
+		{
+			get { return gitPath; }
+			set
+			{
+				var expanded = Environment.ExpandEnvironmentVariables(value);
+				gitPath = Helpers.NormaliseDirectory(expanded);
+			}
+		}
+
+		private string gnupghomeOverride;
+		public string GnupghomeOverride
+		{
+			get { return gnupghomeOverride;}
+			set
+			{
+				var expanded = Environment.ExpandEnvironmentVariables(value);
+				gnupghomeOverride = Helpers.NormaliseDirectory(expanded);
+			}
+		}
+
 		public bool PreloadGpgAgent { get; set; } = true;
 		public double ClipboardTimeout { get; set; } = 30;
 		public string DirectorySeparator { get; set; } = "/";
@@ -71,7 +102,7 @@ namespace PassWinmenu.Configuration
 	internal class UsernameDetectionConfig
 	{
 		[YamlIgnore]
-		public UsernameDetectionMethod Method => (UsernameDetectionMethod) Enum.Parse(typeof (UsernameDetectionMethod), MethodString.ToPascalCase(), true);
+		public UsernameDetectionMethod Method => (UsernameDetectionMethod)Enum.Parse(typeof(UsernameDetectionMethod), MethodString.ToPascalCase(), true);
 		[YamlMember(Alias = "method")]
 		public string MethodString { get; set; } = "regex";
 		public UsernameDetectionOptions Options { get; set; } = new UsernameDetectionOptions();
