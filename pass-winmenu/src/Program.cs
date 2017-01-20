@@ -23,13 +23,13 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.3.1-dev";
+		private const string version = "1.3.1-dev3";
 		private const string encryptedFileExtension = ".gpg";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
 		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
-		private PasswordManager passwordManager;
+		private readonly PasswordManager passwordManager;
 
 		public Program()
 		{
@@ -537,7 +537,16 @@ namespace PassWinmenu
 		{
 			var selectedFile = RequestPasswordFile();
 			if (selectedFile == null) return;
-			var plaintextFile = passwordManager.DecryptFile(selectedFile);
+			string plaintextFile;
+			try
+			{
+				plaintextFile = passwordManager.DecryptFile(selectedFile);
+			}
+			catch (Exception e)
+			{
+				ShowErrorWindow($"Unable to edit your password (decryption failed): {e.Message}");
+				return;
+			}
 
 			// Open the file in the user's default editor
 			Process.Start(plaintextFile);
