@@ -564,7 +564,8 @@ namespace PassWinmenu
 			}
 			else
 			{
-				File.Delete(selectedFile);
+				var selectedFilePath = passwordManager.GetPasswordFilePath(selectedFile);
+				File.Delete(selectedFilePath);
 				passwordManager.EncryptFile(plaintextFile);
 				File.Delete(plaintextFile);
 			}

@@ -111,24 +111,37 @@ namespace PassWinmenu
 
 			var encryptedFileName = GetPasswordFilePath(path);
 			var decryptedFileName = encryptedFileName.Substring(0, encryptedFileName.Length - encryptedFileExtension.Length);
-			
+
+			if (File.Exists(decryptedFileName)) throw new InvalidOperationException($"A plaintext file already exists at \"{decryptedFileName}\".");
 			if (!File.Exists(encryptedFileName)) throw new ArgumentException($"The encrypted file \"{encryptedFileName}\" does not exist.");
 			gpg.DecryptToFile(encryptedFileName, decryptedFileName);
 			return decryptedFileName;
 		}
-		
+
 		/// <summary>
 		/// Turns a relative (password store) path into an absolute path.
 		/// Throws an exception if the password store path is not relative.
 		/// </summary>
 		/// <param name="relativePath">A relative path pointing to a file or directory in the password store.</param>
 		/// <returns>The absolute path of that file or directory.</returns>
-		private string GetPasswordFilePath(string relativePath)
+		public string GetPasswordFilePath(string relativePath)
 		{
 			// Ensure the directory separators are correct
 			var normalised = Helpers.NormaliseDirectory(relativePath);
 			// Only allow saving encrypted files to the password store
-			if (Path.IsPathRooted(relativePath)) throw new ArgumentException("Password file path must be relative to the password store directory.");
+			if (Path.IsPathRooted(relativePath))
+			{
+				// The given path is absolute. If it's a child of the password directory, that's fine.
+				// If it isn't, throw an error.
+				if (passwordStoreDirectory.IsParentOf(relativePath))
+				{
+					return relativePath;
+				}
+				else
+				{
+					throw new ArgumentException("Password file path must be relative to the password store directory.");
+				}
+			}
 			var fullPath = Path.Combine(passwordStoreDirectory.FullName, normalised);
 			return fullPath;
 		}
@@ -154,7 +167,7 @@ namespace PassWinmenu
 			// Walk up from the innermost directory, and keep moving up until an existing directory 
 			// containing a gpg-id file is found.
 			var current = new DirectoryInfo(path);
-			while (!current.Exists && !current.ContainsFile(GpgIdFileName))
+			while (!current.Exists || !current.ContainsFile(GpgIdFileName))
 			{
 				if (current.Parent == null || current.PathEquals(passwordStoreDirectory))
 				{
