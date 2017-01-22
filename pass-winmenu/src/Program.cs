@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using Gpg.NET;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -38,14 +39,11 @@ namespace PassWinmenu
 			hotkeys = AssignHotkeys();
 			Name = "pass-winmenu (main window)";
 
-			var gpg = new GPG(ConfigManager.Config.GpgPath);
+			var gpg = new GPG(ConfigManager.Config.GpgInstallDir);
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, encryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
-				// This command will return a list of private keys managed by GPG.
-				// To get this list, GPG has to start its gpg-agent.
-				// Since we only care about this side effect, we discard the output.
-				Task.Run(() => gpg.RunGPG("--list-secret-keys"));
+				Task.Run(() => gpg.StartAgent());
 			}
 		}
 
@@ -410,9 +408,9 @@ namespace PassWinmenu
 			{
 				passwordManager.EncryptPassword(new PasswordFileContent(password, extraContent), passwordFileName);
 			}
-			catch (GpgException e)
+			catch (GpgNetException e)
 			{
-				ShowErrorWindow("Unable to encrypt your password: " + e.Format());
+				ShowErrorWindow("Unable to encrypt your password: " + e.Message);
 				return;
 			}
 			catch (ConfigurationException e)
@@ -490,9 +488,9 @@ namespace PassWinmenu
 			{
 				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.FirstLineOnly);
 			}
-			catch (GpgException e)
+			catch (GpgNetException e)
 			{
-				ShowErrorWindow("Password decryption failed: " + e.Format());
+				ShowErrorWindow("Password decryption failed: " + e.Message);
 				return;
 			}
 			catch (ConfigurationException e)

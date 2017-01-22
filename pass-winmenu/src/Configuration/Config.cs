@@ -31,6 +31,17 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
+		private string gpgInstallDir = null;
+		public string GpgInstallDir
+		{
+			get { return gpgInstallDir; }
+			set
+			{
+				var expanded = Environment.ExpandEnvironmentVariables(value);
+				gpgInstallDir = Helpers.NormaliseDirectory(expanded);
+			}
+		}
+
 		private string gitPath = "git";
 		public string GitPath
 		{

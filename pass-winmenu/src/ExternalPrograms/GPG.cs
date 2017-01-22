@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing.Text;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Gpg.NET;
 using PassWinmenu.Configuration;
 using PassWinmenu.Windows;
 
@@ -15,86 +18,17 @@ namespace PassWinmenu.ExternalPrograms
 	/// </summary>
 	internal class GPG
 	{
-		private readonly string executable;
+		private readonly GpgContext context;
 
 		/// <summary>
 		/// Initialises the wrapper.
 		/// </summary>
-		/// <param name="executable">The name of the GPG executable. Can be a full filename or the name of an executable contained in %PATH%.</param>
-		public GPG(string executable)
+		/// <param name="installDir">The GPG installation directory. When set to null, Gpg.NET will attempt to use the default installation directory.</param>
+		public GPG(string installDir = null)
 		{
-			this.executable = executable;
-		}
-
-		/// <summary>
-		/// Runs GPG with the given arguments, and returns everything it prints to its standard output.
-		/// </summary>
-		/// <param name="arguments">The arguments to be passed to GPG.</param>
-		/// <param name="stdin">A text string to be sent to GPG's standard input.</param>
-		/// <returns>A (UTF-8 decoded) string containing the text returned by GPG.</returns>
-		/// <exception cref="GpgException">Thrown when GPG returns a non-zero exit code.</exception>
-		internal string RunGPG(string arguments, string stdin = null)
-		{
-			var info = new ProcessStartInfo
-			{
-				FileName = executable,
-				Arguments = arguments,
-				UseShellExecute = false,
-				CreateNoWindow = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				StandardOutputEncoding = Encoding.UTF8
-			};
-			if (ConfigManager.Config.GnupghomeOverride != null)
-			{
-				info.EnvironmentVariables["GNUPGHOME"] = ConfigManager.Config.GnupghomeOverride;
-			}
-			if (stdin != null)
-			{
-				info.RedirectStandardInput = true;
-			}
-			Process proc;
-			try
-			{
-				proc = Process.Start(info);
-			}
-			catch (Win32Exception e) when (e.Message == "The system cannot find the file specified")
-			{
-				throw new ConfigurationException("The value for 'gpg-path' in pass-winmenu.yaml is invalid. No GPG executable exists at the specified location.", e);
-			}
-			if (stdin != null)
-			{
-				proc.StandardInput.Write(stdin);
-				proc.StandardInput.Close();
-			}
-			
-			// The process is taking a while to exit and there is data in stderr,
-			// which means something has probably gone wrong.
-			if (!proc.WaitForExit(1000) && proc.StandardError.Peek() != -1)
-			{
-				var lines = new List<string>();
-				while (proc.StandardError.Peek() > 0)
-				{
-					var t = proc.StandardError.ReadLineAsync();
-					if (t.Wait(500))
-					{
-						lines.Add(t.Result);
-					}
-					else
-					{
-						break;
-					}
-				}
-				throw new GpgException(1, null, string.Join("\n", lines));
-			}
-
-			var result = proc.StandardOutput.ReadToEnd();
-			var error = proc.StandardError.ReadToEnd();
-			if (proc.ExitCode != 0)
-			{
-				throw new GpgException(proc.ExitCode, result, error);
-			}
-			return result;
+			GpgNet.Initialise(installDir, minGpgVersion: "2.1.0");
+			GpgNet.EnsureProtocol(GpgMeProtocol.OpenPgp);
+			context = GpgContext.CreateContext();
 		}
 
 		/// <summary>
@@ -105,7 +39,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
 		public string Decrypt(string file)
 		{
-			return RunGPG($"--decrypt \"{file}\"");
+			return context.DecryptFile(file);
 		}
 
 		/// <summary>
@@ -116,7 +50,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
 		public void DecryptToFile(string encryptedFile, string outputFile)
 		{
-			RunGPG($"--output {outputFile} --decrypt \"{encryptedFile}\"");
+			context.DecryptFile(encryptedFile, outputFile);
 		}
 
 		/// <summary>
@@ -128,9 +62,8 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void Encrypt(string data, string outputFile, params string[] recipients)
 		{
-			if (recipients == null) recipients = new string[0];
-			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
-			RunGPG($"{recipientsString} --output \"{outputFile}\" --encrypt", data);
+			var rcpKeys = context.GetKeys(recipients);
+			context.EncryptString(data, outputFile, rcpKeys);
 		}
 
 		/// <summary>
@@ -142,41 +75,14 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void EncryptFile(string inputFile, string outputFile, params string[] recipients)
 		{
-			if (recipients == null) recipients = new string[0];
-			var recipientsString = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
-			RunGPG($"{recipientsString}  --output \"{outputFile}\" --encrypt {inputFile}");
-		}
-	}
-
-	internal class GpgException : Exception
-	{
-		public int ExitCode { get; }
-		public string GpgOutput { get; }
-		public string GpgError { get; }
-		public override string Message { get; }
-
-		public GpgException(int exitCode, string output, string error)
-		{
-			ExitCode = exitCode;
-			GpgOutput = output;
-			GpgError = error;
-			Message = "GPG exited with code " + exitCode;
+			var rcpKeys = context.GetKeys(recipients);
+			context.EncryptFile(inputFile, outputFile, rcpKeys);
 		}
 
-		public string Format()
+		public void StartAgent()
 		{
-			if (!string.IsNullOrEmpty(GpgError))
-			{
-				return $"GPG exited with code {ExitCode}.\nError message:\n\n{GpgError}";
-			}
-			else if (!string.IsNullOrEmpty(GpgOutput))
-			{
-				return $"GPG exited with code {ExitCode}.\nOutput:\n\n{GpgOutput}";
-			}
-			else
-			{
-				return $"GPG exited with code {ExitCode}.";
-			}
+			// Looking up a private key will start the GPG agent.
+			context.FindKey(null, true);
 		}
 	}
 }
