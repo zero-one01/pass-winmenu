@@ -345,7 +345,7 @@ namespace PassWinmenu
 				var changes = git.Commit();
 
 				var sb = new StringBuilder();
-				if (changes.CommittedFiles.Count == 0)
+				if (!changes.CommittedFiles.Any())
 				{
 					sb.AppendLine("Nothing to commit (no changes since last pushed commit).");
 					if (changes.Pull.Commits.Count > 1)
@@ -361,7 +361,7 @@ namespace PassWinmenu
 				}
 				else
 				{
-					sb.AppendLine($"Pushed {changes.CommittedFiles.Count} changed file{(changes.CommittedFiles.Count > 1 ? "s" : "")} to remote.");
+					sb.AppendLine($"Pushed {changes.CommittedFiles.Count()} changed file{(changes.CommittedFiles.Count() > 1 ? "s" : "")} to remote.");
 					if (changes.Pull.Commits.Count > 1)
 					{
 						sb.AppendLine($"Additionally, {changes.Pull.Commits.Count} new commits were pulled from remote.");

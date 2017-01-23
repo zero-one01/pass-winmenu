@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using LibGit2Sharp;
 using PassWinmenu.Configuration;
+using PassWinmenu.Utilities;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -15,17 +18,20 @@ namespace PassWinmenu.ExternalPrograms
 	internal class Git
 	{
 		private readonly string executable;
-		private readonly string repository;
+		private readonly string repositoryPath;
+		private readonly Repository repo;
 
 		/// <summary>
 		/// Initialises the wrapper.
 		/// </summary>
 		/// <param name="executable">The name of the git executable. Can be a full filename or the name of an executable contained in %PATH%.</param>
-		/// <param name="repository">The repository git should operate on.</param>
-		public Git(string executable, string repository)
+		/// <param name="repositoryPath">The repository git should operate on.</param>
+		public Git(string executable, string repositoryPath)
 		{
 			this.executable = executable;
-			this.repository = repository;
+			this.repositoryPath = repositoryPath;
+
+			repo = new Repository(repositoryPath);
 		}
 
 		/// <summary>
@@ -43,7 +49,7 @@ namespace PassWinmenu.ExternalPrograms
 				{
 					FileName = executable,
 					Arguments = arguments,
-					WorkingDirectory = repository,
+					WorkingDirectory = repositoryPath,
 					UseShellExecute = false,
 					CreateNoWindow = true,
 					RedirectStandardOutput = true,
@@ -129,7 +135,22 @@ namespace PassWinmenu.ExternalPrograms
 		/// <returns>A message containing information about the files that were changed.</returns>
 		public string Update()
 		{
-			var pull = RunGit("pull");
+			var head = repo.Head;
+			var remote = repo.Network.Remotes[head.RemoteName];
+			Commands.Fetch(repo, head.RemoteName, remote.FetchRefSpecs.Select(rs => rs.Specification), new FetchOptions
+			{
+
+			}, null);
+			var sig = repo.Config.BuildSignature(DateTimeOffset.Now);
+			var result = repo.Rebase.Start(head, head, head.TrackedBranch, new Identity(sig.Name, sig.Email), new RebaseOptions());
+			if (result.Status != RebaseStatus.Complete)
+			{
+				repo.Rebase.Abort();
+				return $"Could not rebase {head.FriendlyName} onto {head.TrackedBranch.FriendlyName}";
+			}
+			return "Rebase completed.";
+
+			/*var pull = RunGit("pull");
 			var match = Regex.Match(pull, @"(\d*?) (file.?) changed");
 			if (match.Success)
 			{
@@ -137,7 +158,7 @@ namespace PassWinmenu.ExternalPrograms
 				var sb = new StringBuilder();
 				sb.AppendLine($"The password store has been updated.\n{match.Groups[1].Value} {match.Groups[2].Value} {have} been changed.");
 				var lines = new List<string>();
-				foreach (var line in pull.Split(new[] {"\r\n", "\n"}, StringSplitOptions.RemoveEmptyEntries))
+				foreach (var line in pull.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries))
 				{
 					match = Regex.Match(line, @"create mode \d+ (.*)");
 					if (match.Success)
@@ -150,7 +171,7 @@ namespace PassWinmenu.ExternalPrograms
 						lines.Add($"deleted {match.Groups[1].Value}");
 					}
 				}
-				if(lines.Count > 0) sb.AppendLine("Changes: " + string.Join(", ", lines));
+				if (lines.Count > 0) sb.AppendLine("Changes: " + string.Join(", ", lines));
 
 				return sb.ToString();
 			}
@@ -166,11 +187,14 @@ namespace PassWinmenu.ExternalPrograms
 			else
 			{
 				return $"Git returned an unknown result: \n\"{pull}\"";
-			}
+			}*/
 		}
 
-		private GitStatus GetGitStatus()
+		private RepositoryStatus GetGitStatus()
 		{
+			return repo.RetrieveStatus();
+
+
 			var changes = RunGit("status");
 			// Break up the result into three groups. Changes to be committed, unstaged changes and untracked files.
 			var result = Regex.Match(changes, @"(?:Changes to be committed:(.*?))?(?:Changes not staged for commit:(.*?))?(?:Untracked files:(.*?))?$", RegexOptions.Singleline);
@@ -216,7 +240,7 @@ namespace PassWinmenu.ExternalPrograms
 				gitStatus.UntrackedFiles = files;
 			}
 
-			return gitStatus;
+			//return gitStatus;
 		}
 
 		private GitFileStatus GetStatus(string status)
@@ -238,50 +262,79 @@ namespace PassWinmenu.ExternalPrograms
 		{
 			var status = GetGitStatus();
 
-			// Some files have already been added.
-			// Unstage them so they can be committed individually.
-			if (status.AddedFiles.Count > 0)
+			var staged = status.Where(e => (e.State
+											& (FileStatus.DeletedFromIndex
+											   | FileStatus.ModifiedInIndex
+											   | FileStatus.NewInIndex
+											   | FileStatus.RenamedInIndex
+											   | FileStatus.TypeChangeInIndex)) > 0);
+			Commands.Unstage(repo, staged.Select(entry => entry.FilePath));
+
+			var filesToCommit = repo.RetrieveStatus();
+
+			foreach (var entry in filesToCommit)
 			{
-				foreach (var file in status.AddedFiles)
-				{
-					RunGit($"reset HEAD \"{file.Name}\"");
-				}
-				// Now try committing again.
-				
-				return Commit();
+				Commands.Stage(repo, entry.FilePath);
+				var sig = repo.Config.BuildSignature(DateTimeOffset.Now);
+				var relPath = Helpers.GetRelativePath(entry.FilePath, repositoryPath);
+				repo.Commit($"{GetVerbFromGitFileStatus(entry.State)} password store file {Path.GetFileName(entry.FilePath)}\n\n" +
+							$"This commit was automatically generated by pass-winmenu.", sig, sig);
 			}
-			var changes = new List<GitFile>();
-			// First, commit each changed file.
-			foreach (var file in status.ChangedFiles)
-			{
-				RunGit($"add \"{file.Name}\"");
-				RunGit($"commit -m \"{GetVerbFromGitFileStatus(file.Status)} password store file {file.Name}\n\nThis commit was automatically generated by pass-winmenu.\"");
-				changes.Add(file);
-			}
-			// Now, commit each untracked file.
-			foreach (var file in status.UntrackedFiles)
-			{
-				RunGit($"add \"{file.Name}\"");
-				RunGit($"commit -m \"Add {file.Name} to password store\n\nThis commit was automatically generated by pass-winmenu.\"");
-				changes.Add(file);
-			}
-			// Ensure we're up to date first.
-			var updates = Pull();
-			// Finally, push our commmits to remote.
-			RunGit("push");
-			return new CommitResult(updates, changes);
+
+			var pullResult = Pull();
+
+			return new CommitResult(pullResult, filesToCommit);
+
+			//// Some files have already been added.
+			//// Unstage them so they can be committed individually.
+			//if (status.AddedFiles.Count > 0)
+			//{
+			//	foreach (var file in status.AddedFiles)
+			//	{
+			//		RunGit($"reset HEAD \"{file.Name}\"");
+			//	}
+			//	// Now try committing again.
+
+			//	return Commit();
+			//}
+			//var changes = new List<GitFile>();
+			//// First, commit each changed file.
+			//foreach (var file in status.ChangedFiles)
+			//{
+			//	RunGit($"add \"{file.Name}\"");
+			//	RunGit($"commit -m \"{GetVerbFromGitFileStatus(file.Status)} password store file {file.Name}\n\nThis commit was automatically generated by pass-winmenu.\"");
+			//	changes.Add(file);
+			//}
+			//// Now, commit each untracked file.
+			//foreach (var file in status.UntrackedFiles)
+			//{
+			//	RunGit($"add \"{file.Name}\"");
+			//	RunGit($"commit -m \"Add {file.Name} to password store\n\nThis commit was automatically generated by pass-winmenu.\"");
+			//	changes.Add(file);
+			//}
+			//// Ensure we're up to date first.
+			//var updates = Pull();
+			//// Finally, push our commmits to remote.
+			//RunGit("push");
+			//return new CommitResult(updates, changes);
 		}
 
-		private string GetVerbFromGitFileStatus(GitFileStatus status)
+		private string GetVerbFromGitFileStatus(FileStatus status)
 		{
 			switch (status)
 			{
-				case GitFileStatus.Deleted:
+				case FileStatus.DeletedFromIndex:
 					return "Delete";
-					case GitFileStatus.NewFile:
-					return "Create";
-					default:
-					return "Update";
+				case FileStatus.NewInIndex:
+					return "Add";
+				case FileStatus.ModifiedInIndex:
+					return "Modify";
+				case FileStatus.RenamedInIndex:
+					return "Rename";
+				case FileStatus.TypeChangeInIndex:
+					return "Change filetype for";
+				default:
+					throw new ArgumentException(nameof(status));
 			}
 		}
 	}
@@ -289,9 +342,9 @@ namespace PassWinmenu.ExternalPrograms
 	internal class CommitResult
 	{
 		public PullResult Pull { get; private set; }
-		public List<GitFile> CommittedFiles { get; private set; }
+		public RepositoryStatus CommittedFiles { get; private set; }
 
-		public CommitResult(PullResult pull, List<GitFile> committedFiles)
+		public CommitResult(PullResult pull, RepositoryStatus committedFiles)
 		{
 			Pull = pull;
 			CommittedFiles = committedFiles;
@@ -352,13 +405,13 @@ namespace PassWinmenu.ExternalPrograms
 
 	internal class GitStatus
 	{
-		public List<GitFile> AddedFiles { get;  set; }
-		public List<GitFile> ChangedFiles { get;  set; }
-		public List<GitFile> UntrackedFiles { get;  set; }
+		public List<GitFile> AddedFiles { get; set; }
+		public List<GitFile> ChangedFiles { get; set; }
+		public List<GitFile> UntrackedFiles { get; set; }
 
 		public GitStatus()
 		{
-			
+
 		}
 
 		public GitStatus(List<GitFile> addedFiles, List<GitFile> changedFiles, List<GitFile> untrackedFiles)
@@ -369,7 +422,7 @@ namespace PassWinmenu.ExternalPrograms
 		}
 
 	}
-	
+
 	internal class GitException : Exception
 	{
 		public int ExitCode { get; }
