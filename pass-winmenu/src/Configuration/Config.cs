@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
 using YamlDotNet.Serialization;
@@ -42,6 +43,7 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
+		// TODO: deprecated notification
 		private string gitPath = "git";
 		public string GitPath
 		{
@@ -53,10 +55,22 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
+		private string[] sshKeySearchLocations { get; set; } = { @"%userprofile%\.ssh" };
+
+		public string[] SshKeySearchLocations
+		{
+			get
+			{
+				return sshKeySearchLocations.Select(l =>
+					Helpers.NormaliseDirectory(Environment.ExpandEnvironmentVariables(l))).ToArray();
+			}
+			set { sshKeySearchLocations = value; }
+		}
+
 		private string gnupghomeOverride;
 		public string GnupghomeOverride
 		{
-			get { return gnupghomeOverride;}
+			get { return gnupghomeOverride; }
 			set
 			{
 				var expanded = Environment.ExpandEnvironmentVariables(value);
@@ -64,6 +78,7 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
+		public bool UseGit { get; set; } = true;
 		public bool PreloadGpgAgent { get; set; } = true;
 		public double ClipboardTimeout { get; set; } = 30;
 		public string DirectorySeparator { get; set; } = "/";

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using Gpg.NET;
+using LibGit2Sharp;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -29,7 +30,7 @@ namespace PassWinmenu
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
-		private readonly Git git = new Git(ConfigManager.Config.GitPath, ConfigManager.Config.PasswordStore);
+		private readonly Git git;
 		private readonly PasswordManager passwordManager;
 
 		public Program()
@@ -44,6 +45,11 @@ namespace PassWinmenu
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
 				Task.Run(() => gpg.StartAgent());
+			}
+
+			if (ConfigManager.Config.UseGit)
+			{
+				git = new Git(ConfigManager.Config.PasswordStore);
 			}
 		}
 
@@ -338,48 +344,9 @@ namespace PassWinmenu
 		/// </summary>
 		private void CommitChanges()
 		{
-			try
-			{
-				var changes = git.Commit();
-
-				var sb = new StringBuilder();
-				if (changes.CommittedFiles.Count == 0)
-				{
-					sb.AppendLine("Nothing to commit (no changes since last pushed commit).");
-					if (changes.Pull.Commits.Count > 1)
-					{
-						sb.AppendLine($"{changes.Pull.Commits.Count} new commits were pulled from remote.");
-					}
-					else if (changes.Pull.Commits.Count == 1)
-					{
-						sb.AppendLine("1 new commit was pulled from remote.");
-					}
-
-					if(ConfigManager.Config.Notifications.Types.GitPush) RaiseNotification(sb.ToString(), ToolTipIcon.Info);
-				}
-				else
-				{
-					sb.AppendLine($"Pushed {changes.CommittedFiles.Count} changed file{(changes.CommittedFiles.Count > 1 ? "s" : "")} to remote.");
-					if (changes.Pull.Commits.Count > 1)
-					{
-						sb.AppendLine($"Additionally, {changes.Pull.Commits.Count} new commits were pulled from remote.");
-					}
-					else if (changes.Pull.Commits.Count == 1)
-					{
-						sb.AppendLine("Additionally, 1 new commit was pulled from remote.");
-					}
-					if (ConfigManager.Config.Notifications.Types.GitPush) RaiseNotification(sb.ToString(), ToolTipIcon.Info);
-				}
-
-			}
-			catch (GitException e)
-			{
-				RaiseNotification($"Failed to push your changes. Git returned an error (exit code {e.ExitCode}): {e.GitError}", ToolTipIcon.Error);
-			}
-			catch (Exception e)
-			{
-				RaiseNotification($"Failed to push your changes. An unknown error occurred. Error details:\n{e.GetType().Name}: {e.Message}", ToolTipIcon.Error);
-			}
+			git.Commit();
+			git.Rebase();
+			git.Update();
 		}
 
 		/// <summary>
@@ -393,11 +360,13 @@ namespace PassWinmenu
 				return;
 			}
 			var passwordFileName = ShowFileSelectionWindow();
+			// passwordFileName will be null if no file was selected
+			if (passwordFileName == null) return;
 
 			// Display the password generation window.
 			var passwordWindow = new PasswordWindow(Path.GetFileName(passwordFileName));
 			passwordWindow.ShowDialog();
-			if (passwordWindow.DialogResult == null || !passwordWindow.DialogResult.Value)
+			if (!passwordWindow.DialogResult.GetValueOrDefault())
 			{
 				return;
 			}
@@ -425,6 +394,8 @@ namespace PassWinmenu
 			{
 				RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 			}
+			// Add the password to Git
+			git?.AddPassword(passwordFileName + passwordManager.EncryptedFileExtension);
 		}
 
 		/// <summary>
@@ -434,12 +405,11 @@ namespace PassWinmenu
 		{
 			try
 			{
-				var result = git.Update();
-				if(ConfigManager.Config.Notifications.Types.GitPull) RaiseNotification(result, ToolTipIcon.Info);
+				git.Rebase();
 			}
-			catch (GitException)
+			catch (LibGit2SharpException e)
 			{
-				RaiseNotification("Failed to update the password store.\nYou might have to update it manually.", ToolTipIcon.Error);
+				ShowErrorWindow($"Unable to update the password store:\n{e.Message}");
 			}
 		}
 
@@ -556,15 +526,16 @@ namespace PassWinmenu
 				MessageBoxButton.YesNo,
 				MessageBoxImage.Information);
 
-			if (result != MessageBoxResult.Yes)
-			{
-				File.Delete(plaintextFile);
-			}
-			else
+			if (result == MessageBoxResult.Yes)
 			{
 				var selectedFilePath = passwordManager.GetPasswordFilePath(selectedFile);
 				File.Delete(selectedFilePath);
 				passwordManager.EncryptFile(plaintextFile);
+				File.Delete(plaintextFile);
+				git?.EditPassword(selectedFile);
+			}
+			else
+			{
 				File.Delete(plaintextFile);
 			}
 		}
