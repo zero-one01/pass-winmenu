@@ -13,8 +13,13 @@ password-file-match: '.*\.gpg$'
 # Path to the GPG executable. Can be either a command name (if GPG is added
 # to your PATH environment variable) or a path to your gpg.exe.
 gpg-path: 'gpg'
-# Path to the Git executable.
-git-path: 'git'
+# By default, pass-winmenu will automatically commit new and changed passwords
+# if it detects that your password store is a git repository, as well as
+# providing options for pushing/pulling to/from the remote repository.
+# You can disable this feature by setting the following option to false:
+use-git: true
+# A list of paths to search for SSH keys.
+ssh-key-search-locations: ["%userprofile%\.ssh"]
 
 # If the GNUPGHOME environment variable is set, GPG will use that path to
 # store its keys and settings. Otherwise, GPG will choose its own location.

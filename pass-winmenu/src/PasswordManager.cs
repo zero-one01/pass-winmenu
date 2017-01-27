@@ -27,14 +27,14 @@ namespace PassWinmenu
 
 		private readonly DirectoryInfo passwordStoreDirectory;
 		private readonly GPG gpg;
-		private readonly string encryptedFileExtension;
+		public readonly string EncryptedFileExtension;
 
 		public PasswordManager(string passwordStore, string encryptedFileExtension, GPG gpg)
 		{
 			var normalised = Helpers.NormaliseDirectory(passwordStore);
 			passwordStoreDirectory = new DirectoryInfo(normalised);
 
-			this.encryptedFileExtension = encryptedFileExtension;
+			this.EncryptedFileExtension = encryptedFileExtension;
 			this.gpg = gpg;
 		}
 
@@ -48,7 +48,7 @@ namespace PassWinmenu
 		{
 			var fullPath = GetPasswordFilePath(path);
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-			gpg.Encrypt($"{fileContent.Password}\n{fileContent.ExtraContent}", fullPath + encryptedFileExtension, GetGpgIds(fullPath));
+			gpg.Encrypt($"{fileContent.Password}\n{fileContent.ExtraContent}", fullPath + EncryptedFileExtension, GetGpgIds(fullPath));
 		}
 
 		/// <summary>
@@ -91,9 +91,9 @@ namespace PassWinmenu
 		{
 			var fullFilePath = GetPasswordFilePath(file);
 			if (!File.Exists(fullFilePath)) throw new ArgumentException($"The unencrypted file \"{fullFilePath}\" does not exist.");
-			gpg.EncryptFile(fullFilePath, fullFilePath + encryptedFileExtension, GetGpgIds(file));
+			gpg.EncryptFile(fullFilePath, fullFilePath + EncryptedFileExtension, GetGpgIds(file));
 
-			return fullFilePath + encryptedFileExtension;
+			return fullFilePath + EncryptedFileExtension;
 		}
 
 		/// <summary>
@@ -104,13 +104,13 @@ namespace PassWinmenu
 		/// <returns>An absolute path pointing to the decrypted file.</returns>
 		public string DecryptFile(string path)
 		{
-			if (!path.EndsWith(encryptedFileExtension))
+			if (!path.EndsWith(EncryptedFileExtension))
 			{
-				throw new ArgumentException($"The encrypted file \"{path}\" should have a filename ending with {encryptedFileExtension}");
+				throw new ArgumentException($"The encrypted file \"{path}\" should have a filename ending with {EncryptedFileExtension}");
 			}
 
 			var encryptedFileName = GetPasswordFilePath(path);
-			var decryptedFileName = encryptedFileName.Substring(0, encryptedFileName.Length - encryptedFileExtension.Length);
+			var decryptedFileName = encryptedFileName.Substring(0, encryptedFileName.Length - EncryptedFileExtension.Length);
 
 			if (File.Exists(decryptedFileName)) throw new InvalidOperationException($"A plaintext file already exists at \"{decryptedFileName}\".");
 			if (!File.Exists(encryptedFileName)) throw new ArgumentException($"The encrypted file \"{encryptedFileName}\" does not exist.");
