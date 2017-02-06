@@ -34,7 +34,7 @@ namespace PassWinmenu
 			var normalised = Helpers.NormaliseDirectory(passwordStore);
 			passwordStoreDirectory = new DirectoryInfo(normalised);
 
-			this.EncryptedFileExtension = encryptedFileExtension;
+			EncryptedFileExtension = encryptedFileExtension;
 			this.gpg = gpg;
 		}
 
