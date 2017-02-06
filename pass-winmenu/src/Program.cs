@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -25,8 +25,9 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string version = "1.3.1-dev3";
-		private const string encryptedFileExtension = ".gpg";
+		private const string Version = "1.4-dev";
+		private const string EncryptedFileExtension = ".gpg";
+		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
@@ -41,7 +42,7 @@ namespace PassWinmenu
 			Name = "pass-winmenu (main window)";
 
 			var gpg = new GPG(ConfigManager.Config.GpgInstallDir);
-			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, encryptedFileExtension, gpg);
+			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
 				Task.Run(() => gpg.StartAgent());
@@ -301,7 +302,7 @@ namespace PassWinmenu
 			icon.Icon = EmbeddedResources.Icon;
 			icon.Visible = true;
 			var menu = new ContextMenuStrip();
-			menu.Items.Add(new ToolStripLabel("pass-winmenu v" + version));
+			menu.Items.Add(new ToolStripLabel("pass-winmenu v" + Version));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
 			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)AddPassword));
@@ -430,7 +431,7 @@ namespace PassWinmenu
 			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
 			var relativeNames = passFiles.Select(p => Helpers.GetRelativePath(p, ConfigManager.Config.PasswordStore));
 			// Build a dictionary mapping display names to relative paths
-			var displayNameMap = relativeNames.ToDictionary(val => val.Replace(encryptedFileExtension, "").Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
+			var displayNameMap = relativeNames.ToDictionary(val => val.Replace(EncryptedFileExtension, "").Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
 
 			var selection = ShowPasswordMenu(displayNameMap.Keys);
 			if (selection == null) return selection;
@@ -505,10 +506,13 @@ namespace PassWinmenu
 		{
 			var selectedFile = RequestPasswordFile();
 			if (selectedFile == null) return;
-			string plaintextFile;
+			string decryptedFile, plaintextFile;
 			try
 			{
-				plaintextFile = passwordManager.DecryptFile(selectedFile);
+				decryptedFile = passwordManager.DecryptFile(selectedFile);
+				plaintextFile = decryptedFile + PlaintextFileExtension;
+				// Add a plaintext extension to the decrypted file so it can be opened with a text editor
+				File.Move(decryptedFile, plaintextFile);
 			}
 			catch (Exception e)
 			{
@@ -517,7 +521,16 @@ namespace PassWinmenu
 			}
 
 			// Open the file in the user's default editor
-			Process.Start(plaintextFile);
+			try
+			{
+				Process.Start(plaintextFile);
+			}
+			catch (Win32Exception e)
+			{
+				ShowErrorWindow($"Unable to open an editor to edit your password file ({e.Message}).");
+				File.Delete(plaintextFile);
+				return;
+			}
 
 			var result = MessageBox.Show(
 				"Please keep this window open until you're done editing the password file.\n" +
@@ -530,7 +543,9 @@ namespace PassWinmenu
 			{
 				var selectedFilePath = passwordManager.GetPasswordFilePath(selectedFile);
 				File.Delete(selectedFilePath);
-				passwordManager.EncryptFile(plaintextFile);
+				// Remove the plaintext extension again before re-encrypting the file
+				File.Move(plaintextFile, decryptedFile);
+				passwordManager.EncryptFile(decryptedFile);
 				File.Delete(plaintextFile);
 				git?.EditPassword(selectedFile);
 			}
@@ -552,7 +567,7 @@ namespace PassWinmenu
 			switch (ConfigManager.Config.UsernameDetection.Method)
 			{
 				case UsernameDetectionMethod.FileName:
-					return Path.GetFileName(passwordFile).Replace(encryptedFileExtension, "");
+					return Path.GetFileName(passwordFile)?.Replace(EncryptedFileExtension, "");
 				case UsernameDetectionMethod.LineNumber:
 					var extraLines = extraContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 					var lineNumber = options.LineNumber - 2;
