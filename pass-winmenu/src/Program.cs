@@ -289,6 +289,7 @@ namespace PassWinmenu
 
 		protected override void Dispose(bool disposing)
 		{
+			git?.Dispose();
 			icon?.Dispose();
 			hotkeys?.Dispose();
 			base.Dispose(disposing);
