@@ -1,7 +1,7 @@
 # This is the default configuration file for pass-winmenu.
 # If your password store is is located at %userprofile%\.password-store
-# and GPG and Git are accessible from your PATH, this settings file will work
-# out of the box. Otherwise, you'll have to tweak it a bit.
+# and GPG (not GPG4win) is installed on your computer, this settings file will
+# work out of the box. Otherwise, you'll have to tweak it a bit.
 
 # All values in this file are set to pass-winmenu's default settings,
 # so feel free to delete them from this file; they're only here
@@ -10,17 +10,16 @@ password-store: '%userprofile%\.password-store'
 # A regex string against which all filenames in the password directory are
 # compared. All matching files are considered password files.
 password-file-match: '.*\.gpg$'
-# Path to the GPG executable. Can be either a command name (if GPG is added
-# to your PATH environment variable) or a path to your gpg.exe.
-gpg-path: 'gpg'
-# By default, pass-winmenu will automatically commit new and changed passwords
-# if it detects that your password store is a git repository, as well as
-# providing options for pushing/pulling to/from the remote repository.
-# You can disable this feature by setting the following option to false:
-use-git: true
-# A list of paths to search for SSH keys.
-ssh-key-search-locations: ["%userprofile%\.ssh"]
 
+# Path to your GPG bin directory. By default, the GPGME DLL will try to look
+# for its files in its own directory. This behaviour can be overridden by
+# manually specifying the GPG installation directory.
+gpg-bin-dir: null
+# Path to the libgpgme.dll file that should be loaded. By default, Windows will
+# try to look for the DLL, which should work fine as long as GPG is properly
+# installed. This behaviour can be overridden by manually specifying the path
+# to libgpgme-11.dll
+gpgme-dll-path: null
 # If the GNUPGHOME environment variable is set, GPG will use that path to
 # store its keys and settings. Otherwise, GPG will choose its own location.
 # If you are unable to alter the GNUPGHOME environment variable (or if you
@@ -29,24 +28,31 @@ ssh-key-search-locations: ["%userprofile%\.ssh"]
 # to GPG. For example, like so:
 #   gnupghome-override: '%userprofile%\.gnupg'
 # This normally shouldn't be necessary.
-#
 # The GNUPGHOME environment variable is not overridden when the value is null.
 gnupghome-override: null
 
 # Gpg-agent can have a pretty long startup time on Windows. This option allows
 # the gpg-agent to be started alongside pass-winmenu so it'll be ready when
-# you need it. If this causes pinentry to show up when pass-winmenu starts,
-# you should set this to false.
+# you need it.
 preload-gpg-agent: true
+
+# Pass-winmenu will automatically commit new and changed passwords if it
+# detects that your password store is a git repository, as well as providing
+# options for pushing to/pulling from the remote repository.
+# You can disable this feature by setting the following option to false:
+use-git: true
+# A list of paths to search for SSH keys to use when connecting to a remote.
+ssh-key-search-locations: ["%userprofile%\.ssh"]
+
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30
 # The directory separator that will be used to separate directories and files
 # in the password menu. It's purely a visual indicator, so it can be set to
 # whatever character (or sequence of characters) you like.
 directory-separator: '/'
-# If set to true, only the first line in a decrypted password file will be
-# copied to the clipboard. This is the recommended behaviour, as many password
-# managers for pass will work the same way.
+# Only consider the first line in the password file to be the actual password;
+# all other lines are considered metadata. This is the recommended behaviour, 
+# as many password managers for pass will work the same way.
 first-line-only: true
 # If set to true, the menu will be opened on the same screen the mouse cursor
 # is currently on. If set to false, it will be opened on the primary screen.

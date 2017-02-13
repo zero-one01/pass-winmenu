@@ -23,10 +23,13 @@ namespace PassWinmenu.ExternalPrograms
 		/// <summary>
 		/// Initialises the wrapper.
 		/// </summary>
-		/// <param name="installDir">The GPG installation directory. When set to null, Gpg.NET will attempt to use the default installation directory.</param>
-		public GPG(string installDir = null)
+		/// <param name="dllPath">The path to libgpgme-11.dll. When set to null, Gpg.NET will
+		/// attempt to use the GPGME in the the default GPG installation directory.</param>
+		/// <param name="installDir">The GPG installation directory. When set to null, 
+		/// Gpg.NET will attempt to use the default installation directory.</param>
+		public GPG(string dllPath = null, string installDir = null)
 		{
-			GpgNet.Initialise(installDir, minGpgVersion: "2.1.0");
+			GpgNet.Initialise(dllPath, installDir, minGpgVersion: "2.1.0");
 			GpgNet.EnsureProtocol(GpgMeProtocol.OpenPgp);
 			context = GpgContext.CreateContext();
 		}

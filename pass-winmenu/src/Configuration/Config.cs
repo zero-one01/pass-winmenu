@@ -20,43 +20,38 @@ namespace PassWinmenu.Configuration
 		}
 
 		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";
-
-		private string gpgPath = "gpg";
-		public string GpgPath
+		
+		private string gpgBinDir = @"C:\Program Files (x86)\GnuPG\bin";
+		public string GpgBinDir
 		{
-			get { return gpgPath; }
+			get { return gpgBinDir; }
 			set
 			{
-				var expanded = Environment.ExpandEnvironmentVariables(value);
-				gpgPath = Helpers.NormaliseDirectory(expanded);
+				if (value == null) gpgBinDir = null;
+				else
+				{
+					var expanded = Environment.ExpandEnvironmentVariables(value);
+					gpgBinDir = Helpers.NormaliseDirectory(expanded);
+				}
 			}
 		}
 
-		private string gpgInstallDir = null;
-		public string GpgInstallDir
+		private string gpgmeDllPath;
+		public string GpgmeDllPath
 		{
-			get { return gpgInstallDir; }
+			get { return gpgmeDllPath; }
 			set
 			{
-				var expanded = Environment.ExpandEnvironmentVariables(value);
-				gpgInstallDir = Helpers.NormaliseDirectory(expanded);
+				if (value == null) gpgmeDllPath = null;
+				else
+				{
+					var expanded = Environment.ExpandEnvironmentVariables(value);
+					gpgmeDllPath = Helpers.NormaliseDirectory(expanded);
+				}
 			}
 		}
 
-		// TODO: deprecated notification
-		private string gitPath = "git";
-		public string GitPath
-		{
-			get { return gitPath; }
-			set
-			{
-				var expanded = Environment.ExpandEnvironmentVariables(value);
-				gitPath = Helpers.NormaliseDirectory(expanded);
-			}
-		}
-
-		private string[] sshKeySearchLocations { get; set; } = { @"%userprofile%\.ssh" };
-
+		private string[] sshKeySearchLocations = { @"%userprofile%\.ssh" };
 		public string[] SshKeySearchLocations
 		{
 			get
@@ -73,8 +68,13 @@ namespace PassWinmenu.Configuration
 			get { return gnupghomeOverride; }
 			set
 			{
-				var expanded = Environment.ExpandEnvironmentVariables(value);
-				gnupghomeOverride = Helpers.NormaliseDirectory(expanded);
+				if (value == null) gnupghomeOverride = null;
+				else
+				{
+					var expanded = Environment.ExpandEnvironmentVariables(value);
+					gnupghomeOverride = Helpers.NormaliseDirectory(expanded);
+				}
+
 			}
 		}
 
