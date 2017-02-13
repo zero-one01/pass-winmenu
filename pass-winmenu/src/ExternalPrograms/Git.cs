@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using LibGit2Sharp;
 using PassWinmenu.Configuration;
 
@@ -27,12 +28,20 @@ namespace PassWinmenu.ExternalPrograms
 
 			// Only use the SSH credentials provider if the remote URL is an SSH url.
 			// If it's not, we're better off letting libgit figure out how to deal with it.
-			var uri = new Uri(repo.Network.Remotes[repo.Head.RemoteName].Url);
-			if (uri.Scheme == "ssh")
+			if (IsSshUrl(repo.Network.Remotes[repo.Head.RemoteName].Url))
 			{
 				fetchOptions.CredentialsProvider = SshCredentialsProvider;
 				pushOptions.CredentialsProvider = SshCredentialsProvider;
 			}
+		}
+
+		private static bool IsSshUrl(string url)
+		{
+			// Git considers 'user@server:project.git' to be a valid remote URL, but it's
+			// not actually a URL, so parsing it as one would fail.
+			// Therefore, we need to check for this condition first.
+			if (Regex.IsMatch(url, @".*@.*:.*")) return true;
+			else return new Uri(url).Scheme == "git";
 		}
 
 		private Signature BuildSignature() => repo.Config.BuildSignature(DateTimeOffset.Now);
