@@ -6,16 +6,12 @@ param(
 
 $PKGDIR="bin/Release-Packaged"
 $ZIPDIR="bin/pass-winmenu.zip"
-$INCLUDEDIR="$PKGDIR/include"
+$INCLUDEDIR="$PKGDIR/lib"
 
 if($full){
 	rm -recurse "$PKGDIR"
 	mkdir "$PKGDIR"
-	mkdir "$INCLUDEDIR"
 }else{
-	if(-Not (Test-Path "$INCLUDEDIR")){
-		mkdir "$INCLUDEDIR"
-	}
 	if(Test-Path "$PKGDIR/pass-winmenu.exe"){
 		rm "$PKGDIR/pass-winmenu.exe"
 	}
@@ -24,11 +20,11 @@ if($full){
 	}
 }
 
+cp -recurse "bin/Release/lib" "$PKGDIR/lib"
 cp "bin/Release/pass-winmenu.exe" "$PKGDIR/pass-winmenu.exe"
 cp "include/packaged-config.yaml" "$PKGDIR/pass-winmenu.yaml"
 
 tools/7za.exe x -aos "include/GnuPG.zip" "-o$INCLUDEDIR"
-tools/7za.exe x -aos "include/PortableGit.zip" "-o$INCLUDEDIR"
 
 if($package){
 	if(Test-Path "$ZIPDIR"){
