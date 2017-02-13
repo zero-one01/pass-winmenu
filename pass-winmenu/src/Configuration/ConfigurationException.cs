@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace PassWinmenu.Configuration
 {
+	[Serializable]
 	internal class ConfigurationException : Exception
 	{
 		public ConfigurationException(string message, Exception innerException) : base(message, innerException) { }

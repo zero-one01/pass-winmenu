@@ -8,6 +8,7 @@ namespace PassWinmenu
 {
 	class StartupLink
 	{
+		[Serializable]
 		class StartupLinkCreationException : Exception
 		{
 			public StartupLinkCreationException(string message) : base(message) { }
