@@ -42,7 +42,7 @@ preload-gpg-agent: true
 # You can disable this feature by setting the following option to false:
 use-git: true
 # A list of paths to search for SSH keys to use when connecting to a remote.
-ssh-key-search-locations: ["%userprofile%\.ssh"]
+ssh-key-search-locations: ['%userprofile%\.ssh']
 
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30
