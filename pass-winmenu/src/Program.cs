@@ -349,6 +349,11 @@ namespace PassWinmenu
 		/// </summary>
 		private void CommitChanges()
 		{
+			if (git == null)
+			{
+				RaiseNotification("Unable to commit your  changes: pass-winmenu is not configured to use Git.", ToolTipIcon.Warning);
+				return;
+			}
 			git.Commit();
 			git.Rebase();
 			git.Update();
@@ -408,6 +413,11 @@ namespace PassWinmenu
 		/// </summary>
 		private void UpdatePasswordStore()
 		{
+			if (git == null)
+			{
+				RaiseNotification("Unable to update the password store: pass-winmenu is not configured to use Git.", ToolTipIcon.Warning);
+				return;
+			}
 			try
 			{
 				git.Rebase();
