@@ -315,11 +315,14 @@ namespace PassWinmenu
 			menu.Items.Add("Open Explorer", null, (sender, args) => Process.Start(ConfigManager.Config.PasswordStore));
 			menu.Items.Add("Open Shell", null, (sender, args) =>
 			{
-				Process.Start(new ProcessStartInfo
+				var gpgPath = Path.Combine(Environment.CurrentDirectory, "lib", "GnuPG", "bin");
+				var powershell = new ProcessStartInfo
 				{
 					FileName = "powershell",
 					WorkingDirectory = ConfigManager.Config.PasswordStore
-				});
+				};
+				powershell.EnvironmentVariables["PATH"] = $"{powershell.EnvironmentVariables["PATH"]}{Path.PathSeparator}{gpgPath}";
+				Process.Start(powershell);
 			});
 			menu.Items.Add(new ToolStripSeparator());
 			var startWithWindows = new ToolStripMenuItem("Start with Windows")
