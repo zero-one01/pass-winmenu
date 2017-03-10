@@ -40,8 +40,24 @@ namespace PassWinmenu
 			LoadConfigFile();
 			hotkeys = AssignHotkeys();
 			Name = "pass-winmenu (main window)";
-
-			var gpg = new GPG(ConfigManager.Config.GpgmeDllPath, ConfigManager.Config.GpgBinDir);
+			GPG gpg;
+			try
+			{
+				gpg = new GPG(ConfigManager.Config.GpgmeDllPath, ConfigManager.Config.GpgBinDir);
+			}
+			catch (DllNotFoundException)
+			{
+				if (string.IsNullOrEmpty(ConfigManager.Config.GpgmeDllPath))
+				{
+					ShowErrorWindow($"Unable to find the GpgME DLL file in its default location. Is GPG installed?\nTo configure a custom location for libgpgme.dll, set 'gpgme-dll-path' in pass-winmenu.yaml.");
+				}
+				else
+				{
+					ShowErrorWindow($"Unable to find the GpgME DLL file at the configured location ({ConfigManager.Config.GpgmeDllPath}).");
+				}
+				Exit();
+				return;
+			}
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
