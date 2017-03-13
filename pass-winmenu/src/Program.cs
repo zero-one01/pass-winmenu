@@ -58,6 +58,12 @@ namespace PassWinmenu
 				Exit();
 				return;
 			}
+			catch (GpgNetException e)
+			{
+				ShowErrorWindow(e.Message);
+				Exit();
+				return;
+			}
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
