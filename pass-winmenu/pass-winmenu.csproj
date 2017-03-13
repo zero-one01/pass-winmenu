@@ -71,7 +71,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Gpg.NET, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>..\packages\Gpg.NET.2.1.2\lib\net452\Gpg.NET.dll</HintPath>
+      <HintPath>..\packages\Gpg.NET.2.1.3\lib\net452\Gpg.NET.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="LibGit2Sharp, Version=1.0.22.0, Culture=neutral, PublicKeyToken=7cbde695407f0333, processorArchitecture=MSIL">
