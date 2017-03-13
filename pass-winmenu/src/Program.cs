@@ -25,7 +25,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string Version = "1.4-pre";
+		private const string Version = "1.4";
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
