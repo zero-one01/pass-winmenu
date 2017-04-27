@@ -69,7 +69,7 @@ during installation.
 
 #### Download links:
 
-Gpg: https://www.gpg4win.org/download.html
+Gpg: https://www.gnupg.org/download/index.html
 
 Git: https://git-scm.com/downloads
 
