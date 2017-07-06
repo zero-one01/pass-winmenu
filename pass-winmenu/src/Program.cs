@@ -341,7 +341,8 @@ namespace PassWinmenu
 				var powershell = new ProcessStartInfo
 				{
 					FileName = "powershell",
-					WorkingDirectory = ConfigManager.Config.PasswordStore
+					WorkingDirectory = ConfigManager.Config.PasswordStore,
+					UseShellExecute = false
 				};
 				powershell.EnvironmentVariables["PATH"] = $"{powershell.EnvironmentVariables["PATH"]}{Path.PathSeparator}{gpgPath}";
 				Process.Start(powershell);
