@@ -25,7 +25,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string Version = "1.4";
+		private const string Version = "1.4.1";
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
@@ -49,7 +49,7 @@ namespace PassWinmenu
 			{
 				if (string.IsNullOrEmpty(ConfigManager.Config.GpgmeDllPath))
 				{
-					ShowErrorWindow($"Unable to find the GpgME DLL file in its default location. Is GPG installed?\nTo configure a custom location for libgpgme.dll, set 'gpgme-dll-path' in pass-winmenu.yaml.");
+					ShowErrorWindow("Unable to find the GpgME DLL file in its default location. Is GPG installed?\nTo configure a custom location for libgpgme.dll, set 'gpgme-dll-path' in pass-winmenu.yaml.");
 				}
 				else
 				{
@@ -471,7 +471,7 @@ namespace PassWinmenu
 			var displayNameMap = relativeNames.ToDictionary(val => val.Replace(EncryptedFileExtension, "").Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
 
 			var selection = ShowPasswordMenu(displayNameMap.Keys);
-			if (selection == null) return selection;
+			if (selection == null) return null;
 			return displayNameMap[selection];
 		}
 
