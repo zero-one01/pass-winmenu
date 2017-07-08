@@ -25,15 +25,19 @@ namespace PassWinmenu.ExternalPrograms
 			repo = new Repository(repositoryPath);
 			fetchOptions = new FetchOptions();
 			pushOptions = new PushOptions();
-
-			// Only use the SSH credentials provider if the remote URL is an SSH url.
-			// If it's not, we're better off letting libgit figure out how to deal with it.
-			if (IsSshUrl(repo.Network.Remotes[repo.Head.RemoteName].Url))
-			{
-				fetchOptions.CredentialsProvider = SshCredentialsProvider;
-				pushOptions.CredentialsProvider = SshCredentialsProvider;
-			}
 		}
+
+		public BranchTrackingDetails GetTrackingDetails() => repo.Head.TrackingDetails;
+
+		private Signature BuildSignature() => repo.Config.BuildSignature(DateTimeOffset.Now);
+
+		public void UseSsh()
+		{
+			fetchOptions.CredentialsProvider = SshCredentialsProvider;
+			pushOptions.CredentialsProvider = SshCredentialsProvider;
+		}
+
+		public bool IsSshRemote() => IsSshUrl(repo.Network.Remotes[repo.Head.RemoteName].Url);
 
 		private static bool IsSshUrl(string url)
 		{
@@ -43,20 +47,12 @@ namespace PassWinmenu.ExternalPrograms
 			if (Regex.IsMatch(url, @".*@.*:.*")) return true;
 			else return new Uri(url).Scheme == "git";
 		}
-
-		private Signature BuildSignature() => repo.Config.BuildSignature(DateTimeOffset.Now);
-
+		
 		public void Rebase()
 		{
 			var head = repo.Head;
-			var remote = repo.Network.Remotes[head.RemoteName];
-
-			// First, fetch the latest version from the remote being tracked by the current branch
-
-
-			Commands.Fetch(repo, head.RemoteName, remote.FetchRefSpecs.Select(rs => rs.Specification), fetchOptions, null);
-
 			var tracked = head.TrackedBranch;
+
 			var sig = BuildSignature();
 			var result = repo.Rebase.Start(head, tracked, null, new Identity(sig.Name, sig.Email), new RebaseOptions());
 			if (result.Status != RebaseStatus.Complete)
@@ -74,35 +70,46 @@ namespace PassWinmenu.ExternalPrograms
 			}
 		}
 
+		public void Fetch()
+		{
+			var head = repo.Head;
+			var remote = repo.Network.Remotes[head.RemoteName];
+			Commands.Fetch(repo, head.RemoteName, remote.FetchRefSpecs.Select(rs => rs.Specification), fetchOptions, null);
+		}
+
 		/// <summary>
 		/// Pushes changes to remote.
 		/// </summary>
-		public void Update()
+		public void Push()
 		{
 			repo.Network.Push(repo.Head, pushOptions);
 		}
 
-		private static Credentials SshCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
+		private Credentials SshCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
 		{
 			if (types != SupportedCredentialTypes.Ssh)
 			{
 				throw new InvalidOperationException("Cannot use the SSH credentials provider for non-SSH protocols.");
 			}
+			return FindSshKey(usernameFromUrl);
+		}
 
+		public Credentials FindSshKey(string username)
+		{
 			var searchLocations = ConfigManager.Config.SshKeySearchLocations;
 
 			foreach (var location in searchLocations)
 			{
-				var privateKey = Path.Combine(location, "id_rsa");
-				var publicKey = Path.Combine(location, "id_rsa.pub");
+				var privateRsaKey = Path.Combine(location, "id_rsa");
+				var publicRsaKey = Path.Combine(location, "id_rsa.pub");
 
-				if (File.Exists(privateKey) && File.Exists(publicKey))
+				if (File.Exists(privateRsaKey) && File.Exists(publicRsaKey))
 				{
 					var sshUserKeyCredentials = new SshUserKeyCredentials
 					{
-						PrivateKey = Path.Combine(location, "id_rsa"),
-						PublicKey = Path.Combine(location, "id_rsa.pub"),
-						Username = usernameFromUrl,
+						PrivateKey = privateRsaKey,
+						PublicKey = publicRsaKey,
+						Username = username,
 						Passphrase = ""
 					};
 					return sshUserKeyCredentials;

@@ -178,6 +178,7 @@ namespace PassWinmenu.Configuration
 		public bool PasswordGenerated { get; set; } = false;
 		public bool GitPush { get; set; } = true;
 		public bool GitPull { get; set; } = true;
+		public bool NoSshKeyFound { get; set; } = true;
 	}
 
 	internal class StyleConfig

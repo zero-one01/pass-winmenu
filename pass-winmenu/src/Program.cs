@@ -50,6 +50,28 @@ namespace PassWinmenu
 			if (ConfigManager.Config.UseGit)
 			{
 				git = new Git(ConfigManager.Config.PasswordStore);
+				// Only use the SSH credentials provider if the remote URL is an SSH URL.
+				// If it's not, we're better off letting libgit figure out how to deal with it.
+				if (git.IsSshRemote())
+				{
+					// The remote URL is an SSH URL, so let's see if we can find an SSH key to use
+					// when connecting to the remote.
+					var key = git.FindSshKey(null);
+					if (key == null)
+					{
+						// No SSH key has been found, so we won't be able to connect to the remote.
+						// We should show a warning for this.
+						if (ConfigManager.Config.Notifications.Types.NoSshKeyFound)
+						{
+							RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling will not be possible.", ToolTipIcon.Warning, 10000);
+						}
+					}
+					else
+					{
+						// A valid SSH key has been found, so Git can be configured to use SSH.
+						git.UseSsh();
+					}
+				}
 			}
 		}
 
@@ -351,12 +373,36 @@ namespace PassWinmenu
 		{
 			if (git == null)
 			{
-				RaiseNotification("Unable to commit your  changes: pass-winmenu is not configured to use Git.", ToolTipIcon.Warning);
+				RaiseNotification("Unable to commit your changes: pass-winmenu is not configured to use Git.", ToolTipIcon.Warning);
 				return;
 			}
+			// First, commit any uncommitted files
 			git.Commit();
+			// Now fetch the latest changes
+			git.Fetch();
+			var details = git.GetTrackingDetails();
+			var local = details.AheadBy;
+			var remote = details.BehindBy;
 			git.Rebase();
-			git.Update();
+			git.Push();
+
+			if (!ConfigManager.Config.Notifications.Types.GitPush) return;
+			if (local > 0 && remote > 0)
+			{
+				RaiseNotification($"All changes pushed to remote ({local} pushed, {remote} pulled)", ToolTipIcon.Info);
+			}
+			else if (local.GetValueOrDefault() == 0 && remote.GetValueOrDefault() == 0)
+			{
+				RaiseNotification($"Nothing to commit.", ToolTipIcon.Info);
+			}
+			else if (local > 0)
+			{
+				RaiseNotification($"{local} changes have been pushed.", ToolTipIcon.Info);
+			}
+			else if (remote > 0)
+			{
+				RaiseNotification($"Nothing to commit. {remote} changes were pulled from remote.", ToolTipIcon.Info);
+			}
 		}
 
 		/// <summary>
@@ -420,6 +466,7 @@ namespace PassWinmenu
 			}
 			try
 			{
+				git.Fetch();
 				git.Rebase();
 			}
 			catch (LibGit2SharpException e)

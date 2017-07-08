@@ -153,6 +153,8 @@ notifications:
         git-push: true
         # ...changes are pulled from Git
         git-pull: true
+        # ...the Git remote uses SSH, but no SSH key could be found
+        no-ssh-key-found: true
 
 # Style settings.
 # All colour strings must be formatted as hexadecimal ARGB strings,
