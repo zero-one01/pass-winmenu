@@ -40,30 +40,7 @@ namespace PassWinmenu
 			LoadConfigFile();
 			hotkeys = AssignHotkeys();
 			Name = "pass-winmenu (main window)";
-			GPG gpg;
-			try
-			{
-				gpg = new GPG(ConfigManager.Config.GpgmeDllPath, ConfigManager.Config.GpgBinDir);
-			}
-			catch (DllNotFoundException)
-			{
-				if (string.IsNullOrEmpty(ConfigManager.Config.GpgmeDllPath))
-				{
-					ShowErrorWindow("Unable to find the GpgME DLL file in its default location. Is GPG installed?\nTo configure a custom location for libgpgme.dll, set 'gpgme-dll-path' in pass-winmenu.yaml.");
-				}
-				else
-				{
-					ShowErrorWindow($"Unable to find the GpgME DLL file at the configured location ({ConfigManager.Config.GpgmeDllPath}).");
-				}
-				Exit();
-				return;
-			}
-			catch (GpgNetException e)
-			{
-				ShowErrorWindow(e.Message);
-				Exit();
-				return;
-			}
+			var gpg = new GPG(ConfigManager.Config.GpgBinDir);
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
@@ -496,9 +473,14 @@ namespace PassWinmenu
 			{
 				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.FirstLineOnly);
 			}
-			catch (GpgNetException e)
+			catch (GpgError e)
 			{
 				ShowErrorWindow("Password decryption failed: " + e.Message);
+				return;
+			}
+			catch (GpgException e)
+			{
+				ShowErrorWindow("Password decryption failed. " + e.Message);
 				return;
 			}
 			catch (ConfigurationException e)
@@ -583,7 +565,7 @@ namespace PassWinmenu
 				// Remove the plaintext extension again before re-encrypting the file
 				File.Move(plaintextFile, decryptedFile);
 				passwordManager.EncryptFile(decryptedFile);
-				File.Delete(plaintextFile);
+				File.Delete(decryptedFile);
 				git?.EditPassword(selectedFile);
 			}
 			else

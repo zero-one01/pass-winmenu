@@ -36,21 +36,6 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
-		private string gpgmeDllPath;
-		public string GpgmeDllPath
-		{
-			get { return gpgmeDllPath; }
-			set
-			{
-				if (value == null) gpgmeDllPath = null;
-				else
-				{
-					var expanded = Environment.ExpandEnvironmentVariables(value);
-					gpgmeDllPath = Helpers.NormaliseDirectory(expanded);
-				}
-			}
-		}
-
 		private string[] sshKeySearchLocations = { @"%userprofile%\.ssh" };
 		public string[] SshKeySearchLocations
 		{

@@ -11,15 +11,9 @@ password-store: '%userprofile%\.password-store'
 # compared. All matching files are considered password files.
 password-file-match: '.*\.gpg$'
 
-# Path to your GPG bin directory. By default, the GPGME DLL will try to look
-# for its files in its own directory. This behaviour can be overridden by
-# manually specifying the GPG installation directory.
+# Path to your GPG bin directory. If set to its default of null, pass-winmenu
+# will try to look for the directory in its default location.
 gpg-bin-dir: null
-# Path to the libgpgme.dll file that should be loaded. By default, Windows will
-# try to look for the DLL, which should work fine as long as GPG is properly
-# installed. This behaviour can be overridden by manually specifying the path
-# to libgpgme-11.dll
-gpgme-dll-path: null
 # If the GNUPGHOME environment variable is set, GPG will use that path to
 # store its keys and settings. Otherwise, GPG will choose its own location.
 # If you are unable to alter the GNUPGHOME environment variable (or if you
