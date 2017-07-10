@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
-using Gpg.NET;
 using LibGit2Sharp;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
@@ -25,7 +24,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string Version = "1.4.1";
+		private const string Version = "1.4.1-dev";
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
@@ -433,7 +432,7 @@ namespace PassWinmenu
 			{
 				passwordManager.EncryptPassword(new PasswordFileContent(password, extraContent), passwordFileName);
 			}
-			catch (GpgNetException e)
+			catch (GpgException e)
 			{
 				ShowErrorWindow("Unable to encrypt your password: " + e.Message);
 				return;

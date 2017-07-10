@@ -42,8 +42,11 @@ namespace PassWinmenu
 		/// Generates an encrypted password file at the specified path.
 		/// If the path contains directories that do not exist, they will be created automatically.
 		/// </summary>
-		/// <param name="fileContent"></param>
-		/// <param name="path"></param>
+		/// <param name="fileContent">
+		/// A <see cref="PasswordFileContent"/> instance specifying the contents
+		/// of the password file to be generated.
+		/// </param>
+		/// <param name="path">A relative path specifying where in the password store the password file should be generated.</param>
 		public void EncryptPassword(PasswordFileContent fileContent, string path)
 		{
 			var fullPath = GetPasswordFilePath(path);
@@ -54,7 +57,7 @@ namespace PassWinmenu
 		/// <summary>
 		/// Get the content from an encrypted password file.
 		/// </summary>
-		/// <param name="path"></param>
+		/// <param name="path">A relative path specifying the location of the password file in the password store.</param>
 		/// <param name="passwordOnFirstLine">Should be true if the first line of the file contains the password.
 		/// Any content in the remaining lines will be considered metadata.
 		/// If set to false, the contents of the entire file are considered to be the password.</param>
@@ -86,7 +89,7 @@ namespace PassWinmenu
 		/// Encrypt a file. The path to the unencrypted file (plus a .gpg extension)
 		/// is used to produce the path to the encrypted file.
 		/// </summary>
-		/// <param name="file">An absolute path pointing to the encrypted file.</param>
+		/// <param name="file">A relative path pointing to the encrypted file in the password store.</param>
 		public string EncryptFile(string file)
 		{
 			var fullFilePath = GetPasswordFilePath(file);
@@ -119,8 +122,8 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Turns a relative (password store) path into an absolute path.
-		/// Throws an exception if the password store path is not relative.
+		/// Turns a relative (password store) path into an absolute path pointing to a password store file.
+		/// Throws an exception if the given.
 		/// </summary>
 		/// <param name="relativePath">A relative path pointing to a file or directory in the password store.</param>
 		/// <returns>The absolute path of that file or directory.</returns>
