@@ -37,12 +37,24 @@ namespace PassWinmenu.ExternalPrograms
 
 		private GpgResult CallGpg(string arguments, string input = null)
 		{
+			// TODO: Include --homedir?
+			// Maybe use --display-charset utf-8?
+			var argList = new List<string>
+			{
+				"--batch",
+				"--no-tty",
+				"--status-fd 2",
+				"--with-colons",
+				"--exit-on-status-write-error",
+			};
+			if (ConfigManager.Config.GnupghomeOverride != null)
+			{
+				 argList.Add($"--homedir \"{ConfigManager.Config.GnupghomeOverride}\"");
+			}
 			var psi = new ProcessStartInfo
 			{
 				FileName = gpgExePath,
-				// TODO: Include --homedir?
-				// Maybe use --display-charset utf-8?
-				Arguments = $"--batch --no-tty --status-fd 2 --with-colons --exit-on-status-write-error {arguments}",
+				Arguments = $"{string.Join(" ", argList)} {arguments}",
 				UseShellExecute = false,
 				RedirectStandardError = true,
 				RedirectStandardOutput = true,
@@ -126,11 +138,29 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				throw new GpgError("The file to be decrypted does not look like a valid GPG file.");
 			}
+			if (result.HasStatusCodes(GpgStatusCode.DECRYPTION_FAILED, GpgStatusCode.NO_SECKEY))
+			{
+				var keyIds = result.StatusMessages.Where(m => m.StatusCode == GpgStatusCode.NO_SECKEY);
+
+				throw new GpgError($"None of your private keys appear to be able to decrypt this file.\n" +
+				                   $"The file was encrypted for the following (sub)key(s): {string.Join(", ", keyIds.Select(m => m.Message))}");
+			}
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE))
 			{
 				result.GenerateError();
 			}
 
+			result.EnsureNonZeroExitCode();
+		}
+
+		private void VerifyEncryption(GpgResult result)
+		{
+			if (result.HasStatusCodes(GpgStatusCode.FAILURE, GpgStatusCode.INV_RECP))
+			{
+				var failedrcps = result.StatusMessages.Where(m => m.StatusCode == GpgStatusCode.INV_RECP).Select(m => m.Message.Substring(m.Message.IndexOf(" ")));
+				throw new GpgError($"Invalid/unknown recipient(s): {string.Join(", ", failedrcps)}\n" +
+				                   $"Make sure that you have imported and trusted the keys belonging to those recipients, and that they have not expired.");
+			}
 			result.EnsureNonZeroExitCode();
 		}
 
@@ -147,7 +177,7 @@ namespace PassWinmenu.ExternalPrograms
 			var recipientList = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 
 			var result = CallGpg($"--output \"{outputFile}\" {recipientList} --encrypt", data);
-			;
+			VerifyEncryption(result);
 		}
 
 		/// <summary>
@@ -163,12 +193,14 @@ namespace PassWinmenu.ExternalPrograms
 			var recipientList = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 
 			var result = CallGpg($"--output \"{outputFile}\" {recipientList} --encrypt \"{inputFile}\"");
-			;
+			result.EnsureNonZeroExitCode();
+			VerifyEncryption(result);
 		}
 
 		private void ListSecretKeys()
 		{
 			var result = CallGpg("--list-secret-keys");
+			;
 			// At some point in the future we might have a use for this data,
 			// But for now, all we really use this method for is to ensure the GPG agent is started.
 		}
@@ -199,7 +231,7 @@ namespace PassWinmenu.ExternalPrograms
 
 		public void GenerateError()
 		{
-			throw new GpgException($"\nGPG returned the following errors: \n{string.Join("\n", StderrMessages.Select(m => "    "+m))}");
+			throw new GpgException($"GPG returned the following errors: \n{string.Join("\n", StderrMessages.Select(m => "    "+m))}");
 		}
 
 		public void EnsureNonZeroExitCode()
