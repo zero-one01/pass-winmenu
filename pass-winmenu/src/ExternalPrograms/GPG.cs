@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PassWinmenu.Configuration;
-using PassWinmenu.Windows;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -20,7 +15,7 @@ namespace PassWinmenu.ExternalPrograms
 		private const string statusMarker = "[GNUPG:] ";
 		private const string defaultGpgExePath = @"C:\Program Files (x86)\gnupg\bin\gpg.exe";
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
-		private string gpgExePath = defaultGpgExePath;
+		private readonly string gpgExePath = defaultGpgExePath;
 
 		/// <summary>
 		/// Initialises the wrapper.
@@ -37,15 +32,14 @@ namespace PassWinmenu.ExternalPrograms
 
 		private GpgResult CallGpg(string arguments, string input = null)
 		{
-			// TODO: Include --homedir?
 			// Maybe use --display-charset utf-8?
 			var argList = new List<string>
 			{
-				"--batch",
-				"--no-tty",
-				"--status-fd 2",
-				"--with-colons",
-				"--exit-on-status-write-error",
+				"--batch", // Ensure GPG does not ask for input or user action
+				"--no-tty", // Let GPG know we're not a TTY
+				"--status-fd 2", // Write status messages to stderr
+				"--with-colons", // Use colon notation for displaying keys
+				"--exit-on-status-write-error", //  Exit if status messages cannot be written
 			};
 			if (ConfigManager.Config.GnupghomeOverride != null)
 			{
@@ -200,7 +194,10 @@ namespace PassWinmenu.ExternalPrograms
 		private void ListSecretKeys()
 		{
 			var result = CallGpg("--list-secret-keys");
-			;
+			if (result.Stdout.Length == 0)
+			{
+				throw new GpgError("No private keys found. Pass-winmenu will not be able to decrypt your passwords.");
+			}
 			// At some point in the future we might have a use for this data,
 			// But for now, all we really use this method for is to ensure the GPG agent is started.
 		}
@@ -238,15 +235,10 @@ namespace PassWinmenu.ExternalPrograms
 		{
 			if (ExitCode != 0)
 			{
-				throw new GpgException("GPG exited with status " + ExitCode);
+				throw new GpgException($"GPG exited with status {ExitCode}\n\nOutput:\n{string.Join("\n", StderrMessages)}");
 			}
 		}
-
-		public bool HasStatusCode(GpgStatusCode required)
-		{
-			return StatusCodes.Contains(required);
-		}
-
+		
 		public bool HasStatusCodes(params GpgStatusCode[] required)
 		{
 			return required.All(StatusCodes.Contains);
