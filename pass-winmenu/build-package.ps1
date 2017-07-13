@@ -9,7 +9,9 @@ $ZIPDIR="bin/pass-winmenu.zip"
 $INCLUDEDIR="$PKGDIR/lib"
 
 if($full){
-	rm -recurse "$PKGDIR"
+	if(Test-Path "$PKGDIR"){
+		rm -recurse "$PKGDIR"
+	}
 	mkdir "$PKGDIR"
 }else{
 	if(Test-Path "$PKGDIR/pass-winmenu.exe"){
