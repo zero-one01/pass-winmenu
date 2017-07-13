@@ -13,7 +13,7 @@ Its simplicity and modularity offer many advantages:
 
 - Cryptography is handled by GPG (Don't roll your own cryptography).
 - GPG gives you a lot of control over the keys and algorithms used to encrypt your files.
-- The use of GPG makes it easy for other applications (such as password managers) to interact
+- The use of GPG makes it easy for other applications (such as other password managers) to interact
   with your password store.
 - The directory structure for passwords is intuitive and allows you to organise your passwords
   with your file manager.
@@ -42,7 +42,7 @@ Select the right password file by double-clicking it, or by using the arrow keys
 
 The password will be decrypted using GPG, and your GPG key passphrase may be requested through pinentry.
 The decrypted password will then be copied to your clipboard and/or entered into the active window,
-depending on your `config.yaml` settings.
+depending on your `pass-winmenu.yaml` settings.
 
 ## Configuration
 
@@ -54,24 +54,14 @@ for an annotated list.
 
 Pass-winmenu is built against .NET Framework 4.5.2, which should already be installed on every version
 of Windows since Windows 7.
-Additionally, GPG and Git are required for the application to function correctly.
 
 ## Setup
 
-Installing pass-winmenu is as easy as dropping the executable anywhere you want and running it.
+Setup is as easy as downloading the zip file for the lates release and extracting it anywhere you want.
 
-You'll need to install GPG and Git if you don't have them installed yet.
-Install them to any location of your choosing. Make sure they're added to your PATH!
-
-By default, GPG should add itself to your PATH without you having to do anything.
-Git will do so as well if you select the `Use Git from the Windows Command Prompt` option
-during installation.
-
-#### Download links:
-
-Gpg: https://www.gnupg.org/download/index.html
-
-Git: https://git-scm.com/downloads
+By default, the application comes with a portable version of GPG, which stores its keys under `lib/GnuPG/home`.
+If you already have GPG installed, you can instruct pass-winmenu to use it by changing the value of `gpg-bin-dir`
+in `pass-winmenu.yaml`.
 
 ### Setting up GPG:
 
@@ -115,6 +105,8 @@ On first run, pass-winmenu will generate a `pass-winmenu.yaml` file
 Open the file, read through it, edit the settings as necessary, and save it before
 starting the application again. You should now have a working password manager.
 
+### Password synchronisation
+
 If you want to access your passwords on multiple devices, you have several options.
 What follows are the instructions for setting up Git, but all software 
 able to synchronise directories will work: Git, SVN, Dropbox, Google Drive, ownCloud, network shares, bittorrent sync...
@@ -156,6 +148,18 @@ Copy the `private.key` file to the machine on which you're setting up your passw
 powershell> gpg --import private.key
 ```
 
+Now, set the key validity so that it can be used to decrypt your password files.
+
+```
+powershell> gpg --edit-key youremailaddress@example.com
+gpg> trust
+```
+
+Set the trust level to `5` (ultimate trust) and save your key.
+```
+gpg> save
+```
+
 Clone your password repository
 
 ```
@@ -169,4 +173,4 @@ and start it again.
 
 Check out https://www.passwordstore.org/ if you're looking for implementations for other operating systems.
 
-In addition to pass-winmenu, I personally also use [Android Password Store](https://github.com/zeapo/Android-Password-Store) for Android, and [a dmenu script](https://baggyk.in/p/passmenu.sh) for Linux, which I've adapted from [this script](https://git.zx2c4.com/password-store/tree/contrib/dmenu).
+In addition to pass-winmenu, I personally also use [Android Password Store](https://github.com/zeapo/Android-Password-Store) for Android, and [a dmenu script](https://geluk.io/p/passmenu.sh) for Linux, which I've adapted from [this script](https://git.zx2c4.com/password-store/tree/contrib/dmenu).
