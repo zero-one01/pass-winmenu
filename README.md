@@ -57,7 +57,7 @@ of Windows since Windows 7.
 
 ## Setup
 
-Setup is as easy as downloading the zip file for the lates release and extracting it anywhere you want.
+Setup is as easy as downloading the zip file for the latest release and extracting it anywhere you want.
 
 By default, the application comes with a portable version of GPG, which stores its keys under `lib/GnuPG/home`.
 If you already have GPG installed, you can instruct pass-winmenu to use it by changing the value of `gpg-bin-dir`
