@@ -15,19 +15,37 @@ namespace PassWinmenu.ExternalPrograms
 		private const string statusMarker = "[GNUPG:] ";
 		private const string defaultGpgExePath = @"C:\Program Files (x86)\gnupg\bin\gpg.exe";
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
-		private readonly string gpgExePath = defaultGpgExePath;
+		public string GpgExePath { get; } = defaultGpgExePath;
 
 		/// <summary>
 		/// Initialises the wrapper.
 		/// </summary>
-		/// <param name="gpgBinDir">The path to GPG's bin directory When set to null,
+		/// <param name="gpgExePath">The path to gpg.exe. When set to null,
 		/// the default location will be used.</param>
-		public GPG(string gpgBinDir)
+		public GPG(string gpgExePath)
 		{
-			if (gpgBinDir != null)
+			if (gpgExePath == string.Empty)
 			{
-				gpgExePath = Path.Combine(gpgBinDir, "gpg.exe");
+				throw new ArgumentException("The GPG executable path may not be empty.");
 			}
+			if (gpgExePath != null)
+			{
+				this.GpgExePath = gpgExePath;
+			}
+		}
+
+		public string GetHomeDir()
+		{
+			var gnupghome = Environment.GetEnvironmentVariable("GNUPGHOME");
+			if (ConfigManager.Config.GnupghomeOverride != null)
+			{
+				return ConfigManager.Config.GnupghomeOverride;
+			}
+			else if (gnupghome != null)
+			{
+				return gnupghome;
+			}
+			return null;
 		}
 
 		private GpgResult CallGpg(string arguments, string input = null)
@@ -41,13 +59,13 @@ namespace PassWinmenu.ExternalPrograms
 				"--with-colons", // Use colon notation for displaying keys
 				"--exit-on-status-write-error", //  Exit if status messages cannot be written
 			};
-			if (ConfigManager.Config.GnupghomeOverride != null)
-			{
-				 argList.Add($"--homedir \"{ConfigManager.Config.GnupghomeOverride}\"");
-			}
+
+			var homeDir = GetHomeDir();
+			if(homeDir != null) argList.Add($"--homedir \"{homeDir}\"");
+
 			var psi = new ProcessStartInfo
 			{
-				FileName = gpgExePath,
+				FileName = GpgExePath,
 				Arguments = $"{string.Join(" ", argList)} {arguments}",
 				UseShellExecute = false,
 				RedirectStandardError = true,
@@ -66,13 +84,13 @@ namespace PassWinmenu.ExternalPrograms
 				gpgProc.StandardInput.Flush();
 				gpgProc.StandardInput.Close();
 			}
-			gpgProc.WaitForExit((int) gpgCallTimeout.TotalMilliseconds);
+			gpgProc.WaitForExit((int)gpgCallTimeout.TotalMilliseconds);
 
-			
+
 			string stderrLine;
 			var stderrMessages = new List<string>();
 			var statusMessages = new List<StatusMessage>();
-			while((stderrLine = gpgProc.StandardError.ReadLine()) != null)
+			while ((stderrLine = gpgProc.StandardError.ReadLine()) != null)
 			{
 				if (stderrLine.StartsWith(statusMarker))
 				{
@@ -228,7 +246,7 @@ namespace PassWinmenu.ExternalPrograms
 
 		public void GenerateError()
 		{
-			throw new GpgException($"GPG returned the following errors: \n{string.Join("\n", StderrMessages.Select(m => "    "+m))}");
+			throw new GpgException($"GPG returned the following errors: \n{string.Join("\n", StderrMessages.Select(m => "    " + m))}");
 		}
 
 		public void EnsureNonZeroExitCode()
@@ -238,7 +256,7 @@ namespace PassWinmenu.ExternalPrograms
 				throw new GpgException($"GPG exited with status {ExitCode}\n\nOutput:\n{string.Join("\n", StderrMessages)}");
 			}
 		}
-		
+
 		public bool HasStatusCodes(params GpgStatusCode[] required)
 		{
 			return required.All(StatusCodes.Contains);

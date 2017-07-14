@@ -24,7 +24,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string Version = "1.4.1-dev";
+		private const string Version = "1.5-pre";
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
@@ -39,11 +39,25 @@ namespace PassWinmenu
 			LoadConfigFile();
 			hotkeys = AssignHotkeys();
 			Name = "pass-winmenu (main window)";
-			var gpg = new GPG(ConfigManager.Config.GpgBinDir);
+			var gpg = new GPG(ConfigManager.Config.GpgPath);
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
-				Task.Run(() => gpg.StartAgent());
+				Task.Run(() =>
+				{
+					try
+					{
+						gpg.StartAgent();
+					}
+					catch (GpgError e)
+					{
+						ShowErrorWindow(e.Message);
+					}
+					// Ignore other exceptions. If it turns out GPG is misconfigured,
+					// these errors will surface upon decryption/encryption.
+					// The reason we catch GpgErrors here is so we can notify the user
+					// if we don't detect any decryption keys.
+				});
 			}
 
 			if (ConfigManager.Config.UseGit)

@@ -21,17 +21,17 @@ namespace PassWinmenu.Configuration
 
 		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";
 		
-		private string gpgBinDir = @"C:\Program Files (x86)\GnuPG\bin";
-		public string GpgBinDir
+		private string gpgPath = @"C:\Program Files (x86)\GnuPG\bin";
+		public string GpgPath
 		{
-			get { return gpgBinDir; }
+			get { return gpgPath; }
 			set
 			{
-				if (value == null) gpgBinDir = null;
+				if (value == null) gpgPath = null;
 				else
 				{
 					var expanded = Environment.ExpandEnvironmentVariables(value);
-					gpgBinDir = Helpers.NormaliseDirectory(expanded);
+					gpgPath = Helpers.NormaliseDirectory(expanded);
 				}
 			}
 		}

@@ -26,7 +26,7 @@ namespace PassWinmenu
 		internal const string GpgIdFileName = ".gpg-id";
 
 		private readonly DirectoryInfo passwordStoreDirectory;
-		private readonly GPG gpg;
+		public GPG Gpg { get; }
 		public readonly string EncryptedFileExtension;
 
 		public PasswordManager(string passwordStore, string encryptedFileExtension, GPG gpg)
@@ -35,7 +35,7 @@ namespace PassWinmenu
 			passwordStoreDirectory = new DirectoryInfo(normalised);
 
 			EncryptedFileExtension = encryptedFileExtension;
-			this.gpg = gpg;
+			Gpg = gpg;
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace PassWinmenu
 		{
 			var fullPath = GetPasswordFilePath(path);
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-			gpg.Encrypt($"{fileContent.Password}\n{fileContent.ExtraContent}", fullPath + EncryptedFileExtension, GetGpgIds(fullPath));
+			Gpg.Encrypt($"{fileContent.Password}\n{fileContent.ExtraContent}", fullPath + EncryptedFileExtension, GetGpgIds(fullPath));
 		}
 
 		/// <summary>
@@ -66,7 +66,7 @@ namespace PassWinmenu
 		{
 			var fullPath = GetPasswordFilePath(path);
 			if (!File.Exists(fullPath)) throw new ArgumentException($"The password file \"{fullPath}\" does not exist.");
-			var content = gpg.Decrypt(fullPath);
+			var content = Gpg.Decrypt(fullPath);
 
 			if (passwordOnFirstLine)
 			{
@@ -94,7 +94,7 @@ namespace PassWinmenu
 		{
 			var fullFilePath = GetPasswordFilePath(file);
 			if (!File.Exists(fullFilePath)) throw new ArgumentException($"The unencrypted file \"{fullFilePath}\" does not exist.");
-			gpg.EncryptFile(fullFilePath, fullFilePath + EncryptedFileExtension, GetGpgIds(file));
+			Gpg.EncryptFile(fullFilePath, fullFilePath + EncryptedFileExtension, GetGpgIds(file));
 
 			return fullFilePath + EncryptedFileExtension;
 		}
@@ -117,13 +117,13 @@ namespace PassWinmenu
 
 			if (File.Exists(decryptedFileName)) throw new InvalidOperationException($"A plaintext file already exists at \"{decryptedFileName}\".");
 			if (!File.Exists(encryptedFileName)) throw new ArgumentException($"The encrypted file \"{encryptedFileName}\" does not exist.");
-			gpg.DecryptToFile(encryptedFileName, decryptedFileName);
+			Gpg.DecryptToFile(encryptedFileName, decryptedFileName);
 			return decryptedFileName;
 		}
 
 		/// <summary>
 		/// Turns a relative (password store) path into an absolute path pointing to a password store file.
-		/// Throws an exception if the given.
+		/// Throws an exception if the given path is not in the password store.
 		/// </summary>
 		/// <param name="relativePath">A relative path pointing to a file or directory in the password store.</param>
 		/// <returns>The absolute path of that file or directory.</returns>
