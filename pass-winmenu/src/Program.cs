@@ -193,6 +193,9 @@ namespace PassWinmenu
 						case HotkeyAction.GitPush:
 							hotkeyManager.AddHotKey(keys, CommitChanges);
 							break;
+						case HotkeyAction.ShowDebugInfo:
+							hotkeyManager.AddHotKey(keys, ShowDebugInfo);
+							break;
 					}
 				}
 			}
@@ -236,6 +239,24 @@ namespace PassWinmenu
 		private void ShowErrorWindow(string message, string title = "An error occurred.")
 		{
 			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+		}
+
+		private void ShowDebugInfo()
+		{
+			string gitData = "";
+			if (git != null)
+			{
+				gitData = $"\tssh remote:\t{git.IsSshRemote()}\n" +
+				          $"\tbehind by:\t{git.GetTrackingDetails().BehindBy}\n" +
+				          $"\tahead by:\t\t{git.GetTrackingDetails().AheadBy}\n";
+			}
+
+			var debugInfo = $"gpg.exe path:\t\t{passwordManager.Gpg.GpgExePath}\n" +
+			                $"gpg version:\t\t{passwordManager.Gpg.GetVersion()}\n" +
+			                $"gpg homedir:\t\t{passwordManager.Gpg.GetHomeDir()}\n" +
+			                $"password store:\t\t{passwordManager.GetPasswordFilePath(".").TrimEnd('.')}\n" +
+			                $"git enabled:\t\t{git != null}\n{gitData}";
+			MessageBox.Show(debugInfo, "Debugging information", MessageBoxButton.OK, MessageBoxImage.None);
 		}
 
 		/// <summary>

@@ -225,6 +225,12 @@ namespace PassWinmenu.ExternalPrograms
 			// Looking up a private key will start the GPG agent.
 			ListSecretKeys();
 		}
+
+		public string GetVersion()
+		{
+			var output = CallGpg("--version");
+			return output.Stdout.Split(new []{"\r\n"}, StringSplitOptions.RemoveEmptyEntries).First();
+		}
 	}
 
 	internal class GpgResult

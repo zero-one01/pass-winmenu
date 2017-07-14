@@ -146,7 +146,8 @@ namespace PassWinmenu.Configuration
 		AddPassword,
 		EditPassword,
 		GitPull,
-		GitPush
+		GitPush,
+		ShowDebugInfo,
 	}
 
 	internal class HotkeyConfig
