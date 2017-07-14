@@ -24,7 +24,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private const string Version = "1.5-pre";
+		private string Version => EmbeddedResources.Version; // "1.5-pre";
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
@@ -35,6 +35,7 @@ namespace PassWinmenu
 
 		public Program()
 		{
+			EmbeddedResources.Load();
 			CreateNotifyIcon();
 			LoadConfigFile();
 			hotkeys = AssignHotkeys();
@@ -358,7 +359,7 @@ namespace PassWinmenu
 			icon.Icon = EmbeddedResources.Icon;
 			icon.Visible = true;
 			var menu = new ContextMenuStrip();
-			menu.Items.Add(new ToolStripLabel("pass-winmenu v" + Version));
+			menu.Items.Add(new ToolStripLabel("pass-winmenu " + Version));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
 			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)AddPassword));
