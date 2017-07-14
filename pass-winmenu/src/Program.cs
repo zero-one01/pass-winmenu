@@ -349,14 +349,31 @@ namespace PassWinmenu
 			menu.Items.Add("Open Explorer", null, (sender, args) => Process.Start(ConfigManager.Config.PasswordStore));
 			menu.Items.Add("Open Shell", null, (sender, args) =>
 			{
-				var gpgPath = Path.Combine(Environment.CurrentDirectory, "lib", "GnuPG", "bin");
 				var powershell = new ProcessStartInfo
 				{
 					FileName = "powershell",
 					WorkingDirectory = ConfigManager.Config.PasswordStore,
 					UseShellExecute = false
 				};
-				powershell.EnvironmentVariables["PATH"] = $"{powershell.EnvironmentVariables["PATH"]}{Path.PathSeparator}{gpgPath}";
+
+				var gpgLocation = passwordManager.Gpg.GpgExePath;
+				if (gpgLocation.Contains(Path.DirectorySeparatorChar) || gpgLocation.Contains(Path.AltDirectorySeparatorChar))
+				{
+					// gpgLocation is a path, so ensure it's absolute.
+					gpgLocation = Path.GetFullPath(gpgLocation);
+				}
+				else if (gpgLocation == "gpg")
+				{
+					// This would conflict with our function name, so rename it to gpg.exe.
+					gpgLocation = "gpg.exe";
+				}
+
+				string homeDir = passwordManager.Gpg.GetHomeDir();
+				if (homeDir != null)
+				{
+					homeDir = $" --homedir \"{homeDir}\"";
+				}
+				powershell.Arguments = $"-NoExit -Command \"function gpg() {{ {gpgLocation}{homeDir} $args }}\"";
 				Process.Start(powershell);
 			});
 			menu.Items.Add(new ToolStripSeparator());
