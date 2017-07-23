@@ -41,6 +41,24 @@ namespace PassWinmenu
 			hotkeys = AssignHotkeys();
 			Name = "pass-winmenu (main window)";
 			var gpg = new GPG(ConfigManager.Config.GpgPath);
+
+			try
+			{
+				gpg.GetVersion();
+			}
+			catch (Win32Exception e)
+			{
+				ShowErrorWindow("Could not find GPG. Make sure your gpg-path is set correctly.");
+				Exit();
+				return;
+			}
+			catch (Exception e)
+			{
+				ShowErrorWindow($"Failed to initialise GPG. {e.GetType().Name}: {e.Message}");
+				Exit();
+				return;
+			}
+
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
