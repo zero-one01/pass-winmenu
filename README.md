@@ -74,7 +74,11 @@ in `pass-winmenu.yaml`.
 ### Setting up GPG:
 
 If you already have a GPG key, you may want to consider importing it and using that.
-If you've never used GPG before, you can generate a new key:
+If you've never used GPG before, you can generate a new key. Start pass-winmenu, right click the key icon
+in the notification area, and click `Open password shell`.
+
+This will open a PowerShell window in which you'll be able to set up your GPG keys.
+Start by generating a new key:
 
 ```
 powershell> gpg --gen-key
@@ -107,11 +111,11 @@ in the root of your password directory.
 powershell> echo "myemail@example.com" | Out-File -Encoding utf8 $HOME\.password-store\.gpg-id
 ```
 
-Now you can point pass-winmenu to your password store.
-On first run, pass-winmenu will generate a `pass-winmenu.yaml` file 
-(containing all its settings initialised to their default values) in its current directory and exit.
-Open the file, read through it, edit the settings as necessary, and save it before
-starting the application again. You should now have a working password manager.
+If you've used a different location for your password store directory, you'll have to point pass-winmenu to it.
+Open `pass-winmenu.yaml` in the directory where you've installed the application, and set the `password-store`
+variable to the correct location. Exit pass-winmenu (right click the icon > Quit), and start it again.
+
+You should now have a working password manager.
 
 ### Password synchronisation
 
