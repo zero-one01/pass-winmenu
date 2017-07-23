@@ -59,8 +59,9 @@ Git support is provided by LibGit2Sharp, which requires some native dependencies
 release builds.
 
 For convenience, the release builds also contain a portable GPG installation, which pass-winmenu uses by default.
-If you already have GPG installed, you can delete the `lib/GnuPG` directory and all its contents, and edit the config
-file to point pass-winmenu to your GPG installation. Future releases will also provide a version without GPG.
+If you already have GPG installed, you may want to use that instead. In that case, edit the config file to point
+pass-winmenu to your GPG installation and, optionally, delete the `lib/GnuPG` directory and all its contents.
+Future releases will also provide a version without GPG.
 
 ## Setup
 
