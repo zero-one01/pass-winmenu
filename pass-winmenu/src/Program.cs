@@ -321,6 +321,11 @@ namespace PassWinmenu
 		/// <param name="timeout">The amount of time, in seconds, the text should remain on the clipboard.</param>
 		private void CopyToClipboard(string value, double timeout)
 		{
+			if (InvokeRequired)
+			{
+				Invoke(new Action<string, double>(CopyToClipboard), value, timeout);
+				return;
+			}
 			// Try to save the current contents of the clipboard and restore them after the password is removed.
 			string previousText = "";
 			if (Clipboard.ContainsText())
