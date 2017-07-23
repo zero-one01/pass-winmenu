@@ -288,6 +288,7 @@ namespace PassWinmenu.ExternalPrograms
 	/// The exception message does not necessarily contain information useful to the user,
 	/// and may contain cryptic error messages directly passed on from GPG.
 	/// </summary>
+	[Serializable]
 	internal class GpgException : Exception
 	{
 		public GpgException(string message) : base(message) { }
@@ -297,6 +298,7 @@ namespace PassWinmenu.ExternalPrograms
 	/// Represents an error type that is recognised by <see cref="GPG"/>.
 	/// The exception message contains useful information that can be displayed directly to the user.
 	/// </summary>
+	[Serializable]
 	internal class GpgError : GpgException
 	{
 		public GpgError(string message) : base(message) { }
