@@ -1,14 +1,16 @@
 param(
-	[switch]$full,
-	[switch]$package,
-	[switch]$compress
+	[switch]$Clean,
+	[switch]$Package,
+	[switch]$Compress,
+	[switch]$WithGpg
 )
 
 $PKGDIR="bin/Release-Packaged"
 $ZIPDIR="bin/pass-winmenu.zip"
 $INCLUDEDIR="$PKGDIR/lib"
+$ZIPNAME="pass-winmenu.zip"
 
-if($full){
+if($Clean){
 	if(Test-Path "$PKGDIR"){
 		rm -recurse "$PKGDIR"
 	}
@@ -26,19 +28,23 @@ cp -recurse "bin/Release/lib" "$PKGDIR/lib"
 cp "bin/Release/pass-winmenu.exe" "$PKGDIR/pass-winmenu.exe"
 cp "include/packaged-config.yaml" "$PKGDIR/pass-winmenu.yaml"
 
-tools/7za.exe x -aos "include/GnuPG.zip" "-o$INCLUDEDIR"
+if($WithGpg){
+	tools/7za.exe x -aos "include/GnuPG.zip" "-o$INCLUDEDIR"
+}else{
+	$ZIPNAME="pass-winmenu-nogpg.zip"
+}
 
-if($package){
+if($Package){
 	if(Test-Path "$ZIPDIR"){
 		echo "Removing old package: $ZIPDIR"
 		rm "$ZIPDIR"
 	}
 	cd bin
-	if($compress){
-		../tools/7za.exe a -mm=Deflate -mfb=258 -mpass=15 "pass-winmenu.zip" "Release-Packaged/*"
+	if($Compress){
+		../tools/7za.exe a -mm=Deflate -mfb=258 -mpass=15 "$ZIPNAME" "Release-Packaged/*"
 	}else{
-		../tools/7za.exe a "pass-winmenu.zip" "Release-Packaged/*"
+		../tools/7za.exe a "$ZIPNAME" "Release-Packaged/*"
 	}
-	../tools/7za.exe rn "pass-winmenu.zip" "Release-Packaged" "pass-winmenu"
+	../tools/7za.exe rn "$ZIPNAME" "Release-Packaged" "pass-winmenu"
 	cd ..
 }
