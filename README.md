@@ -75,7 +75,7 @@ in `pass-winmenu.yaml`.
 
 If you already have a GPG key, you may want to consider importing it and using that.
 If you've never used GPG before, you can generate a new key. Start pass-winmenu, right click the key icon
-in the notification area, and click `Open password shell`.
+in the notification area, and click `Open shell`.
 
 This will open a PowerShell window in which you'll be able to set up your GPG keys.
 Start by generating a new key:
