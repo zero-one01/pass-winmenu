@@ -55,6 +55,13 @@ for an annotated list.
 Pass-winmenu is built against .NET Framework 4.5.2, which should already be installed on every version
 of Windows since Windows 7.
 
+Git support is provided by LibGit2Sharp, which requires some native dependencies which are contained within the
+release builds.
+
+For convenience, the release builds also contain a portable GPG installation, which pass-winmenu uses by default.
+If you already have GPG installed, you can delete the `lib/GnuPG` directory and all its contents, and edit the config
+file to point pass-winmenu to your GPG installation. Future releases will also provide a version without GPG.
+
 ## Setup
 
 Setup is as easy as downloading the zip file for the latest release and extracting it anywhere you want.
