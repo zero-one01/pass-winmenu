@@ -95,7 +95,7 @@ namespace PassWinmenu
 						// We should show a warning for this.
 						if (ConfigManager.Config.Notifications.Types.NoSshKeyFound)
 						{
-							RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling will not be possible.", ToolTipIcon.Warning, 10000);
+							RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling from pass-winmenu will not be possible.", ToolTipIcon.Warning, 10000);
 						}
 					}
 					else
