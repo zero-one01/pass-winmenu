@@ -30,21 +30,45 @@ namespace PassWinmenu
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
-		private readonly Git git;
-		private readonly PasswordManager passwordManager;
+		private Git git;
+		private PasswordManager passwordManager;
 
 		public Program()
+		{
+			hotkeys = new HotkeyManager(Handle);
+			Name = "pass-winmenu (main window)";
+
+			Initialise();
+			RunInitialCheck();
+		}
+
+		/// <summary>
+		/// Loads all required resources.
+		/// </summary>
+		protected void Initialise()
 		{
 			EmbeddedResources.Load();
 			CreateNotifyIcon();
 			LoadConfigFile();
-			hotkeys = AssignHotkeys();
-			Name = "pass-winmenu (main window)";
-			var gpg = new GPG(ConfigManager.Config.GpgPath);
+			AssignHotkeys(hotkeys);
 
+			var gpg = new GPG(ConfigManager.Config.GpgPath);
+			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
+
+			if (ConfigManager.Config.UseGit)
+			{
+				git = new Git(ConfigManager.Config.PasswordStore);
+			}
+		}
+
+		/// <summary>
+		/// Checks if all components are configured correctly.
+		/// </summary>
+		private void RunInitialCheck()
+		{
 			try
 			{
-				gpg.GetVersion();
+				passwordManager.Gpg.GetVersion();
 			}
 			catch (Win32Exception e)
 			{
@@ -58,19 +82,17 @@ namespace PassWinmenu
 				Exit();
 				return;
 			}
-
-			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			if (ConfigManager.Config.PreloadGpgAgent)
 			{
 				Task.Run(() =>
 				{
 					try
 					{
-						gpg.StartAgent();
+						passwordManager.Gpg.StartAgent();
 					}
-					catch (GpgError e)
+					catch (GpgError err)
 					{
-						ShowErrorWindow(e.Message);
+						ShowErrorWindow(err.Message);
 					}
 					// Ignore other exceptions. If it turns out GPG is misconfigured,
 					// these errors will surface upon decryption/encryption.
@@ -79,30 +101,26 @@ namespace PassWinmenu
 				});
 			}
 
-			if (ConfigManager.Config.UseGit)
+			// Only use the SSH credentials provider if the remote URL is an SSH URL.
+			// If it's not, we're better off letting libgit figure out how to deal with it.
+			if (git?.IsSshRemote() ?? false)
 			{
-				git = new Git(ConfigManager.Config.PasswordStore);
-				// Only use the SSH credentials provider if the remote URL is an SSH URL.
-				// If it's not, we're better off letting libgit figure out how to deal with it.
-				if (git.IsSshRemote())
+				// The remote URL is an SSH URL, so let's see if we can find an SSH key to use
+				// when connecting to the remote.
+				var key = git.FindSshKey(null);
+				if (key == null)
 				{
-					// The remote URL is an SSH URL, so let's see if we can find an SSH key to use
-					// when connecting to the remote.
-					var key = git.FindSshKey(null);
-					if (key == null)
+					// No SSH key has been found, so we won't be able to connect to the remote.
+					// We should show a warning for this.
+					if (ConfigManager.Config.Notifications.Types.NoSshKeyFound)
 					{
-						// No SSH key has been found, so we won't be able to connect to the remote.
-						// We should show a warning for this.
-						if (ConfigManager.Config.Notifications.Types.NoSshKeyFound)
-						{
-							RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling from pass-winmenu will not be possible.", ToolTipIcon.Warning, 10000);
-						}
+						RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling from pass-winmenu will not be possible.", ToolTipIcon.Warning, 10000);
 					}
-					else
-					{
-						// A valid SSH key has been found, so Git can be configured to use SSH.
-						git.UseSsh();
-					}
+				}
+				else
+				{
+					// A valid SSH key has been found, so Git can be configured to use SSH.
+					git.UseSsh();
 				}
 			}
 		}
@@ -174,12 +192,10 @@ namespace PassWinmenu
 		/// <summary>
 		/// Loads keybindings from the configuration file and registers them with Windows.
 		/// </summary>
-		private HotkeyManager AssignHotkeys()
+		private void AssignHotkeys(HotkeyManager hotkeyManager)
 		{
-			HotkeyManager hotkeyManager = null;
 			try
 			{
-				hotkeyManager = new HotkeyManager(Handle);
 				foreach (var hotkey in ConfigManager.Config.Hotkeys)
 				{
 					var keys = KeyCombination.Parse(hotkey.Hotkey);
@@ -223,7 +239,6 @@ namespace PassWinmenu
 				RaiseNotification(e.Message, ToolTipIcon.Error);
 				Exit();
 			}
-			return hotkeyManager;
 		}
 
 		/// <summary>
