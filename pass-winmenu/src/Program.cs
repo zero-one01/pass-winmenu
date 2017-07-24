@@ -74,6 +74,12 @@ namespace PassWinmenu
 		/// </summary>
 		private void RunInitialCheck()
 		{
+			if (!Directory.Exists(ConfigManager.Config.PasswordStore))
+			{
+				ShowErrorWindow($"Could not find the password store at {Path.GetFullPath(ConfigManager.Config.PasswordStore)}. Please make sure it exists.");
+				Exit();
+				return;
+			}
 			try
 			{
 				passwordManager.Gpg.GetVersion();
