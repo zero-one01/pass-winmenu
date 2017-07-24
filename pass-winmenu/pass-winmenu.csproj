@@ -146,7 +146,9 @@
     <EmbeddedResource Include="embedded\pass-winmenu.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="build-package.ps1" />
     <None Include="include\GnuPG.zip" />
+    <None Include="include\packaged-config-nogpg.yaml" />
     <None Include="include\packaged-config.yaml" />
     <None Include="packages.config" />
   </ItemGroup>

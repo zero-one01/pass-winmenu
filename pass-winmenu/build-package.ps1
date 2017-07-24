@@ -26,12 +26,13 @@ if($Clean){
 
 cp -recurse "bin/Release/lib" "$PKGDIR/lib"
 cp "bin/Release/pass-winmenu.exe" "$PKGDIR/pass-winmenu.exe"
-cp "include/packaged-config.yaml" "$PKGDIR/pass-winmenu.yaml"
 
 if($WithGpg){
 	tools/7za.exe x -aos "include/GnuPG.zip" "-o$INCLUDEDIR"
+	cp "include/packaged-config.yaml" "$PKGDIR/pass-winmenu.yaml"
 }else{
 	$ZIPNAME="pass-winmenu-nogpg.zip"
+	cp "include/packaged-config-nogpg.yaml" "$PKGDIR/pass-winmenu.yaml"
 }
 
 if($Package){
