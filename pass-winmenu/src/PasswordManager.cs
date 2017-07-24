@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -147,6 +148,21 @@ namespace PassWinmenu
 			}
 			var fullPath = Path.Combine(passwordStoreDirectory.FullName, normalised);
 			return fullPath;
+		}
+
+		/// <summary>
+		/// Returns all password files in a directory that match a search pattern.
+		/// </summary>
+		/// <param name="directory">The directory to search in.</param>
+		/// <param name="pattern">The pattern against which the files should be matched.</param>
+		/// <returns></returns>
+		public IEnumerable<string> GetPasswordFiles(string pattern)
+		{
+			var files = Directory.EnumerateFiles(passwordStoreDirectory.FullName, "*", SearchOption.AllDirectories);
+			var matchingFiles = files.Where(f => Regex.IsMatch(Path.GetFileName(f), pattern)).ToArray();
+			var relativeNames = matchingFiles.Select(p => Helpers.GetRelativePath(p, passwordStoreDirectory.FullName));
+
+			return relativeNames;
 		}
 
 		/// <summary>

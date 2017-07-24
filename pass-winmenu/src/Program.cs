@@ -596,10 +596,14 @@ namespace PassWinmenu
 				return (string)Invoke((Func<string>)RequestPasswordFile);
 			}
 			// Find GPG-encrypted password files
-			var passFiles = GetPasswordFiles(ConfigManager.Config.PasswordStore, ConfigManager.Config.PasswordFileMatch);
-			var relativeNames = passFiles.Select(p => Helpers.GetRelativePath(p, ConfigManager.Config.PasswordStore));
+			var passFiles = passwordManager.GetPasswordFiles(ConfigManager.Config.PasswordFileMatch).ToList();
+			if (passFiles.Count == 0)
+			{
+				MessageBox.Show("Your password store doesn't appear to contain any passwords yet.", "Empty password store", MessageBoxButton.OK, MessageBoxImage.Information);
+				return null;
+			}
 			// Build a dictionary mapping display names to relative paths
-			var displayNameMap = relativeNames.ToDictionary(val => val.Replace(EncryptedFileExtension, "").Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
+			var displayNameMap = passFiles.ToDictionary(val => val.Replace(EncryptedFileExtension, "").Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
 
 			var selection = ShowPasswordMenu(displayNameMap.Keys);
 			if (selection == null) return null;
@@ -780,21 +784,6 @@ namespace PassWinmenu
 			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~' };
 			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
-		}
-
-		/// <summary>
-		/// Returns all password files in a directory that match a search pattern.
-		/// </summary>
-		/// <param name="directory">The directory to search in.</param>
-		/// <param name="pattern">The pattern against which the files should be matched.</param>
-		/// <returns></returns>
-		private static IEnumerable<string> GetPasswordFiles(string directory, string pattern)
-		{
-			var files = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories);
-
-			var matches = files.Where(f => Regex.IsMatch(Path.GetFileName(f), pattern)).ToArray();
-
-			return matches;
 		}
 
 		[STAThread]
