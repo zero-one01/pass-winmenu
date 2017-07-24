@@ -67,10 +67,6 @@ Future releases will also provide a version without GPG.
 
 Setup is as easy as downloading the zip file for the latest release and extracting it anywhere you want.
 
-By default, the application comes with a portable version of GPG, which stores its keys under `lib/GnuPG/home`.
-If you already have GPG installed, you can instruct pass-winmenu to use it by changing the value of `gpg-bin-dir`
-in `pass-winmenu.yaml`.
-
 ### Setting up GPG:
 
 If you already have a GPG key, you may want to consider importing it and using that.
