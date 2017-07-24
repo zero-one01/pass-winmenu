@@ -25,6 +25,13 @@ if($Clean){
 }
 
 cp -recurse "bin/Release/lib" "$PKGDIR/lib"
+# Linux and OSX are not supported, so their libraries do not have to be included.
+rm -recurse "$PKGDIR/lib/osx"
+rm -recurse "$PKGDIR/lib/linux"
+# The PDB files aren't used either, so they can be removed as well.
+rm -recurse "$PKGDIR/lib/win32/x64/*.pdb"
+rm -recurse "$PKGDIR/lib/win32/x86/*.pdb"
+
 cp "bin/Release/pass-winmenu.exe" "$PKGDIR/pass-winmenu.exe"
 
 if($WithGpg){
