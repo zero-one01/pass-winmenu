@@ -1,6 +1,6 @@
 # This is the default configuration file for pass-winmenu.
 # If your password store is is located at %userprofile%\.password-store
-# and GPG (not GPG4win) is installed on your computer, this settings file will
+# and GPG is reachable from your PATH, this settings file will
 # work out of the box. Otherwise, you'll have to tweak it a bit.
 
 # All values in this file are set to pass-winmenu's default settings,
