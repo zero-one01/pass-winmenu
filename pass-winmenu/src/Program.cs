@@ -57,7 +57,15 @@ namespace PassWinmenu
 
 			if (ConfigManager.Config.UseGit)
 			{
-				git = new Git(ConfigManager.Config.PasswordStore);
+				try
+				{
+					git = new Git(ConfigManager.Config.PasswordStore);
+				}
+				catch (RepositoryNotFoundException)
+				{
+					// Password store doesn't appear to be a Git repository.
+					// Git support will be disabled.
+				}
 			}
 		}
 
