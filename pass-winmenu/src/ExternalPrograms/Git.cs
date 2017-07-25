@@ -48,6 +48,9 @@ namespace PassWinmenu.ExternalPrograms
 			else return new Uri(url).Scheme == "git";
 		}
 		
+		/// <summary>
+		/// Rebases the current branch onto the branch it is tracking.
+		/// </summary>
 		public void Rebase()
 		{
 			var head = repo.Head;
