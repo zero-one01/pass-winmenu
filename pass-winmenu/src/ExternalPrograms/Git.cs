@@ -33,8 +33,9 @@ namespace PassWinmenu.ExternalPrograms
 
 		public void UseSsh()
 		{
-			fetchOptions.CredentialsProvider = SshCredentialsProvider;
-			pushOptions.CredentialsProvider = SshCredentialsProvider;
+			// TODO: Implement new SSH feature
+			//fetchOptions.CredentialsProvider = SshCredentialsProvider;
+			//pushOptions.CredentialsProvider = SshCredentialsProvider;
 		}
 
 		public bool IsSshRemote() => IsSshUrl(repo.Network.Remotes[repo.Head.RemoteName].Url);
@@ -88,38 +89,38 @@ namespace PassWinmenu.ExternalPrograms
 			repo.Network.Push(repo.Head, pushOptions);
 		}
 
-		private Credentials SshCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
-		{
-			if (types != SupportedCredentialTypes.Ssh)
-			{
-				throw new InvalidOperationException("Cannot use the SSH credentials provider for non-SSH protocols.");
-			}
-			return FindSshKey(usernameFromUrl);
-		}
+		//private Credentials SshCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
+		//{
+		//	if (!types.HasFlag(SupportedCredentialTypes.Ssh))
+		//	{
+		//		throw new InvalidOperationException("Cannot use the SSH credentials provider for non-SSH protocols.");
+		//	}
+		//	return FindSshKey(usernameFromUrl);
+		//}
 
-		public Credentials FindSshKey(string username)
-		{
-			var searchLocations = ConfigManager.Config.SshKeySearchLocations;
+		//public Credentials FindSshKey(string username)
+		//{
+		//	var searchLocations = ConfigManager.Config.SshKeySearchLocations;
 
-			foreach (var location in searchLocations)
-			{
-				var privateRsaKey = Path.Combine(location, "id_rsa");
-				var publicRsaKey = Path.Combine(location, "id_rsa.pub");
+		//	foreach (var location in searchLocations)
+		//	{
+		//		var privateRsaKey = Path.Combine(location, "id_rsa");
+		//		var publicRsaKey = Path.Combine(location, "id_rsa.pub");
 
-				if (File.Exists(privateRsaKey) && File.Exists(publicRsaKey))
-				{
-					var sshUserKeyCredentials = new SshUserKeyCredentials
-					{
-						PrivateKey = privateRsaKey,
-						PublicKey = publicRsaKey,
-						Username = username,
-						Passphrase = ""
-					};
-					return sshUserKeyCredentials;
-				}
-			}
-			return null;
-		}
+		//		if (File.Exists(privateRsaKey) && File.Exists(publicRsaKey))
+		//		{
+		//			var sshUserKeyCredentials = new SshUserKeyCredentials
+		//			{
+		//				PrivateKey = privateRsaKey,
+		//				PublicKey = publicRsaKey,
+		//				Username = username,
+		//				Passphrase = ""
+		//			};
+		//			return sshUserKeyCredentials;
+		//		}
+		//	}
+		//	return null;
+		//}
 
 		public RepositoryStatus Commit()
 		{

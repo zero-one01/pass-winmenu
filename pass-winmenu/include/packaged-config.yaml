@@ -36,8 +36,16 @@ preload-gpg-agent: true
 # options for pushing to/pulling from the remote repository.
 # You can disable this feature by setting the following option to false:
 use-git: true
+# Either 'builtin' or 'native-git'. 'builtin', the default option, will use
+# the Git library to sync your password repository. This library, however,
+# has several limitations.
+sync-mode: builtin
 # A list of paths to search for SSH keys to use when connecting to a remote.
+# Only used when sync-mode is set to 'builtin'.
 ssh-key-search-locations: ['%userprofile%\.ssh']
+# Path to the Git executable that should be used. Only used when sync-mode
+# is set to 'native-git'. 
+git-path: git
 
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30

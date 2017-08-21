@@ -121,21 +121,21 @@ namespace PassWinmenu
 			{
 				// The remote URL is an SSH URL, so let's see if we can find an SSH key to use
 				// when connecting to the remote.
-				var key = git.FindSshKey(null);
-				if (key == null)
-				{
-					// No SSH key has been found, so we won't be able to connect to the remote.
-					// We should show a warning for this.
-					if (ConfigManager.Config.Notifications.Types.NoSshKeyFound)
-					{
-						RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling from pass-winmenu will not be possible.", ToolTipIcon.Warning, 10000);
-					}
-				}
-				else
-				{
-					// A valid SSH key has been found, so Git can be configured to use SSH.
-					git.UseSsh();
-				}
+				//var key = git.FindSshKey(null);
+				//if (key == null)
+				//{
+				//	// No SSH key has been found, so we won't be able to connect to the remote.
+				//	// We should show a warning for this.
+				//	if (ConfigManager.Config.Notifications.Types.NoSshKeyFound)
+				//	{
+				//		RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling from pass-winmenu will not be possible.", ToolTipIcon.Warning, 10000);
+				//	}
+				//}
+				//else
+				//{
+				// A valid SSH key has been found, so Git can be configured to use SSH.
+				git.UseSsh();
+				//}
 			}
 		}
 
