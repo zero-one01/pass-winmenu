@@ -37,17 +37,6 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
-		private string[] sshKeySearchLocations = { @"%userprofile%\.ssh" };
-		public string[] SshKeySearchLocations
-		{
-			get
-			{
-				return sshKeySearchLocations.Select(l =>
-					Helpers.NormaliseDirectory(Environment.ExpandEnvironmentVariables(l))).ToArray();
-			}
-			set { sshKeySearchLocations = value; }
-		}
-
 		private string gnupghomeOverride;
 		public string GnupghomeOverride
 		{
@@ -64,7 +53,29 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
+		private string gitPath = @"git";
+		public string GitPath
+		{
+			get { return gitPath; }
+			set
+			{
+				if (value == null) gitPath = null;
+				else
+				{
+					var expanded = Environment.ExpandEnvironmentVariables(value);
+					gitPath = Helpers.NormaliseDirectory(expanded);
+				}
+			}
+		}
+
+
 		public bool UseGit { get; set; } = true;
+
+		[YamlIgnore]
+		public SyncMode SyncMode => (SyncMode)Enum.Parse(typeof(SyncMode), SyncModeString.ToPascalCase(), true);
+		[YamlMember(Alias = "sync-mode")]
+		public string SyncModeString { get; set; } = "builtin";
+
 		public bool PreloadGpgAgent { get; set; } = true;
 		public double ClipboardTimeout { get; set; } = 30;
 		public string DirectorySeparator { get; set; } = "/";
@@ -98,6 +109,12 @@ namespace PassWinmenu.Configuration
 		public NotificationConfig Notifications { get; set; } = new NotificationConfig();
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
+	}
+
+	internal enum SyncMode
+	{
+		Builtin,
+		NativeGit
 	}
 
 	internal class PasswordGenerationConfig

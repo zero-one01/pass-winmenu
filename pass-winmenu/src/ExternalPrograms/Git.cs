@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using LibGit2Sharp;
 using PassWinmenu.Configuration;
@@ -15,6 +18,9 @@ namespace PassWinmenu.ExternalPrograms
 		private readonly Repository repo;
 		private readonly FetchOptions fetchOptions;
 		private readonly PushOptions pushOptions;
+		private readonly string repositoryPath;
+		private readonly string nativeGitPath;
+		private readonly TimeSpan gitCallTimeout = TimeSpan.FromSeconds(5);
 
 		/// <summary>
 		/// Initialises the wrapper.
@@ -22,33 +28,26 @@ namespace PassWinmenu.ExternalPrograms
 		/// <param name="repositoryPath">The repository git should operate on.</param>
 		public Git(string repositoryPath)
 		{
+			this.repositoryPath = repositoryPath;
 			repo = new Repository(repositoryPath);
 			fetchOptions = new FetchOptions();
 			pushOptions = new PushOptions();
+		}
+
+		/// <summary>
+		/// Initialises the wrapper, using a native Git installation for pushing/pulling.
+		/// </summary>
+		/// <param name="repositoryPath">The repository git should operate on.</param>
+		/// <param name="nativeGitPath">The path to the Git executable.</param>
+		public Git(string repositoryPath, string nativeGitPath) : this(repositoryPath)
+		{
+			this.nativeGitPath = nativeGitPath ?? throw new ArgumentNullException(nameof(nativeGitPath));
 		}
 
 		public BranchTrackingDetails GetTrackingDetails() => repo.Head.TrackingDetails;
 
 		private Signature BuildSignature() => repo.Config.BuildSignature(DateTimeOffset.Now);
 
-		public void UseSsh()
-		{
-			// TODO: Implement new SSH feature
-			//fetchOptions.CredentialsProvider = SshCredentialsProvider;
-			//pushOptions.CredentialsProvider = SshCredentialsProvider;
-		}
-
-		public bool IsSshRemote() => IsSshUrl(repo.Network.Remotes[repo.Head.RemoteName].Url);
-
-		private static bool IsSshUrl(string url)
-		{
-			// Git considers 'user@server:project.git' to be a valid remote URL, but it's
-			// not actually a URL, so parsing it as one would fail.
-			// Therefore, we need to check for this condition first.
-			if (Regex.IsMatch(url, @".*@.*:.*")) return true;
-			else return new Uri(url).Scheme == "git";
-		}
-		
 		/// <summary>
 		/// Rebases the current branch onto the branch it is tracking.
 		/// </summary>
@@ -74,11 +73,47 @@ namespace PassWinmenu.ExternalPrograms
 			}
 		}
 
+		private void CallGit(string arguments)
+		{
+			var argList = new List<string>
+			{
+				"--non-interactive"
+			};
+
+			var psi = new ProcessStartInfo
+			{
+				FileName = nativeGitPath,
+				WorkingDirectory = repositoryPath,
+				Arguments = $"{arguments} {string.Join(" ", argList)}",
+				UseShellExecute = false,
+				RedirectStandardError = true,
+				RedirectStandardOutput = true,
+				CreateNoWindow = true
+			};
+			var gitProc = Process.Start(psi);
+
+			gitProc.WaitForExit((int)gitCallTimeout.TotalMilliseconds);
+			var output = gitProc.StandardOutput.ReadToEnd();
+			if (gitProc.ExitCode != 0)
+			{
+				throw new GitException($"Git exited with code {gitProc.ExitCode}");
+			}
+			;
+		}
+
 		public void Fetch()
 		{
 			var head = repo.Head;
 			var remote = repo.Network.Remotes[head.RemoteName];
-			Commands.Fetch(repo, head.RemoteName, remote.FetchRefSpecs.Select(rs => rs.Specification), fetchOptions, null);
+
+			if (nativeGitPath == null)
+			{
+				Commands.Fetch(repo, head.RemoteName, remote.FetchRefSpecs.Select(rs => rs.Specification), fetchOptions, null);
+			}
+			else
+			{
+				CallGit("fetch " + remote.Name);
+			}
 		}
 
 		/// <summary>
@@ -86,41 +121,15 @@ namespace PassWinmenu.ExternalPrograms
 		/// </summary>
 		public void Push()
 		{
-			repo.Network.Push(repo.Head, pushOptions);
+			if (nativeGitPath == null)
+			{
+				repo.Network.Push(repo.Head, pushOptions);
+			}
+			else
+			{
+				CallGit("push");
+			}
 		}
-
-		//private Credentials SshCredentialsProvider(string url, string usernameFromUrl, SupportedCredentialTypes types)
-		//{
-		//	if (!types.HasFlag(SupportedCredentialTypes.Ssh))
-		//	{
-		//		throw new InvalidOperationException("Cannot use the SSH credentials provider for non-SSH protocols.");
-		//	}
-		//	return FindSshKey(usernameFromUrl);
-		//}
-
-		//public Credentials FindSshKey(string username)
-		//{
-		//	var searchLocations = ConfigManager.Config.SshKeySearchLocations;
-
-		//	foreach (var location in searchLocations)
-		//	{
-		//		var privateRsaKey = Path.Combine(location, "id_rsa");
-		//		var publicRsaKey = Path.Combine(location, "id_rsa.pub");
-
-		//		if (File.Exists(privateRsaKey) && File.Exists(publicRsaKey))
-		//		{
-		//			var sshUserKeyCredentials = new SshUserKeyCredentials
-		//			{
-		//				PrivateKey = privateRsaKey,
-		//				PublicKey = publicRsaKey,
-		//				Username = username,
-		//				Passphrase = ""
-		//			};
-		//			return sshUserKeyCredentials;
-		//		}
-		//	}
-		//	return null;
-		//}
 
 		public RepositoryStatus Commit()
 		{
@@ -196,6 +205,18 @@ namespace PassWinmenu.ExternalPrograms
 		public void Dispose()
 		{
 			repo?.Dispose();
+		}
+	}
+
+	[Serializable]
+	internal class GitException : Exception
+	{
+		public GitException(string message) : base(message)
+		{
+		}
+
+		public GitException(string message, Exception innerException) : base(message, innerException)
+		{
 		}
 	}
 }

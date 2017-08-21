@@ -59,7 +59,14 @@ namespace PassWinmenu
 			{
 				try
 				{
-					git = new Git(ConfigManager.Config.PasswordStore);
+					if (ConfigManager.Config.SyncMode == SyncMode.NativeGit)
+					{
+						git = new Git(ConfigManager.Config.PasswordStore, ConfigManager.Config.GitPath);
+					}
+					else
+					{
+						git = new Git(ConfigManager.Config.PasswordStore);
+					}
 				}
 				catch (RepositoryNotFoundException)
 				{
@@ -113,29 +120,6 @@ namespace PassWinmenu
 					// The reason we catch GpgErrors here is so we can notify the user
 					// if we don't detect any decryption keys.
 				});
-			}
-
-			// Only use the SSH credentials provider if the remote URL is an SSH URL.
-			// If it's not, we're better off letting libgit figure out how to deal with it.
-			if (git?.IsSshRemote() ?? false)
-			{
-				// The remote URL is an SSH URL, so let's see if we can find an SSH key to use
-				// when connecting to the remote.
-				//var key = git.FindSshKey(null);
-				//if (key == null)
-				//{
-				//	// No SSH key has been found, so we won't be able to connect to the remote.
-				//	// We should show a warning for this.
-				//	if (ConfigManager.Config.Notifications.Types.NoSshKeyFound)
-				//	{
-				//		RaiseNotification("The Git remote for your password store requires SSH, but no SSH key could be found. Pushing/pulling from pass-winmenu will not be possible.", ToolTipIcon.Warning, 10000);
-				//	}
-				//}
-				//else
-				//{
-				// A valid SSH key has been found, so Git can be configured to use SSH.
-				git.UseSsh();
-				//}
 			}
 		}
 
@@ -294,8 +278,7 @@ namespace PassWinmenu
 			string gitData = "";
 			if (git != null)
 			{
-				gitData = $"\tssh remote:\t{git.IsSshRemote()}\n" +
-				          $"\tbehind by:\t{git.GetTrackingDetails().BehindBy}\n" +
+				gitData = $"\tbehind by:\t{git.GetTrackingDetails().BehindBy}\n" +
 				          $"\tahead by:\t\t{git.GetTrackingDetails().AheadBy}\n";
 			}
 
