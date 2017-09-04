@@ -225,7 +225,7 @@ namespace PassWinmenu.Windows
 		/// <returns>The first label matching this condition, or null if no matching labels were found.</returns>
 		private Label FindPrevious(int index)
 		{
-			int previous = index - 1;
+			var previous = index - 1;
 			if (previous >= 0)
 			{
 				var opt = Options[previous];
@@ -244,7 +244,7 @@ namespace PassWinmenu.Windows
 		/// <returns>The first label matching this condition, or null if no matching labels were found.</returns>
 		private Label FindNext(int index)
 		{
-			int next = index + 1;
+			var next = index + 1;
 			if (next < Options.Count)
 			{
 				var opt = Options[next];

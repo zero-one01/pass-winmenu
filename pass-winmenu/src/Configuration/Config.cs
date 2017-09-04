@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
 using YamlDotNet.Serialization;
@@ -12,7 +11,7 @@ namespace PassWinmenu.Configuration
 		private string passwordStore = Environment.ExpandEnvironmentVariables(@"%userprofile%\.password-store");
 		public string PasswordStore
 		{
-			get { return passwordStore; }
+			get => passwordStore;
 			set
 			{
 				var expanded = Environment.ExpandEnvironmentVariables(value);
@@ -25,7 +24,7 @@ namespace PassWinmenu.Configuration
 		private string gpgPath = @"C:\Program Files (x86)\GnuPG\bin";
 		public string GpgPath
 		{
-			get { return gpgPath; }
+			get => gpgPath;
 			set
 			{
 				if (value == null) gpgPath = null;
@@ -40,7 +39,7 @@ namespace PassWinmenu.Configuration
 		private string gnupghomeOverride;
 		public string GnupghomeOverride
 		{
-			get { return gnupghomeOverride; }
+			get => gnupghomeOverride;
 			set
 			{
 				if (value == null) gnupghomeOverride = null;
@@ -56,7 +55,7 @@ namespace PassWinmenu.Configuration
 		private string gitPath = @"git";
 		public string GitPath
 		{
-			get { return gitPath; }
+			get => gitPath;
 			set
 			{
 				if (value == null) gitPath = null;

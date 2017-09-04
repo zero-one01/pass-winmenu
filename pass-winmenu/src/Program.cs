@@ -13,7 +13,6 @@ using LibGit2Sharp;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
-using PassWinmenu.Utilities;
 using PassWinmenu.Windows;
 using YamlDotNet.Core;
 using Application = System.Windows.Forms.Application;
@@ -24,7 +23,7 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private string Version => EmbeddedResources.Version; // "1.5-pre";
+		private string Version => EmbeddedResources.Version;
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
@@ -75,7 +74,7 @@ namespace PassWinmenu
 				}
 				catch (TypeInitializationException e) when (e.InnerException is DllNotFoundException)
 				{
-					ShowErrorWindow($"The git2 DLL could not be found. Git support will be disabled.");
+					ShowErrorWindow("The git2 DLL could not be found. Git support will be disabled.");
 				}
 				catch (Exception e)
 				{
@@ -99,7 +98,7 @@ namespace PassWinmenu
 			{
 				passwordManager.Gpg.GetVersion();
 			}
-			catch (Win32Exception e)
+			catch (Win32Exception)
 			{
 				ShowErrorWindow("Could not find GPG. Make sure your gpg-path is set correctly.");
 				Exit();
@@ -283,7 +282,7 @@ namespace PassWinmenu
 
 		private void ShowDebugInfo()
 		{
-			string gitData = "";
+			var gitData = "";
 			if (git != null)
 			{
 				gitData = $"\tbehind by:\t{git.GetTrackingDetails().BehindBy}\n" +
@@ -365,7 +364,7 @@ namespace PassWinmenu
 				return;
 			}
 			// Try to save the current contents of the clipboard and restore them after the password is removed.
-			string previousText = "";
+			var previousText = "";
 			if (Clipboard.ContainsText())
 			{
 				previousText = Clipboard.GetText();
@@ -420,8 +419,8 @@ namespace PassWinmenu
 			};
 			startWithWindows.Click += (sender, args) =>
 			{
-				string target = Assembly.GetExecutingAssembly().Location;
-				string workingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+				var target = Assembly.GetExecutingAssembly().Location;
+				var workingDirectory = AppDomain.CurrentDomain.BaseDirectory;
 				startupLink.Toggle(target, workingDirectory);
 				startWithWindows.Checked = startupLink.Exists;
 			};
@@ -453,7 +452,7 @@ namespace PassWinmenu
 				gpgLocation = "gpg.exe";
 			}
 
-			string homeDir = passwordManager.Gpg.GetHomeDir();
+			var homeDir = passwordManager.Gpg.GetHomeDir();
 			if (homeDir != null)
 			{
 				homeDir = Path.GetFullPath(homeDir);
@@ -483,8 +482,8 @@ namespace PassWinmenu
 			}
 			catch (LibGit2SharpException e) when (e.Message == "unsupported URL protocol")
 			{
-				ShowErrorWindow($"Unable to push your changes: Remote uses an unknown protocol.\n\n" +
-				                $"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
+				ShowErrorWindow("Unable to push your changes: Remote uses an unknown protocol.\n\n" +
+				                "If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 				return;
 			}
 			var details = git.GetTrackingDetails();
@@ -500,7 +499,7 @@ namespace PassWinmenu
 			}
 			else if (local.GetValueOrDefault() == 0 && remote.GetValueOrDefault() == 0)
 			{
-				RaiseNotification($"Nothing to commit.", ToolTipIcon.Info);
+				RaiseNotification("Nothing to commit.", ToolTipIcon.Info);
 			}
 			else if (local > 0)
 			{
@@ -578,8 +577,8 @@ namespace PassWinmenu
 			}
 			catch (LibGit2SharpException e) when(e.Message == "unsupported URL protocol")
 			{
-				ShowErrorWindow($"Unable to update the password store: Remote uses an unknown protocol.\n\n" +
-				                $"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
+				ShowErrorWindow("Unable to update the password store: Remote uses an unknown protocol.\n\n" +
+				                "If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 			}
 			catch (LibGit2SharpException e)
 			{

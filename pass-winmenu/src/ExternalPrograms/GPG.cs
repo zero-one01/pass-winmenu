@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using PassWinmenu.Configuration;
 
@@ -30,7 +29,7 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			if (gpgExePath != null)
 			{
-				this.GpgExePath = gpgExePath;
+				GpgExePath = gpgExePath;
 			}
 		}
 
@@ -96,7 +95,7 @@ namespace PassWinmenu.ExternalPrograms
 				{
 					// This line is a status line, so extract status information from it.
 					var statusLine = stderrLine.Substring(statusMarker.Length);
-					var spaceIndex = statusLine.IndexOf(" ");
+					var spaceIndex = statusLine.IndexOf(" ", StringComparison.Ordinal);
 					if (spaceIndex == -1)
 					{
 						statusMessages.Add(new StatusMessage(statusLine, null));
@@ -154,7 +153,7 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				var keyIds = result.StatusMessages.Where(m => m.StatusCode == GpgStatusCode.NO_SECKEY);
 
-				throw new GpgError($"None of your private keys appear to be able to decrypt this file.\n" +
+				throw new GpgError("None of your private keys appear to be able to decrypt this file.\n" +
 				                   $"The file was encrypted for the following (sub)key(s): {string.Join(", ", keyIds.Select(m => m.Message))}");
 			}
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE))
@@ -169,9 +168,9 @@ namespace PassWinmenu.ExternalPrograms
 		{
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE, GpgStatusCode.INV_RECP))
 			{
-				var failedrcps = result.StatusMessages.Where(m => m.StatusCode == GpgStatusCode.INV_RECP).Select(m => m.Message.Substring(m.Message.IndexOf(" ")));
+				var failedrcps = result.StatusMessages.Where(m => m.StatusCode == GpgStatusCode.INV_RECP).Select(m => m.Message.Substring(m.Message.IndexOf(" ", StringComparison.Ordinal)));
 				throw new GpgError($"Invalid/unknown recipient(s): {string.Join(", ", failedrcps)}\n" +
-				                   $"Make sure that you have imported and trusted the keys belonging to those recipients, and that they have not expired.");
+				                   "Make sure that you have imported and trusted the keys belonging to those recipients, and that they have not expired.");
 			}
 			result.EnsureNonZeroExitCode();
 		}

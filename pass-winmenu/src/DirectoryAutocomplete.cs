@@ -23,7 +23,7 @@ namespace PassWinmenu
 			// Ensure the directory separators in the input string are correct
 			input = Path.Combine(input.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries));
 
-			string fullPath = Path.Combine(baseDirectory, input);
+			var fullPath = Path.Combine(baseDirectory, input);
 			var directory = Path.GetDirectoryName(fullPath);
 			var file = Path.GetFileName(fullPath);
 			
@@ -34,7 +34,7 @@ namespace PassWinmenu
 			}
 			
 			// Dotfiles should be filtered out.
-			IEnumerable<string> suggestions = Directory.GetFileSystemEntries(directory, file + "*")
+			var suggestions = Directory.GetFileSystemEntries(directory, file + "*")
 				.Where(suggestion => !Path.GetFileName(suggestion).StartsWith("."));
 
 			// If we have no suggestions, try showing suggestions for just the parent directory.

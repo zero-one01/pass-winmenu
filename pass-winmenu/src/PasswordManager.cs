@@ -164,9 +164,8 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Returns all password files in a directory that match a search pattern.
+		/// Returns all password files that match a search pattern.
 		/// </summary>
-		/// <param name="directory">The directory to search in.</param>
 		/// <param name="pattern">The pattern against which the files should be matched.</param>
 		/// <returns></returns>
 		public IEnumerable<string> GetPasswordFiles(string pattern)

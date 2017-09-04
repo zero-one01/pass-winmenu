@@ -11,12 +11,6 @@ namespace PassWinmenu
 		public static Stream DefaultConfig => Assembly.GetExecutingAssembly().GetManifestResourceStream("PassWinmenu.embedded.default-config.yaml");
 		public static string Version { get; private set; }
 
-
-		static EmbeddedResources()
-		{
-
-		}
-
 		public static void Load()
 		{
 			var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PassWinmenu.embedded.version.txt");
