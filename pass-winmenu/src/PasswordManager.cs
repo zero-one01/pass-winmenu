@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
