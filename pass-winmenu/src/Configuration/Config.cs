@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
@@ -15,7 +16,7 @@ namespace PassWinmenu.Configuration
 			set
 			{
 				var expanded = Environment.ExpandEnvironmentVariables(value);
-				passwordStore = Helpers.NormaliseDirectory(expanded);
+				passwordStore = Path.GetFullPath(Helpers.NormaliseDirectory(expanded));
 			}
 		}
 
