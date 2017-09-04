@@ -104,6 +104,8 @@ namespace PassWinmenu.Configuration
 				}
 			}
 		};
+
+		public PasswordEditorConfig PasswordEditor { get; set; } = new PasswordEditorConfig();
 		public PasswordGenerationConfig PasswordGeneration { get; set; } = new PasswordGenerationConfig();
 		public UsernameDetectionConfig UsernameDetection { get; set; } = new UsernameDetectionConfig();
 		public NotificationConfig Notifications { get; set; } = new NotificationConfig();
@@ -115,6 +117,11 @@ namespace PassWinmenu.Configuration
 	{
 		Builtin,
 		NativeGit
+	}
+
+	internal class PasswordEditorConfig
+	{
+		public bool UseBuiltin { get; set; } = true;
 	}
 
 	internal class PasswordGenerationConfig

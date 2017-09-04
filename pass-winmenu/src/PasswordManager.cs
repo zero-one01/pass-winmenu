@@ -48,9 +48,27 @@ namespace PassWinmenu
 		/// <param name="path">A relative path specifying where in the password store the password file should be generated.</param>
 		public void EncryptPassword(PasswordFileContent fileContent, string path)
 		{
+			EncryptText($"{fileContent.Password}\n{fileContent.ExtraContent}", path);
+		}
+
+		/// <summary>
+		/// Generates an ecrypted password file at the specified path.
+		/// If the path contains directories that do not exist, they will be created automatically.
+		/// </summary>
+		/// <param name="text">The text to be encrypted.</param>
+		/// <param name="path">A relative path specifying where in the password store the password file should be generated.</param>
+		public void EncryptText(string text, string path)
+		{
 			var fullPath = GetPasswordFilePath(path);
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-			Gpg.Encrypt($"{fileContent.Password}\n{fileContent.ExtraContent}", fullPath + EncryptedFileExtension, GetGpgIds(fullPath));
+			Gpg.Encrypt(text, fullPath, GetGpgIds(fullPath));
+		}
+
+		public string DecryptText(string path)
+		{
+			var fullPath = GetPasswordFilePath(path);
+			if (!File.Exists(fullPath)) throw new ArgumentException($"The password file \"{fullPath}\" does not exist.");
+			return Gpg.Decrypt(fullPath);
 		}
 
 		/// <summary>
@@ -63,10 +81,7 @@ namespace PassWinmenu
 		/// <returns></returns>
 		public PasswordFileContent DecryptPassword(string path, bool passwordOnFirstLine)
 		{
-			var fullPath = GetPasswordFilePath(path);
-			if (!File.Exists(fullPath)) throw new ArgumentException($"The password file \"{fullPath}\" does not exist.");
-			var content = Gpg.Decrypt(fullPath);
-
+			var content = DecryptText(path);
 			if (passwordOnFirstLine)
 			{
 				// The first line contains the password, any other lines contain additional (contextual) content.

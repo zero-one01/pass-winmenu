@@ -103,6 +103,12 @@ hotkeys:
 #    hotkey: 'ctrl alt o'
 #    action: 'add-password'
 
+password-editor:
+    # Use the built-in password editor. You can set this to false if you want
+    # to use a different text editor instead. In that case, pass-winmenu will
+    # launch your default text editor for .txt files.
+    use-builtin: true
+
 password-generation:
     # This template allows you to alter the default extra content that's
     # added to new password files. Note that this is a multiline string;

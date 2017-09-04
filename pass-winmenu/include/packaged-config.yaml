@@ -38,14 +38,14 @@ preload-gpg-agent: true
 use-git: true
 # Either 'builtin' or 'native-git'. 'builtin', the default option, will use
 # the Git library to sync your password repository. This library, however,
-# has several limitations.
+# has several limitations. For instance, SSH remotes are not supported.
+# By setting this value to 'native-git', pass-winmenu will use your native
+# Git installation instead, 
 sync-mode: builtin
-# A list of paths to search for SSH keys to use when connecting to a remote.
-# Only used when sync-mode is set to 'builtin'.
-ssh-key-search-locations: ['%userprofile%\.ssh']
 # Path to the Git executable that should be used. Only used when sync-mode
 # is set to 'native-git'. 
 git-path: git
+
 
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30
@@ -102,6 +102,12 @@ hotkeys:
 #  - 
 #    hotkey: 'ctrl alt o'
 #    action: 'add-password'
+
+password-editor:
+    # Use the built-in password editor. You can set this to false if you want
+    # to use a different text editor instead. In that case, pass-winmenu will
+    # launch your default text editor for .txt files.
+    use-builtin: true
 
 password-generation:
     # This template allows you to alter the default extra content that's

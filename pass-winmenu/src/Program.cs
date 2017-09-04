@@ -521,7 +521,7 @@ namespace PassWinmenu
 
 			try
 			{
-				passwordManager.EncryptPassword(new PasswordFileContent(password, extraContent), passwordFileName);
+				passwordManager.EncryptPassword(new PasswordFileContent(password, extraContent), passwordFileName + passwordManager.EncryptedFileExtension);
 			}
 			catch (GpgException e)
 			{
@@ -586,7 +586,7 @@ namespace PassWinmenu
 				return null;
 			}
 			// Build a dictionary mapping display names to relative paths
-			var displayNameMap = passFiles.ToDictionary(val => val.Replace(EncryptedFileExtension, "").Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
+			var displayNameMap = passFiles.ToDictionary(val => val.Substring(0, val.Length - EncryptedFileExtension.Length).Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
 
 			var selection = ShowPasswordMenu(displayNameMap.Keys);
 			if (selection == null) return null;
@@ -666,6 +666,43 @@ namespace PassWinmenu
 		{
 			var selectedFile = RequestPasswordFile();
 			if (selectedFile == null) return;
+
+			if (ConfigManager.Config.PasswordEditor.UseBuiltin)
+			{
+				EditWithEditWindow(selectedFile);
+			}
+			else
+			{
+				EditWithTextEditor(selectedFile);
+			}
+		}
+
+		private void EditWithEditWindow(string selectedFile)
+		{
+			if (InvokeRequired)
+			{
+				Invoke((Action<string>)EditWithEditWindow, selectedFile);
+				return;
+			}
+
+			var content = passwordManager.DecryptText(selectedFile);
+			var window = new EditWindow(content);
+
+			if (window.ShowDialog() ?? false)
+			{
+				try
+				{
+					passwordManager.EncryptText(window.PasswordContent.Text, selectedFile);
+				}
+				catch (Exception e)
+				{
+					ShowErrorWindow($"Unable to save your password (encyrption failed): {e.Message}");
+				}
+			}
+		}
+
+		private void EditWithTextEditor(string selectedFile)
+		{
 			string decryptedFile, plaintextFile;
 			try
 			{
