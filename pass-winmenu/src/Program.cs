@@ -73,6 +73,14 @@ namespace PassWinmenu
 					// Password store doesn't appear to be a Git repository.
 					// Git support will be disabled.
 				}
+				catch (TypeInitializationException e) when (e.InnerException is DllNotFoundException)
+				{
+					ShowErrorWindow($"The git2 DLL could not be found. Git support will be disabled.");
+				}
+				catch (Exception e)
+				{
+					ShowErrorWindow($"Failed to open the password store Git repository ({e.GetType().Name}: {e.Message}). Git support will be disabled.");
+				}
 			}
 		}
 
