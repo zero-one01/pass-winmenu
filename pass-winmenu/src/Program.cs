@@ -469,7 +469,16 @@ namespace PassWinmenu
 			// First, commit any uncommitted files
 			git.Commit();
 			// Now fetch the latest changes
-			git.Fetch();
+			try
+			{
+				git.Fetch();
+			}
+			catch (LibGit2SharpException e) when (e.Message == "unsupported URL protocol")
+			{
+				ShowErrorWindow($"Unable to push your changes: Remote uses an unknown protocol.\n\n" +
+				                $"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
+				return;
+			}
 			var details = git.GetTrackingDetails();
 			var local = details.AheadBy;
 			var remote = details.BehindBy;
@@ -558,6 +567,11 @@ namespace PassWinmenu
 			{
 				git.Fetch();
 				git.Rebase();
+			}
+			catch (LibGit2SharpException e) when(e.Message == "unsupported URL protocol")
+			{
+				ShowErrorWindow($"Unable to update the password store: Remote uses an unknown protocol.\n\n" +
+				                $"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 			}
 			catch (LibGit2SharpException e)
 			{
