@@ -116,12 +116,19 @@
     <Compile Include="src\EmbeddedResources.cs" />
     <Compile Include="src\StartupLink.cs" />
     <Compile Include="src\Utilities\Helpers.cs" />
+    <Compile Include="src\Windows\EditWindow.xaml.cs">
+      <DependentUpon>EditWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
     <Compile Include="src\Windows\MainWindowConfiguration.cs" />
     <Compile Include="src\Windows\PasswordSelectionWindow.cs" />
     <Compile Include="src\Windows\PasswordWindow.xaml.cs">
       <DependentUpon>PasswordWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="src\Windows\EditWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="src\Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
