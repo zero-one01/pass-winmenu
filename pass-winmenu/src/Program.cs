@@ -716,10 +716,14 @@ namespace PassWinmenu
 					File.Delete(passwordManager.GetPasswordFilePath(selectedFile));
 					passwordManager.EncryptText(window.PasswordContent.Text, selectedFile);
 					git?.EditPassword(selectedFile);
+					if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
+					{
+						RaiseNotification($"Password file \"{selectedFile}\" has been updated.", ToolTipIcon.Info);
+					}
 				}
 				catch (Exception e)
 				{
-					ShowErrorWindow($"Unable to save your password (encyrption failed): {e.Message}");
+					ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
 				}
 			}
 		}
@@ -768,6 +772,10 @@ namespace PassWinmenu
 				passwordManager.EncryptFile(decryptedFile);
 				File.Delete(decryptedFile);
 				git?.EditPassword(selectedFile);
+				if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
+				{
+					RaiseNotification($"Password file \"{selectedFile}\" has been updated.", ToolTipIcon.Info);
+				}
 			}
 			else
 			{

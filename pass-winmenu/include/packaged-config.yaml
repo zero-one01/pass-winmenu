@@ -164,6 +164,8 @@ notifications:
         password-copied: true
         # ...a new password has been generated:
         password-generated: true
+        # ...a password has been edited:
+        password-updated: true
         # ...changes are pushed to Git
         git-push: true
         # ...changes are pulled from Git
