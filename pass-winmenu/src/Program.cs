@@ -715,6 +715,7 @@ namespace PassWinmenu
 				{
 					File.Delete(passwordManager.GetPasswordFilePath(selectedFile));
 					passwordManager.EncryptText(window.PasswordContent.Text, selectedFile);
+					git?.EditPassword(selectedFile);
 				}
 				catch (Exception e)
 				{
