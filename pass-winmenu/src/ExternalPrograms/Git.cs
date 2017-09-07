@@ -53,6 +53,7 @@ namespace PassWinmenu.ExternalPrograms
 			var tracked = head.TrackedBranch;
 
 			var sig = BuildSignature();
+
 			var result = repo.Rebase.Start(head, tracked, null, new Identity(sig.Name, sig.Email), new RebaseOptions());
 			if (result.Status != RebaseStatus.Complete)
 			{
@@ -73,7 +74,8 @@ namespace PassWinmenu.ExternalPrograms
 		{
 			var argList = new List<string>
 			{
-				"--non-interactive"
+				// May be required in certain cases?
+				//"--non-interactive"
 			};
 
 			var psi = new ProcessStartInfo
