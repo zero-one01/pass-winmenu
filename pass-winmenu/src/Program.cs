@@ -713,6 +713,7 @@ namespace PassWinmenu
 			{
 				try
 				{
+					File.Delete(passwordManager.GetPasswordFilePath(selectedFile));
 					passwordManager.EncryptText(window.PasswordContent.Text, selectedFile);
 				}
 				catch (Exception e)
