@@ -30,6 +30,7 @@ namespace PassWinmenu.Windows
 
 		private bool isClosing;
 		private bool firstActivation = true;
+		private MainWindowConfiguration configuration;
 
 		protected readonly StyleConfig StyleConfig;
 
@@ -38,6 +39,7 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		protected MainWindow(MainWindowConfiguration configuration)
 		{
+			this.configuration = configuration;
 			StyleConfig = ConfigManager.Config.Style;
 			InitializeComponent();
 
@@ -80,12 +82,21 @@ namespace PassWinmenu.Windows
 
 			Background = BrushFromColourString(StyleConfig.BackgroundColour);
 
-			Left = configuration.Position.X;
-			Top = configuration.Position.Y;
-			Width = configuration.Dimensions.X;
-			Height = configuration.Dimensions.Y;
 			BorderBrush = BrushFromColourString(StyleConfig.BorderColour);
 			BorderThickness = new Thickness(1);
+		}
+
+		protected override void OnContentRendered(EventArgs e)
+		{
+			var transfomedPos = PointFromScreen(configuration.Position);
+			var transformedDims = PointFromScreen(configuration.Dimensions);
+
+			Left = transfomedPos.X;
+			Top = transfomedPos.Y;
+			Width = transformedDims.X;
+			Height = transformedDims.Y;
+
+			base.OnContentRendered(e);
 		}
 
 		/// <summary>
@@ -201,15 +212,15 @@ namespace PassWinmenu.Windows
 			base.OnActivated(e);
 
 			// Whenever the window is activated, the search box should gain focus.
-			if(!isClosing) SearchBox.Focus();
+			if (!isClosing) SearchBox.Focus();
 		}
-		
+
 		// Whenever the window loses focus, we reactivate it so it's brought to the front again, allowing it
 		// to regain focus.
 		protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
 		{
 			base.OnLostKeyboardFocus(e);
-			if(!isClosing) Activate();
+			if (!isClosing) Activate();
 		}
 
 		protected override void OnClosing(CancelEventArgs e)
@@ -264,7 +275,7 @@ namespace PassWinmenu.Windows
 
 		protected virtual void HandleSelectionChange(Label selection)
 		{
-			
+
 		}
 
 		protected abstract void HandleSelect();

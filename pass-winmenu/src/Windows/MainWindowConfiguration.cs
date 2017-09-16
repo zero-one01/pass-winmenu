@@ -10,8 +10,8 @@ namespace PassWinmenu.Windows
 {
 	internal class MainWindowConfiguration
 	{
-		public Vector Position { get; set; }
-		public Vector Dimensions { get; set; }
+		public Point Position { get; set; }
+		public Point Dimensions { get; set; }
 		public Orientation Orientation { get; set; }
 
 		/// <summary>
@@ -54,8 +54,8 @@ namespace PassWinmenu.Windows
 
 			return new MainWindowConfiguration
 			{
-				Dimensions = new Vector(width, height),
-				Position = new Vector(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top),
+				Dimensions = new Point(width, height),
+				Position = new Point(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top),
 				Orientation = orientation
 			};
 		}
