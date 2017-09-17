@@ -9,27 +9,20 @@ Pass-winmenu follows the philosophy of (and is compatible with) the Linux passwo
 ## Introduction
 
 [Pass (https://www.passwordstore.org)](https://www.passwordstore.org) stores passwords as GPG-encrypted files organised into a directory structure.
-Its simplicity and modularity offer many advantages:
+Its simplicity and modularity offer many advantages, most importantly:
 
-- Cryptography is handled by GPG (Don't roll your own cryptography).
-- GPG gives you a lot of control over the keys and algorithms used to encrypt your files.
-- The use of GPG makes it easy for other applications (such as other password managers) to interact
-  with your password store.
-- The directory structure for passwords is intuitive and allows you to organise your passwords
-  with your file manager.
-- Because the passwords are simply stored in a directory tree, it's easy to synchronise your
-  password store using any version control software of your choosing, giving you synchronisation, 
-  file history, and redundancy all at the same time (provided you use multiple devices and/or a
-  remote VCS server).
-- Widespread availability of VCS software gives you the option to set up your own synchronisation server,
-  giving you full control over your passwords.
-  Alternatively, you can choose one of the many online version control services (such as GitHub)
-  and store your passwords in a private repository.
-- The password files are always encrypted and can only be decrypted with your private GPG key,
-  which is secured with a passphrase. If someone gains access to your password files, they're useless
-  even if said person additionally managed to get hold of your GPG keys.
+- Cryptography is handled by GPG, an open-source, high quality security suite trusted and used by
+  security analysts, journalists, Linux distributions and many other parties all over the world
+- The use of open standards makes it easy for anyone to develop compatible password managers
+  for any platform they like (Linux, Android, Windows, Mac OS, etc)
+- Because the passwords are simply stored as encrypted files in directories, you can organise them
+  with your file manager and synchronise them across your devices using whatever method you prefer
+  (Git, Dropbox, Nextcloud, etc).
+- The passwords are securely encrypted with your own GPG keys, which can only be unlocked with
+  your master password. Even if someone manages to acquire your encrypted passwords and your GPG keys,
+  they won't be able to do anything unless they have your master password.
 
-Unfortunately, while there are many Linux integrations available, Windows integrations are scarce.
+Unfortunately, while there are many Linux integrations available, Windows integrations are more scarce.
 
 I wasn't happy with the existing ones, so I created my own, focusing on easy, keyboard-friendly
 interaction and a minimal interface that stays out of your way.
@@ -59,17 +52,20 @@ Git support is provided by LibGit2Sharp, which requires some native dependencies
 release builds.
 
 For convenience, the release builds also contain a portable GPG installation, which pass-winmenu uses by default.
-If you already have GPG installed, you may want to use that instead. In that case, edit the config file to point
-pass-winmenu to your GPG installation and, optionally, delete the `lib/GnuPG` directory and all its contents.
-Future releases will also provide a version without GPG.
+If you already have GPG installed, you may want to use that instead. In that case, you can download the
+`nogpg` release, which will use your native GPG installation.
 
-## Setup
+## Installation
 
-Setup is as easy as downloading the zip file for the latest release and extracting it anywhere you want.
+Installing pass-winmenu is as easy as downloading the zip file for the latest release and extracting it anywhere you want.
+
+If this is your first time using `pass`, you'll want to create a password store and import/create your GPG keys next.
+This process is explained below.
 
 ### Setting up GPG:
 
-If you already have a GPG key, you may want to consider importing it and using that.
+If you already have a GPG key, you may want to consider importing it and using that (see ['accessing an existing password store on a different host'](
+#accessing-an-existing-password-store-on-a-different-host).
 If you've never used GPG before, you can generate a new key. Start pass-winmenu, right click the key icon
 in the notification area, and click `Open shell`.
 
@@ -181,4 +177,4 @@ and start it again.
 
 Check out https://www.passwordstore.org/ if you're looking for implementations for other operating systems.
 
-In addition to pass-winmenu, I personally also use [Android Password Store](https://github.com/zeapo/Android-Password-Store) for Android, and [a dmenu script](https://geluk.io/p/passmenu.sh) for Linux, which I've adapted from [this script](https://git.zx2c4.com/password-store/tree/contrib/dmenu).
+Personally, I use [Android Password Store](https://github.com/zeapo/Android-Password-Store) for Android, and [a dmenu script](https://geluk.io/p/passmenu.sh) for Linux, which I've adapted from [this script](https://git.zx2c4.com/password-store/tree/contrib/dmenu).
