@@ -16,7 +16,7 @@
 				<CheckBox x:Name="Cbx_Numbers" Content="Numbers" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="5,55,0,0" VerticalAlignment="Top" IsChecked="True"/>
 				<CheckBox x:Name="Cbx_Lower" Content="Lowercase" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="105,35,0,0" VerticalAlignment="Top" IsChecked="True"/>
 				<CheckBox x:Name="Cbx_Upper" Content="Uppercase" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="105,55,0,0" VerticalAlignment="Top" IsChecked="True"/>
-				<CheckBox x:Name="Cbx_Whitespace" Content="Whitespace" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="205,35,0,0" VerticalAlignment="Top" IsChecked="True"/>
+				<CheckBox x:Name="Cbx_Whitespace" Content="Whitespace" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="205,35,0,0" VerticalAlignment="Top" IsChecked="False"/>
 
 			</Grid>
 		</GroupBox>
