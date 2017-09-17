@@ -98,6 +98,8 @@
     <Compile Include="src\Configuration\ConfigurationException.cs" />
     <Compile Include="src\Configuration\ConfigurationParseException.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
+    <Compile Include="src\PasswordGeneration\PasswordGenerationOptions.cs" />
+    <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
     <Compile Include="src\PasswordManager.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\DirectoryInfoExtensions.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\StringExtensions.cs" />
