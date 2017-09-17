@@ -65,7 +65,7 @@ This process is explained below.
 ### Setting up GPG:
 
 If you already have a GPG key, you may want to consider importing it and using that (see ['accessing an existing password store on a different host'](
-#accessing-an-existing-password-store-on-a-different-host).
+#accessing-an-existing-password-store-on-a-different-host)).
 If you've never used GPG before, you can generate a new key. Start pass-winmenu, right click the key icon
 in the notification area, and click `Open shell`.
 
