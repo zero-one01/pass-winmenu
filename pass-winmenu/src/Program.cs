@@ -45,6 +45,7 @@ namespace PassWinmenu
 			catch (Exception e)
 			{
 				ShowErrorWindow($"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})");
+				Exit();
 			}
 
 		}
