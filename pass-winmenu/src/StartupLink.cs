@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 
 namespace PassWinmenu
 {
-	class StartupLink
+	internal class StartupLink
 	{
 		[Serializable]
-		class StartupLinkCreationException : Exception
+		private class StartupLinkCreationException : Exception
 		{
 			public StartupLinkCreationException(string message) : base(message) { }
 		}

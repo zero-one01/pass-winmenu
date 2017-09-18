@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PassWinmenu.PasswordGeneration
+﻿namespace PassWinmenu.PasswordGeneration
 {
-	class PasswordGenerationOptions
+	internal class PasswordGenerationOptions
 	{
 		public bool AllowSymbols { get; set; }
 		public bool AllowNumbers { get; set; }
