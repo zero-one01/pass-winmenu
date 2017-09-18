@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PassWinmenu.PasswordGeneration
 {
-	class PasswordGenerator
+	internal class PasswordGenerator : IDisposable
 	{
 		public PasswordGenerationOptions Options { get; }
 
-		private RNGCryptoServiceProvider csprng = new RNGCryptoServiceProvider();
-		private int bufferIndex = 0;
-		private byte[] buffer = new byte[1024];
+		private readonly RNGCryptoServiceProvider csprng = new RNGCryptoServiceProvider();
+		private int bufferIndex;
+		private readonly byte[] buffer = new byte[1024];
 
 		public PasswordGenerator() : this(new PasswordGenerationOptions()) { }
 
@@ -75,6 +71,11 @@ namespace PassWinmenu.PasswordGeneration
 			var found = (char)buffer[bufferIndex];
 			MoveNext();
 			return found;
+		}
+
+		public void Dispose()
+		{
+			csprng.Dispose();
 		}
 	}
 }

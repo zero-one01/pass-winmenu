@@ -526,14 +526,18 @@ namespace PassWinmenu
 			if (passwordFileName == null) return;
 
 			// Display the password generation window.
-			var passwordWindow = new PasswordWindow(Path.GetFileName(passwordFileName));
-			passwordWindow.ShowDialog();
-			if (!passwordWindow.DialogResult.GetValueOrDefault())
+			string password;
+			string extraContent;
+			using (var passwordWindow = new PasswordWindow(Path.GetFileName(passwordFileName)))
 			{
-				return;
+				passwordWindow.ShowDialog();
+				if (!passwordWindow.DialogResult.GetValueOrDefault())
+				{
+					return;
+				}
+				password = passwordWindow.Password.Text;
+				extraContent = passwordWindow.ExtraContent.Text.Replace(Environment.NewLine, "\n");
 			}
-			var password = passwordWindow.Password.Text;
-			var extraContent = passwordWindow.ExtraContent.Text.Replace(Environment.NewLine, "\n");
 
 			try
 			{
@@ -707,23 +711,24 @@ namespace PassWinmenu
 			}
 
 			var content = passwordManager.DecryptText(selectedFile);
-			var window = new EditWindow(content);
-
-			if (window.ShowDialog() ?? false)
+			using (var window = new EditWindow(content))
 			{
-				try
+				if (window.ShowDialog() ?? false)
 				{
-					File.Delete(passwordManager.GetPasswordFilePath(selectedFile));
-					passwordManager.EncryptText(window.PasswordContent.Text, selectedFile);
-					git?.EditPassword(selectedFile);
-					if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
+					try
 					{
-						RaiseNotification($"Password file \"{selectedFile}\" has been updated.", ToolTipIcon.Info);
+						File.Delete(passwordManager.GetPasswordFilePath(selectedFile));
+						passwordManager.EncryptText(window.PasswordContent.Text, selectedFile);
+						git?.EditPassword(selectedFile);
+						if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
+						{
+							RaiseNotification($"Password file \"{selectedFile}\" has been updated.", ToolTipIcon.Info);
+						}
 					}
-				}
-				catch (Exception e)
-				{
-					ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
+					catch (Exception e)
+					{
+						ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
+					}
 				}
 			}
 		}

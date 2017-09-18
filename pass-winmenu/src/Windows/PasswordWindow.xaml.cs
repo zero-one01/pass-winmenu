@@ -6,12 +6,9 @@ using PassWinmenu.PasswordGeneration;
 
 namespace PassWinmenu.Windows
 {
-	/// <summary>
-	/// Interaction logic for PathWindow.xaml
-	/// </summary>
-	public partial class PasswordWindow
+	public sealed partial class PasswordWindow : IDisposable
 	{
-		private PasswordGenerator passwordGenerator = new PasswordGenerator();
+		private readonly PasswordGenerator passwordGenerator = new PasswordGenerator();
 
 		public PasswordWindow(string filename)
 		{
@@ -82,6 +79,11 @@ namespace PassWinmenu.Windows
 			passwordGenerator.Options.AllowWhitespace = Cbx_Whitespace?.IsChecked ?? false;
 
 			RegeneratePassword();
+		}
+
+		public void Dispose()
+		{
+			passwordGenerator.Dispose();
 		}
 	}
 }
