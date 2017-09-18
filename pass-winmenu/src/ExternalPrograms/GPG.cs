@@ -156,6 +156,10 @@ namespace PassWinmenu.ExternalPrograms
 				throw new GpgError("None of your private keys appear to be able to decrypt this file.\n" +
 				                   $"The file was encrypted for the following (sub)key(s): {string.Join(", ", keyIds.Select(m => m.Message))}");
 			}
+			if (result.HasStatusCodes(GpgStatusCode.DECRYPTION_FAILED) && result.StderrMessages.Any(m => m.Contains("Operation cancelled")))
+			{
+				throw new GpgError("Operation cancelled.");
+			}
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE))
 			{
 				result.GenerateError();
