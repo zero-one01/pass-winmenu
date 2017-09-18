@@ -37,8 +37,16 @@ namespace PassWinmenu
 			hotkeys = new HotkeyManager(Handle);
 			Name = "pass-winmenu (main window)";
 
-			Initialise();
-			RunInitialCheck();
+			try
+			{
+				Initialise();
+				RunInitialCheck();
+			}
+			catch (Exception e)
+			{
+				ShowErrorWindow($"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})");
+			}
+
 		}
 
 		/// <summary>
