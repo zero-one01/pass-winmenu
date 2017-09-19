@@ -58,6 +58,10 @@ namespace PassWinmenu
 			EmbeddedResources.Load();
 			CreateNotifyIcon();
 			LoadConfigFile();
+			if (ConfigManager.Config.CreateLogFile)
+			{
+				Log.Initialise();
+			}
 			AssignHotkeys(hotkeys);
 
 			var gpg = new GPG(ConfigManager.Config.GpgPath);

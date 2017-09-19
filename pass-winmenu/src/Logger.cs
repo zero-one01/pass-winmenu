@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Windows;
 
 namespace PassWinmenu
 {
@@ -14,11 +12,28 @@ namespace PassWinmenu
 		Error
 	}
 
-	class Log
+	static class Log
 	{
+		private static StreamWriter writer;
+
+		public static void Initialise()
+		{
+			try
+			{
+				writer = new StreamWriter(File.Open("pass-winmenu.log", FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
+				writer.AutoFlush = true;
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show($"The log file could not be created: an error occurred ({e.GetType().Name}: {e.Message})", "Failed to create log file");
+			}
+		}
+
 		public static void Send(string message, LogLevel level = LogLevel.Debug)
 		{
-			Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff}: [{GetLevelString(level)}] {message}");
+			var line = $"{DateTime.Now:HH:mm:ss.fff}: [{GetLevelString(level)}] {message}";
+			Console.WriteLine(line);
+			writer?.WriteLine(line);
 		}
 
 		private static string GetLevelString(LogLevel level)

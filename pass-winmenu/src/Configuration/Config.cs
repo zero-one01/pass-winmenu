@@ -110,6 +110,7 @@ namespace PassWinmenu.Configuration
 		public NotificationConfig Notifications { get; set; } = new NotificationConfig();
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
+		public bool CreateLogFile { get; set; } = false;
 	}
 
 	internal enum SyncMode
