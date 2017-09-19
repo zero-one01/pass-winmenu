@@ -66,6 +66,7 @@ namespace PassWinmenu
 
 			var gpg = new GPG(ConfigManager.Config.GpgPath);
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
+			passwordManager.PinentryFixEnabled = ConfigManager.Config.PinentryFix;
 
 			if (ConfigManager.Config.UseGit)
 			{

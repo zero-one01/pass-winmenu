@@ -30,6 +30,11 @@ gnupghome-override: null
 # the gpg-agent to be started alongside pass-winmenu so it'll be ready when
 # you need it.
 preload-gpg-agent: true
+# On multi-monitor screens, pinentry often fails to make itself the foreground
+# window when it asks for your password. When enabled, this option will allow
+# pass-winmenu to detect when this happens, and force the pinentry window to the
+# foreground.
+pinentry-fix: false
 
 # Pass-winmenu will automatically commit new and changed passwords if it
 # detects that your password store is a git repository, as well as providing
@@ -170,8 +175,6 @@ notifications:
         git-push: true
         # ...changes are pulled from Git
         git-pull: true
-        # ...the Git remote uses SSH, but no SSH key could be found
-        no-ssh-key-found: true
 
 # Style settings.
 # All colour strings must be formatted as hexadecimal ARGB strings,

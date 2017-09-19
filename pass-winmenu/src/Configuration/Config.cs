@@ -111,6 +111,7 @@ namespace PassWinmenu.Configuration
 		public bool FirstLineOnly { get; set; } = true;
 		public bool FollowCursor { get; set; } = true;
 		public bool CreateLogFile { get; set; } = false;
+		public bool PinentryFix { get; set; } = false;
 	}
 
 	internal enum SyncMode

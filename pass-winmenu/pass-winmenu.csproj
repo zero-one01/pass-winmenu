@@ -100,6 +100,7 @@
     <Compile Include="src\PasswordGeneration\PasswordGenerationOptions.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
     <Compile Include="src\PasswordManager.cs" />
+    <Compile Include="src\PinentryWatcher.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\DirectoryInfoExtensions.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\StringExtensions.cs" />
     <Compile Include="src\Hotkeys\HotkeyException.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="src\EmbeddedResources.cs" />
     <Compile Include="src\StartupLink.cs" />
     <Compile Include="src\Utilities\Helpers.cs" />
+    <Compile Include="src\Utilities\NativeMethods.cs" />
     <Compile Include="src\Windows\EditWindow.xaml.cs">
       <DependentUpon>EditWindow.xaml</DependentUpon>
     </Compile>

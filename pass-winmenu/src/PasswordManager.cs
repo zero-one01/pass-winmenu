@@ -24,8 +24,11 @@ namespace PassWinmenu
 	{
 		internal const string GpgIdFileName = ".gpg-id";
 
+		private readonly PinentryWatcher pinentryWatcher = new PinentryWatcher();
 		private readonly DirectoryInfo passwordStoreDirectory;
+
 		public GPG Gpg { get; }
+		public bool PinentryFixEnabled { get; set; }
 		public readonly string EncryptedFileExtension;
 
 		public PasswordManager(string passwordStore, string encryptedFileExtension, GPG gpg)
@@ -68,6 +71,8 @@ namespace PassWinmenu
 		{
 			var fullPath = GetPasswordFilePath(path);
 			if (!File.Exists(fullPath)) throw new ArgumentException($"The password file \"{fullPath}\" does not exist.");
+
+			if(PinentryFixEnabled) pinentryWatcher.BumpPinentryWindow();
 			return Gpg.Decrypt(fullPath);
 		}
 
@@ -131,6 +136,8 @@ namespace PassWinmenu
 
 			if (File.Exists(decryptedFileName)) throw new InvalidOperationException($"A plaintext file already exists at \"{decryptedFileName}\".");
 			if (!File.Exists(encryptedFileName)) throw new ArgumentException($"The encrypted file \"{encryptedFileName}\" does not exist.");
+
+			if(PinentryFixEnabled) pinentryWatcher.BumpPinentryWindow();
 			Gpg.DecryptToFile(encryptedFileName, decryptedFileName);
 			return decryptedFileName;
 		}
