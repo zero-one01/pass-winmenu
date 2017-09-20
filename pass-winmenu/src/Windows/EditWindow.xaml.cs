@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using PassWinmenu.PasswordGeneration;
 
 namespace PassWinmenu.Windows
@@ -59,6 +60,18 @@ namespace PassWinmenu.Windows
 			passwordGenerator.Options.AllowWhitespace = Cbx_Whitespace?.IsChecked ?? false;
 
 			RegeneratePassword();
+		}
+
+		private void HandlePasswordContentFocus(object sender, RoutedEventArgs e)
+		{
+			if (PasswordContent.IsFocused)
+			{
+				PasswordDivider.Stroke = new SolidColorBrush(Color.FromRgb(86, 157, 229));
+			}
+			else
+			{
+				PasswordDivider.Stroke = new SolidColorBrush(Color.FromRgb(171, 173, 179));
+			}
 		}
 
 		public void Dispose()

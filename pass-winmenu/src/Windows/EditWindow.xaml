@@ -11,7 +11,7 @@
 			<Grid>
 				<TextBox x:Name="Password" Height="23" Margin="5,5,90,0" Padding="3,3,3,3" TextWrapping="Wrap" Text="" VerticalAlignment="Top" FontFamily="Consolas"/>
 				<Button x:Name="Btn_Generate" Content="Generate" Margin="0,5,5,0" Click="Btn_Generate_Click" HorizontalAlignment="Right" Width="80" Height="23" VerticalAlignment="Top"/>
-				
+
 				<CheckBox x:Name="Cbx_Symbols" Content="Symbols" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="5,35,0,0" VerticalAlignment="Top" IsChecked="True"/>
 				<CheckBox x:Name="Cbx_Numbers" Content="Numbers" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="5,55,0,0" VerticalAlignment="Top" IsChecked="True"/>
 				<CheckBox x:Name="Cbx_Lower" Content="Lowercase" Checked="HandleCheckedChanged" Unchecked="HandleCheckedChanged" HorizontalAlignment="Left" Margin="105,35,0,0" VerticalAlignment="Top" IsChecked="True"/>
@@ -24,7 +24,8 @@
 
 
 		<Label x:Name="Lbl_ExtraContent" Content="Password file contents" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top"/>
-		<TextBox x:Name="PasswordContent" Margin="10,135,10,45" Padding="3,3,3,3" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" CaretIndex="10" FontFamily="Consolas"/>
+        <TextBox x:Name="PasswordContent" Margin="10,135,10,45" Padding="3,3,3,3" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" CaretIndex="10" FontFamily="Consolas" GotFocus="HandlePasswordContentFocus" LostFocus="HandlePasswordContentFocus"/>
+        <Rectangle x:Name="PasswordDivider" Stroke="#569de5" Margin="11,153,0,0" StrokeThickness="1" StrokeDashArray="2 3"  HorizontalAlignment="Left" Height="1" VerticalAlignment="Top" Width="323"/>
 
 		<Button x:Name="Btn_OK" Content="Save" Margin="0,0,90,10" IsDefault="True" Click="Btn_OK_Click" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75"/>
 		<Button x:Name="Btn_Cancel" Content="Cancel" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Click="Btn_Cancel_Click"/>
