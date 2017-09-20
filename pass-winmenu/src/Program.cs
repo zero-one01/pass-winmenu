@@ -215,7 +215,7 @@ namespace PassWinmenu
 		{
 			try
 			{
-				foreach (var hotkey in ConfigManager.Config.Hotkeys)
+				foreach (var hotkey in ConfigManager.Config.Hotkeys ?? new HotkeyConfig[]{})
 				{
 					var keys = KeyCombination.Parse(hotkey.Hotkey);
 					HotkeyAction action;
