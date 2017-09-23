@@ -472,7 +472,7 @@ namespace PassWinmenu
 				homeDir = Path.GetFullPath(homeDir);
 				powershell.EnvironmentVariables["GNUPGHOME"] = homeDir;
 			}
-			powershell.Arguments = $"-NoExit -Command \"function gpg() {{ {gpgLocation} $args }}\"";
+			powershell.Arguments = $"-NoExit -Command \"function gpg() {{ & '{gpgLocation}' $args }}\"";
 			Process.Start(powershell);
 		}
 
