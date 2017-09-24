@@ -503,7 +503,15 @@ namespace PassWinmenu
 			var details = git.GetTrackingDetails();
 			var local = details.AheadBy;
 			var remote = details.BehindBy;
-			git.Rebase();
+			try
+			{
+				git.Rebase();
+			}
+			catch (LibGit2SharpException e)
+			{
+				ShowErrorWindow($"Unable to rebase your changes onto the tracking branch:\n{e.Message}");
+				return;
+			}
 			git.Push();
 
 			if (!ConfigManager.Config.Notifications.Types.GitPush) return;
