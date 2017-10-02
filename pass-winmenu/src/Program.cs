@@ -469,10 +469,9 @@ namespace PassWinmenu
 			var homeDir = passwordManager.Gpg.GetHomeDir();
 			if (homeDir != null)
 			{
-				homeDir = Path.GetFullPath(homeDir);
-				powershell.EnvironmentVariables["GNUPGHOME"] = homeDir;
+				homeDir = $" --homedir \"{Path.GetFullPath(homeDir)}\"";
 			}
-			powershell.Arguments = $"-NoExit -Command \"function gpg() {{ & '{gpgLocation}' $args }}\"";
+			powershell.Arguments = $"-NoExit -Command \"function gpg() {{ & '{gpgLocation}'{homeDir} $args }}\"";
 			Process.Start(powershell);
 		}
 
