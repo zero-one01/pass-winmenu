@@ -173,6 +173,7 @@ namespace PassWinmenu.Configuration
 		EditPassword,
 		GitPull,
 		GitPush,
+		OpenShell,
 		ShowDebugInfo,
 	}
 

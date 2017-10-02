@@ -78,6 +78,7 @@ output:
 # - edit-password
 # - git-pull
 # - git-push
+# - open-shell
 # Actions can be further configured using the 'options' variable.
 # Valid options for 'decrypt-password' are:
 # - copy-to-clipboard: (true/false)

@@ -247,6 +247,9 @@ namespace PassWinmenu
 						case HotkeyAction.GitPush:
 							hotkeyManager.AddHotKey(keys, CommitChanges);
 							break;
+						case HotkeyAction.OpenShell:
+							hotkeyManager.AddHotKey(keys, OpenPasswordShell);
+							break;
 						case HotkeyAction.ShowDebugInfo:
 							hotkeyManager.AddHotKey(keys, ShowDebugInfo);
 							break;
