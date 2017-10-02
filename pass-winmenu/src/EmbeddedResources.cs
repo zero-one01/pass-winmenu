@@ -20,7 +20,7 @@ namespace PassWinmenu
 			}
 			using (var reader = new StreamReader(stream))
 			{
-				Version = reader.ReadToEnd();
+				Version = reader.ReadLine();
 			}
 		}
 	}
