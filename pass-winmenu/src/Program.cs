@@ -62,6 +62,10 @@ namespace PassWinmenu
 			{
 				Log.Initialise();
 			}
+			Log.Send("------------------------------");
+			Log.Send($"Starting pass-winmenu {Version}");
+			Log.Send("------------------------------");
+
 			AssignHotkeys(hotkeys);
 
 			var gpg = new GPG(ConfigManager.Config.GpgPath);

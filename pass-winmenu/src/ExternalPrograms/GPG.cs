@@ -49,6 +49,7 @@ namespace PassWinmenu.ExternalPrograms
 
 		private GpgResult CallGpg(string arguments, string input = null)
 		{
+			Log.Send($"Calling GPG with \"{arguments}\"");
 			// Maybe use --display-charset utf-8?
 			var argList = new List<string>
 			{
@@ -85,12 +86,12 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			gpgProc.WaitForExit((int)gpgCallTimeout.TotalMilliseconds);
 
-
 			string stderrLine;
 			var stderrMessages = new List<string>();
 			var statusMessages = new List<StatusMessage>();
 			while ((stderrLine = gpgProc.StandardError.ReadLine()) != null)
 			{
+				Log.Send($"[GPG]: {stderrLine}");
 				if (stderrLine.StartsWith(statusMarker))
 				{
 					// This line is a status line, so extract status information from it.
@@ -221,6 +222,8 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			// At some point in the future we might have a use for this data,
 			// But for now, all we really use this method for is to ensure the GPG agent is started.
+			Log.Send("Secret key IDs: ");
+			Log.Send(result.Stdout);
 		}
 
 		public void StartAgent()
