@@ -68,9 +68,10 @@ namespace PassWinmenu
 
 			AssignHotkeys(hotkeys);
 
-			var gpg = new GPG(ConfigManager.Config.GpgPath);
+			var gpg = new GPG(ConfigManager.Config.Gpg.GpgPath, ConfigManager.Config.Gpg.GpgAgent.Config);
+			gpg.UpdateAgentConfig();
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
-			passwordManager.PinentryFixEnabled = ConfigManager.Config.PinentryFix;
+			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
 
 			if (ConfigManager.Config.UseGit)
 			{
@@ -128,7 +129,7 @@ namespace PassWinmenu
 				Exit();
 				return;
 			}
-			if (ConfigManager.Config.PreloadGpgAgent)
+			if (ConfigManager.Config.Gpg.GpgAgent.Preload)
 			{
 				Task.Run(() =>
 				{
@@ -312,7 +313,7 @@ namespace PassWinmenu
 
 			var debugInfo = $"gpg.exe path:\t\t{passwordManager.Gpg.GpgExePath}\n" +
 			                $"gpg version:\t\t{passwordManager.Gpg.GetVersion()}\n" +
-			                $"gpg homedir:\t\t{passwordManager.Gpg.GetHomeDir()}\n" +
+			                $"gpg homedir:\t\t{passwordManager.Gpg.GetConfiguredHomeDir()}\n" +
 			                $"password store:\t\t{passwordManager.GetPasswordFilePath(".").TrimEnd('.')}\n" +
 			                $"git enabled:\t\t{git != null}\n{gitData}";
 			MessageBox.Show(debugInfo, "Debugging information", MessageBoxButton.OK, MessageBoxImage.None);
@@ -473,7 +474,7 @@ namespace PassWinmenu
 				gpgLocation = "gpg.exe";
 			}
 
-			var homeDir = passwordManager.Gpg.GetHomeDir();
+			var homeDir = passwordManager.Gpg.GetConfiguredHomeDir();
 			if (homeDir != null)
 			{
 				homeDir = $" --homedir \"{Path.GetFullPath(homeDir)}\"";

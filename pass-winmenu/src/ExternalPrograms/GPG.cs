@@ -1,8 +1,10 @@
-﻿using System;
+﻿using PassWinmenu.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using PassWinmenu.Configuration;
+using System.Text.RegularExpressions;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -11,9 +13,11 @@ namespace PassWinmenu.ExternalPrograms
 	/// </summary>
 	internal class GPG
 	{
+		private const string gpgAgentConfigFileName = "gpg-agent.conf";
 		private const string statusMarker = "[GNUPG:] ";
 		private const string defaultGpgExePath = @"C:\Program Files (x86)\gnupg\bin\gpg.exe";
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
+		private readonly GpgAgentConfigFile configFileManagementSettings;
 		public string GpgExePath { get; } = defaultGpgExePath;
 
 		/// <summary>
@@ -21,7 +25,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// </summary>
 		/// <param name="gpgExePath">The path to gpg.exe. When set to null,
 		/// the default location will be used.</param>
-		public GPG(string gpgExePath)
+		public GPG(string gpgExePath, GpgAgentConfigFile configFileManagementSettings)
 		{
 			if (gpgExePath == string.Empty)
 			{
@@ -31,20 +35,92 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				GpgExePath = gpgExePath;
 			}
+			this.configFileManagementSettings = configFileManagementSettings;
 		}
 
-		public string GetHomeDir()
+		public void UpdateAgentConfig()
 		{
-			var gnupghome = Environment.GetEnvironmentVariable("GNUPGHOME");
-			if (ConfigManager.Config.GnupghomeOverride != null)
+			if (configFileManagementSettings.AllowConfigManagement)
 			{
-				return ConfigManager.Config.GnupghomeOverride;
+				var agentConf = Path.Combine(GetHomeDir(), gpgAgentConfigFileName);
+				var lines = File.ReadAllLines(agentConf);
+				var keysToSet = configFileManagementSettings.Keys.ToList();
+
+				var newLines = UpdateAgentConfigKeyCollection(lines, keysToSet).ToArray();
+
+				if (lines.SequenceEqual(newLines))
+				{
+					Log.Send("GPG agent config file already contains the correct settings; it'll be left untouched.");
+				}
+				else
+				{
+					Log.Send("Modifying GPG agent config file.");
+					File.WriteAllLines(agentConf, newLines);
+				}
 			}
-			else if (gnupghome != null)
+		}
+
+		private IEnumerable<string> UpdateAgentConfigKeyCollection(IEnumerable<string> existingLines, List<KeyValuePair<string, string>> keysToSet)
+		{
+			var configKeyRegex = new Regex(@"^(\s*([^#^\s][^\s]*)\s+)(.*)$");
+			foreach (var line in existingLines)
 			{
-				return gnupghome;
+				var match = configKeyRegex.Match(line);
+				if (match.Success)
+				{
+					var key = match.Groups[2].Value;
+					var value = match.Groups[3].Value;
+
+					var matchedPair = keysToSet.FirstOrDefault(k => k.Key == key);
+					if (matchedPair.Key == key)
+					{
+						keysToSet.RemoveAll(k => k.Key == key);
+						//yield return "# This configuration key is automatically managed by pass-winmenu";
+						yield return $"{matchedPair.Key} {matchedPair.Value}";
+					}
+					else
+					{
+						yield return line;
+					}
+				}
 			}
-			return null;
+			// We need to set some config keys that aren't in the config file yet
+			while (keysToSet.Any())
+			{
+				var next = keysToSet[0];
+				keysToSet.RemoveAt(0);
+				//yield return "# This configuration key is automatically managed by pass-winmenu";
+				yield return $"{next.Key} {next.Value}";
+			}
+		}
+
+		/// <summary>
+		/// Returns the path GPG will use as its home directory.
+		/// </summary>
+		/// <returns></returns>
+		public string GetHomeDir() => GetConfiguredHomeDir() ?? GetDefaultHomeDir();
+
+		/// <summary>
+		/// Returns the home directory as configured by the user, or null if no home directory has been defined.
+		/// </summary>
+		/// <returns></returns>
+		public string GetConfiguredHomeDir()
+		{
+			if (ConfigManager.Config.Gpg.GnupghomeOverride != null)
+			{
+				return ConfigManager.Config.Gpg.GnupghomeOverride;
+			}
+			return Environment.GetEnvironmentVariable("GNUPGHOME");
+		}
+
+		/// <summary>
+		/// Returns the default home directory used by GPG when no user-defined home directory is available.
+		/// </summary>
+		/// <returns></returns>
+		public string GetDefaultHomeDir()
+		{
+			var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+			return Path.Combine(appdata, "gnupg");
 		}
 
 		private GpgResult CallGpg(string arguments, string input = null)
@@ -60,7 +136,7 @@ namespace PassWinmenu.ExternalPrograms
 				"--exit-on-status-write-error", //  Exit if status messages cannot be written
 			};
 
-			var homeDir = GetHomeDir();
+			var homeDir = GetConfiguredHomeDir();
 			if(homeDir != null) argList.Add($"--homedir \"{homeDir}\"");
 
 			var psi = new ProcessStartInfo

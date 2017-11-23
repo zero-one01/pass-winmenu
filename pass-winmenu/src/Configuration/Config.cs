@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
@@ -20,7 +21,76 @@ namespace PassWinmenu.Configuration
 		}
 
 		public string PasswordFileMatch { get; set; } = ".*\\.gpg$";
-		
+
+		private string gitPath = @"git";
+		public string GitPath
+		{
+			get => gitPath;
+			set
+			{
+				if (value == null) gitPath = null;
+				else
+				{
+					var expanded = Environment.ExpandEnvironmentVariables(value);
+					gitPath = Helpers.NormaliseDirectory(expanded);
+				}
+			}
+		}
+
+
+		public bool UseGit { get; set; } = true;
+
+		[YamlIgnore]
+		public SyncMode SyncMode => (SyncMode)Enum.Parse(typeof(SyncMode), SyncModeString.ToPascalCase(), true);
+		[YamlMember(Alias = "sync-mode")]
+		public string SyncModeString { get; set; } = "builtin";
+
+		public double ClipboardTimeout { get; set; } = 30;
+		public string DirectorySeparator { get; set; } = "/";
+		public StyleConfig Style { get; set; } = new StyleConfig();
+		public OutputConfig Output { get; set; } = new OutputConfig();
+		public HotkeyConfig[] Hotkeys { get; set; } =
+		{
+			new HotkeyConfig
+			{
+				Hotkey = "ctrl alt p",
+				ActionString = "decrypt-password",
+				Options = new HotkeyOptions
+				{
+					CopyToClipboard = true
+				}
+			},
+			new HotkeyConfig
+			{
+				Hotkey = "ctrl alt shift p",
+				ActionString = "decrypt-password",
+				Options = new HotkeyOptions
+				{
+					CopyToClipboard = true,
+					TypeUsername = true,
+					TypePassword = true
+				}
+			}
+		};
+
+		public GpgConfig Gpg { get; set; } = new GpgConfig();
+		public PasswordEditorConfig PasswordEditor { get; set; } = new PasswordEditorConfig();
+		public PasswordGenerationConfig PasswordGeneration { get; set; } = new PasswordGenerationConfig();
+		public UsernameDetectionConfig UsernameDetection { get; set; } = new UsernameDetectionConfig();
+		public NotificationConfig Notifications { get; set; } = new NotificationConfig();
+		public bool FirstLineOnly { get; set; } = true;
+		public bool FollowCursor { get; set; } = true;
+		public bool CreateLogFile { get; set; } = false;
+	}
+
+	internal enum SyncMode
+	{
+		Builtin,
+		NativeGit
+	}
+
+	internal class GpgConfig
+	{
 		private string gpgPath = @"C:\Program Files (x86)\GnuPG\bin";
 		public string GpgPath
 		{
@@ -52,72 +122,20 @@ namespace PassWinmenu.Configuration
 			}
 		}
 
-		private string gitPath = @"git";
-		public string GitPath
-		{
-			get => gitPath;
-			set
-			{
-				if (value == null) gitPath = null;
-				else
-				{
-					var expanded = Environment.ExpandEnvironmentVariables(value);
-					gitPath = Helpers.NormaliseDirectory(expanded);
-				}
-			}
-		}
-
-
-		public bool UseGit { get; set; } = true;
-
-		[YamlIgnore]
-		public SyncMode SyncMode => (SyncMode)Enum.Parse(typeof(SyncMode), SyncModeString.ToPascalCase(), true);
-		[YamlMember(Alias = "sync-mode")]
-		public string SyncModeString { get; set; } = "builtin";
-
-		public bool PreloadGpgAgent { get; set; } = true;
-		public double ClipboardTimeout { get; set; } = 30;
-		public string DirectorySeparator { get; set; } = "/";
-		public StyleConfig Style { get; set; } = new StyleConfig();
-		public OutputConfig Output { get; set; } = new OutputConfig();
-		public HotkeyConfig[] Hotkeys { get; set; } =
-		{
-			new HotkeyConfig
-			{
-				Hotkey = "ctrl alt p",
-				ActionString = "decrypt-password",
-				Options = new HotkeyOptions
-				{
-					CopyToClipboard = true
-				}
-			},
-			new HotkeyConfig
-			{
-				Hotkey = "ctrl alt shift p",
-				ActionString = "decrypt-password",
-				Options = new HotkeyOptions
-				{
-					CopyToClipboard = true,
-					TypeUsername = true,
-					TypePassword = true
-				}
-			}
-		};
-
-		public PasswordEditorConfig PasswordEditor { get; set; } = new PasswordEditorConfig();
-		public PasswordGenerationConfig PasswordGeneration { get; set; } = new PasswordGenerationConfig();
-		public UsernameDetectionConfig UsernameDetection { get; set; } = new UsernameDetectionConfig();
-		public NotificationConfig Notifications { get; set; } = new NotificationConfig();
-		public bool FirstLineOnly { get; set; } = true;
-		public bool FollowCursor { get; set; } = true;
-		public bool CreateLogFile { get; set; } = false;
 		public bool PinentryFix { get; set; } = false;
+		public GpgAgentConfig GpgAgent { get; set; } = new GpgAgentConfig();
 	}
 
-	internal enum SyncMode
+	internal class GpgAgentConfig
 	{
-		Builtin,
-		NativeGit
+		public bool Preload { get; set; } = true;
+		public GpgAgentConfigFile Config { get; set; } = new GpgAgentConfigFile();
+	}
+
+	internal class GpgAgentConfigFile
+	{
+		public bool AllowConfigManagement { get; set; }
+		public Dictionary<string, string> Keys { get; set; } = new Dictionary<string, string>();
 	}
 
 	internal class PasswordEditorConfig

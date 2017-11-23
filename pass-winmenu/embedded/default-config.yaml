@@ -11,31 +11,6 @@ password-store: '%userprofile%\.password-store'
 # compared. All matching files are considered password files.
 password-file-match: '.*\.gpg$'
 
-# Path to your gpg.exe. If set to its default of null, pass-winmenu
-# will try to look for the file in its default location.
-# If you have added GPG to your PATH, you can also set this to 'gpg'.
-gpg-path: null
-# If the GNUPGHOME environment variable is set, GPG will use that path to
-# store its keys and settings. Otherwise, GPG will choose its own location.
-# If you are unable to alter the GNUPGHOME environment variable (or if you
-# have a separate GPG homedir that isn't related to the one used for your
-# password files), you can have pass-winmenu pass along a custom value
-# to GPG. For example, like so:
-#   gnupghome-override: '%userprofile%\.gnupg'
-# This normally shouldn't be necessary.
-# The GNUPGHOME environment variable is not overridden when the value is null.
-gnupghome-override: null
-
-# Gpg-agent can have a pretty long startup time on Windows. This option allows
-# the gpg-agent to be started alongside pass-winmenu so it'll be ready when
-# you need it.
-preload-gpg-agent: true
-# On multi-monitor screens, pinentry often fails to make itself the foreground
-# window when it asks for your password. When enabled, this option will allow
-# pass-winmenu to detect when this happens, and force the pinentry window to the
-# foreground.
-pinentry-fix: false
-
 # Pass-winmenu will automatically commit new and changed passwords if it
 # detects that your password store is a git repository, as well as providing
 # options for pushing to/pulling from the remote repository.
@@ -45,12 +20,11 @@ use-git: true
 # the Git library to sync your password repository. This library, however,
 # has several limitations. For instance, SSH remotes are not supported.
 # By setting this value to 'native-git', pass-winmenu will use your native
-# Git installation instead, 
+# Git installation instead.
 sync-mode: builtin
 # Path to the Git executable that should be used. Only used when sync-mode
 # is set to 'native-git'.
 git-path: git
-
 
 # Amount of time (in seconds) your passwords should remain on the clipboard.
 clipboard-timeout: 30
@@ -65,6 +39,45 @@ first-line-only: true
 # If set to true, the menu will be opened on the same screen the mouse cursor
 # is currently on. If set to false, it will be opened on the primary screen.
 follow-cursor: true
+
+# GPG-related settings
+gpg:
+    # Path to your gpg.exe. If set to its default of null, pass-winmenu
+    # will try to look for the file in its default location.
+    # If you have added GPG to your PATH, you can also set this to 'gpg'.
+    gpg-path: null
+    # If the GNUPGHOME environment variable is set, GPG will use that path to
+    # store its keys and settings. Otherwise, GPG will choose its own location.
+    # If you are unable to alter the GNUPGHOME environment variable (or if you
+    # have a separate GPG homedir that isn't related to the one used for your
+    # password files), you can have pass-winmenu pass along a custom value
+    # to GPG. For example, like so:
+    #   gnupghome-override: '%userprofile%\.gnupg'
+    # This normally shouldn't be necessary.
+    # The GNUPGHOME environment variable is not overridden when the value is null.
+    gnupghome-override: null
+    # On multi-monitor screens, pinentry often fails to make itself the foreground
+    # window when it asks for your password. When enabled, this option will allow
+    # pass-winmenu to detect when this happens, and force the pinentry window to the
+    # foreground.
+    pinentry-fix: false
+    gpg-agent:
+        # Gpg-agent can have a pretty long startup time on Windows. This option allows
+        # the gpg-agent to be started alongside pass-winmenu so it'll be ready when
+        # you need it.
+        preload: true
+        config:
+            # Set this to true to allow pass-winmenu to set some configuration keys in your
+            # `gpg-agent.conf` file, allowing you to configure some features like password timeout.
+            allow-config-management: true
+            # Add the following configuration keys to `gpg-agent.conf`:
+            keys:
+                # Remember your master password for up to one hour.
+                # Every time you decrypt a password within this one-hour timespan, the timer will reset.
+                default-cache-ttl: 7200
+                # This is the maximum amount of time gpg-agent will remember your master password.
+                # Once this amount of time has expired, gpg-agent will always ask you to re-enter it.
+                max-cache-ttl: 127800
 
 output:
     # If your keyboard has dead keys enabled (type ' + e for é), this should
