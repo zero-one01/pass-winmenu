@@ -96,6 +96,7 @@
     <Compile Include="src\Configuration\ConfigurationException.cs" />
     <Compile Include="src\Configuration\ConfigurationParseException.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
+    <Compile Include="src\ExternalPrograms\GpgAgent.cs" />
     <Compile Include="src\Logger.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerationOptions.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />

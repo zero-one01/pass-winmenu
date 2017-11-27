@@ -68,8 +68,12 @@ namespace PassWinmenu
 
 			AssignHotkeys(hotkeys);
 
-			var gpg = new GPG(ConfigManager.Config.Gpg.GpgPath, ConfigManager.Config.Gpg.GpgAgent.Config);
-			gpg.UpdateAgentConfig();
+			var gpg = new GPG(ConfigManager.Config.Gpg.GpgPath);
+			var agent = new GpgAgent();
+			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
+			{
+				agent.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys, gpg.GetHomeDir());
+			}
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
 
@@ -854,7 +858,7 @@ namespace PassWinmenu
 		/// <param name="text">The text to be sent to the active window.</param>
 		/// <param name="escapeDeadKeys">Whether dead keys should be escaped or not. 
 		/// If true, inserts a space after every dead key in order to prevent it from being combined with the next character.</param>
-		private void EnterText(string text, bool escapeDeadKeys)
+		private static void EnterText(string text, bool escapeDeadKeys)
 		{
 			if (escapeDeadKeys)
 			{
