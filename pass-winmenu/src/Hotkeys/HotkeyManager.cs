@@ -66,10 +66,11 @@ namespace PassWinmenu.Hotkeys
 		{
 			if (message.Msg == NativeMethods.WM_HOTKEY)
 			{
-				//var  key = (Keys)(((int)message.LParam >> 16) & 0xFFFF);
-				//var modifier = (ModifierKey)((int)message.LParam & 0xFFFF);
 				var id = message.WParam.ToInt32();
-				hotkeyActions[id]();
+				if (hotkeyActions.ContainsKey(id))
+				{
+					hotkeyActions[id]();
+				}
 			}
 		}
 
