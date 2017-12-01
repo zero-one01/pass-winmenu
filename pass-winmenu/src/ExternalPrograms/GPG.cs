@@ -235,8 +235,8 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			// At some point in the future we might have a use for this data,
 			// But for now, all we really use this method for is to ensure the GPG agent is started.
-			Log.Send("Secret key IDs: ");
-			Log.Send(result.Stdout);
+			//Log.Send("Secret key IDs: ");
+			//Log.Send(result.Stdout);
 		}
 
 		public void StartAgent()
