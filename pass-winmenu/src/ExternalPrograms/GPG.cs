@@ -87,13 +87,9 @@ namespace PassWinmenu.ExternalPrograms
 				UseShellExecute = false,
 				RedirectStandardError = true,
 				RedirectStandardOutput = true,
+				RedirectStandardInput = input != null, // Only redirect stdin if we're going to send anything to it.
 				CreateNoWindow = true
 			};
-			if (input != null)
-			{
-				// Only redirect stdin if we're going to send anything to it.
-				psi.RedirectStandardInput = true;
-			}
 			var gpgProc = Process.Start(psi);
 			if (input != null)
 			{
