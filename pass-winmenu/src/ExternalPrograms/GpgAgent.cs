@@ -79,7 +79,7 @@ namespace PassWinmenu.ExternalPrograms
 				proc.Kill();
 				// Now try to find the correct gpg-agent process.
 				// We'll start by looking for a process whose filename matches the installation directory we're working with.
-				// This means that there are several gpg-agents running, we will ignore those that our gpg process likely won't try to connect to.
+				// This means that if there are several gpg-agents running, we will ignore those that our gpg process likely won't try to connect to.
 				var matches = Process.GetProcesses().Where(p => p.MainModule.FileName == Path.Combine(Path.GetFullPath(gpgInstallDir), gpgAgentProcessName)).ToList();
 				if (matches.Any())
 				{
