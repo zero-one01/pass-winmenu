@@ -393,19 +393,37 @@ namespace PassWinmenu
 			var previousText = "";
 			if (Clipboard.ContainsText())
 			{
+				Log.Send("Saving previous clipboard contents before storing the password");
 				previousText = Clipboard.GetText();
 			}
 			//Clipboard.SetText(value);
-			Clipboard.SetDataObject(value);
+			try
+			{
+				Clipboard.SetDataObject(value);
+			}
+			catch (Exception e)
+			{
+				Log.Send($"Password could not be copied to clipboard: {e.GetType().Name}: {e.Message}", LogLevel.Error);
+				ShowErrorWindow($"Failed to copy your password to the clipboard ({e.GetType().Name}: {e.Message}).");
+			}
+
 			Task.Delay(TimeSpan.FromSeconds(timeout)).ContinueWith(_ =>
 			{
 				Invoke((MethodInvoker)(() =>
 				{
-					// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
-					// If the clipboard did not previously contain any text, it is simply cleared.
-					if (Clipboard.ContainsText() && Clipboard.GetText() == value)
+					try
 					{
-						Clipboard.SetText(previousText);
+						// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
+						// If the clipboard did not previously contain any text, it is simply cleared.
+						if (Clipboard.ContainsText() && Clipboard.GetText() == value)
+						{
+							Log.Send("Restoring previous clipboard contents");
+							Clipboard.SetText(previousText);
+						}
+					}
+					catch (Exception e)
+					{
+						Log.Send($"Failed to restore previous clipboard contents ({previousText.Length} chars): An exception occurred ({e.GetType().Name}: {e.Message})", LogLevel.Error);
 					}
 				}));
 			});
