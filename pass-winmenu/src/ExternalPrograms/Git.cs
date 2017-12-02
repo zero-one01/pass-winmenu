@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using LibGit2Sharp;
@@ -88,13 +89,22 @@ namespace PassWinmenu.ExternalPrograms
 				RedirectStandardOutput = true,
 				CreateNoWindow = true
 			};
-			var gitProc = Process.Start(psi);
+			Process gitProc;
+			try
+			{
+				gitProc = Process.Start(psi);
+			}
+			catch (Win32Exception e)
+			{
+				throw new GitException("Git failed to start. " + e.Message, e);
+			}
 
 			gitProc.WaitForExit((int)gitCallTimeout.TotalMilliseconds);
 			var output = gitProc.StandardOutput.ReadToEnd();
+			var error = gitProc.StandardError.ReadToEnd();
 			if (gitProc.ExitCode != 0)
 			{
-				throw new GitException($"Git exited with code {gitProc.ExitCode}");
+				throw new GitException($"Git exited with code {gitProc.ExitCode}", error);
 			}
 		}
 
@@ -214,12 +224,19 @@ namespace PassWinmenu.ExternalPrograms
 	[Serializable]
 	internal class GitException : Exception
 	{
+		public string GitError { get; }
+
 		public GitException(string message) : base(message)
 		{
 		}
 
 		public GitException(string message, Exception innerException) : base(message, innerException)
 		{
+		}
+
+		public GitException(string message, string gitError) : base(message)
+		{
+			GitError = gitError;
 		}
 	}
 }

@@ -529,6 +529,17 @@ namespace PassWinmenu
 				                "If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 				return;
 			}
+			catch (GitException e)
+			{
+				if (e.GitError != null)
+				{
+					ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
+				}
+				else
+				{
+					ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
+				}
+			}
 			var details = git.GetTrackingDetails();
 			var local = details.AheadBy;
 			var remote = details.BehindBy;
@@ -638,6 +649,17 @@ namespace PassWinmenu
 			catch (LibGit2SharpException e)
 			{
 				ShowErrorWindow($"Unable to update the password store:\n{e.Message}");
+			}
+			catch (GitException e)
+			{
+				if (e.GitError != null)
+				{
+					ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
+				}
+				else
+				{
+					ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
+				}
 			}
 		}
 
