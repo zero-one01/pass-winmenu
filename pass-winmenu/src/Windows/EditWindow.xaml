@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PassWinmenu.Windows"
         mc:Ignorable="d"
-        Title="Edit your Password" Height="350" Width="350" MinHeight="250" MinWidth="350" ResizeMode="NoResize" KeyUp="Window_KeyUp">
+        Title="" Height="350" Width="350" MinHeight="250" MinWidth="350" ResizeMode="NoResize" KeyUp="Window_KeyUp">
 	<Grid>
 		<GroupBox Header="Password generator" VerticalAlignment="Top" Margin="5,15,5,0" >
 			<Grid>

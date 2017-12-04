@@ -10,10 +10,11 @@ namespace PassWinmenu.Windows
 	{
 		private readonly PasswordGenerator passwordGenerator = new PasswordGenerator();
 
-		public EditWindow(string content)
+		public EditWindow(string path, string content)
 		{
 			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			InitializeComponent();
+			Title = $"Editing '{path}'";
 
 			PasswordContent.Text = content;
 			PasswordContent.Focus();

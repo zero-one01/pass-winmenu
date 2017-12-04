@@ -784,7 +784,7 @@ namespace PassWinmenu
 			}
 
 			var content = passwordManager.DecryptText(selectedFile);
-			using (var window = new EditWindow(content))
+			using (var window = new EditWindow(selectedFile, content))
 			{
 				if (window.ShowDialog() ?? false)
 				{
