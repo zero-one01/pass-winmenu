@@ -38,6 +38,11 @@ namespace PassWinmenu
 			LogExceptionAsText(unhandledExceptionEventArgs.ExceptionObject as Exception, 0);
 		}
 
+		public static void ReportException(Exception e)
+		{
+			LogExceptionAsText(e, 0);
+		}
+
 		private static void LogExceptionAsText(Exception e, int level)
 		{
 			var trace = new StackTrace(e, true);
