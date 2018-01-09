@@ -184,11 +184,18 @@ namespace PassWinmenu.ExternalPrograms
 
 		private void VerifyEncryption(GpgResult result)
 		{
+			if (result.HasStatusCodes(GpgStatusCode.FAILURE, GpgStatusCode.INV_RECP, GpgStatusCode.KEYEXPIRED))
+			{
+				var failedrcps = result.StatusMessages.Where(m => m.StatusCode == GpgStatusCode.INV_RECP).Select(m => m.Message.Substring(m.Message.IndexOf(" ", StringComparison.Ordinal)));
+				throw new GpgError($"Invalid/unknown recipient(s): {string.Join(", ", failedrcps)}\n" +
+				                   "The key(s) belonging to this recipient may have expired.");
+			}
+
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE, GpgStatusCode.INV_RECP))
 			{
 				var failedrcps = result.StatusMessages.Where(m => m.StatusCode == GpgStatusCode.INV_RECP).Select(m => m.Message.Substring(m.Message.IndexOf(" ", StringComparison.Ordinal)));
 				throw new GpgError($"Invalid/unknown recipient(s): {string.Join(", ", failedrcps)}\n" +
-				                   "Make sure that you have imported and trusted the keys belonging to those recipients, and that they have not expired.");
+				                   "Make sure that you have imported and trusted the keys belonging to those recipients.");
 			}
 			result.EnsureNonZeroExitCode();
 		}
