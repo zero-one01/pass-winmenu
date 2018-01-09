@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,9 +15,16 @@ namespace PassWinmenu
 		Error
 	}
 
+	internal class LogLine
+	{
+		public DateTime DateTime { get; set; }
+		public string Message { get; set; }
+	}
+
 	static class Log
 	{
 		private static StreamWriter writer;
+		public static List<LogLine> History { get; } = new List<LogLine>();
 
 		public static void Initialise()
 		{
@@ -84,7 +92,13 @@ namespace PassWinmenu
 
 		private static void SendRaw(string message)
 		{
-			var line = $"[{DateTime.Now:HH:mm:ss.fff}] {message}";
+			var submissionTime = DateTime.Now;
+			var line = $"[{submissionTime:HH:mm:ss.fff}] {message}";
+			History.Add(new LogLine
+			{
+				DateTime = submissionTime,
+				Message = message
+			});
 			Console.WriteLine(line);
 			writer?.WriteLine(line);
 		}
