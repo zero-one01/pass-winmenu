@@ -19,13 +19,15 @@ namespace PassWinmenu.ExternalPrograms
 		private const string gpgAgentFileName = "gpg-agent.exe";
 		private const string gpgConnectAgentFileName = "gpg-connect-agent.exe";
 		private readonly TimeSpan agentConnectTimeout = TimeSpan.FromSeconds(2);
+		private readonly string gpgInstallDir;
 
-		public GpgAgent()
+
+		public GpgAgent(string installDir)
 		{
-			
+			gpgInstallDir = installDir;
 		}
 
-		public void EnsureAgentResponsive(string gpgInstallDir)
+		public void EnsureAgentResponsive()
 		{
 			// In certain situations, gpg-agent may hang and become unresponsive to input.
 			// This will cause any decryption attempts to hang indefinitely, without any indication of what's happening.
@@ -96,7 +98,7 @@ namespace PassWinmenu.ExternalPrograms
 					// we'll need to re-run our check in order to see if we're able to connect again.
 					// If that check fails, it'll fall back to the less surgically precise method below...
 					Log.Send($"Agent(s) killed, re-running gpg-agent check.");
-					EnsureAgentResponsive(gpgInstallDir);
+					EnsureAgentResponsive();
 				}
 				else
 				{

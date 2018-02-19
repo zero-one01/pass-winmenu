@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Text;
+using PassWinmenu.Utilities;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -14,24 +15,51 @@ namespace PassWinmenu.ExternalPrograms
 	internal class GPG
 	{
 		private const string statusMarker = "[GNUPG:] ";
-		private const string defaultGpgExePath = @"C:\Program Files (x86)\gnupg\bin\gpg.exe";
+		private const string gpgDefaultInstallDir = @"C:\Program Files (x86)\gnupg\bin";
+		private const string gpgExeName = "gpg.exe";
+
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
-		public string GpgExePath { get; } = defaultGpgExePath;
+		private GpgAgent gpgAgent;
+
+		public string GpgExePath { get; private set; }
 
 		/// <summary>
-		/// Initialises the wrapper.
+		/// Tries to find the GPG installation directory and configures the wrapper to use it.
 		/// </summary>
-		/// <param name="gpgExePath">The path to gpg.exe. When set to null,
+		/// <param name="gpgExePath">Path to the GPG executable. When set to null,
 		/// the default location will be used.</param>
-		public GPG(string gpgExePath)
+		public void FindGpgInstallation(string gpgExePath = null)
 		{
+			Log.Send("Attempting to detect the GPG installation directory");
 			if (gpgExePath == string.Empty)
 			{
-				throw new ArgumentException("The GPG executable path may not be empty.");
+				throw new ArgumentException("The GPG installation path is invalid.");
 			}
-			if (gpgExePath != null)
+			GpgExePath = gpgExePath;
+
+			string installDir = null;
+			if (gpgExePath == null)
 			{
-				GpgExePath = gpgExePath;
+				Log.Send("No GPG executable path set, assuming GPG to be in its default installation directory.");
+				// No executable path is set, assume GPG to be in its default installation directory.
+				installDir = gpgDefaultInstallDir;
+			}
+			else
+			{
+				if (File.Exists(gpgExePath))
+				{
+					var directory = Path.GetDirectoryName(gpgExePath);
+					Log.Send("GPG executable found at the configured path. Assuming installation dir to be " + installDir);
+					installDir = Path.GetFullPath(directory);
+				}
+				else
+				{
+					Log.Send("GPG executable not found. Restarting the GPG agent will not be possible.", LogLevel.Info);
+				}
+			}
+			if (installDir != null)
+			{
+				gpgAgent = new GpgAgent(installDir);
 			}
 		}
 
@@ -64,9 +92,11 @@ namespace PassWinmenu.ExternalPrograms
 			return Path.Combine(appdata, "gnupg");
 		}
 
-		private GpgResult CallGpg(string arguments, string input = null)
+		/// <summary>
+		/// Generates a ProcessStartInfo object that can be used to spawn a GPG process.
+		/// </summary>
+		private ProcessStartInfo CreateGpgProcessStartInfo(string arguments, bool redirectStdin)
 		{
-			Log.Send($"Calling GPG with \"{arguments}\"");
 			// Maybe use --display-charset utf-8?
 			var argList = new List<string>
 			{
@@ -76,9 +106,8 @@ namespace PassWinmenu.ExternalPrograms
 				"--with-colons", // Use colon notation for displaying keys
 				"--exit-on-status-write-error", //  Exit if status messages cannot be written
 			};
-
 			var homeDir = GetConfiguredHomeDir();
-			if(homeDir != null) argList.Add($"--homedir \"{homeDir}\"");
+			if (homeDir != null) argList.Add($"--homedir \"{homeDir}\"");
 
 			var psi = new ProcessStartInfo
 			{
@@ -87,9 +116,21 @@ namespace PassWinmenu.ExternalPrograms
 				UseShellExecute = false,
 				RedirectStandardError = true,
 				RedirectStandardOutput = true,
-				RedirectStandardInput = input != null, // Only redirect stdin if we're going to send anything to it.
+				RedirectStandardInput = redirectStdin, 
 				CreateNoWindow = true
 			};
+			return psi;
+		}
+
+		/// <summary>
+		/// Spawns a GPG process.
+		/// </summary>
+		private Process CreateGpgProcess(string arguments, string input = null)
+		{
+			Log.Send($"Calling GPG with \"{arguments}\"");
+			// Only redirect stdin if we're going to send anything to it.
+			var psi = CreateGpgProcessStartInfo(arguments, input != null);
+
 			var gpgProc = Process.Start(psi);
 			if (input != null)
 			{
@@ -97,6 +138,12 @@ namespace PassWinmenu.ExternalPrograms
 				gpgProc.StandardInput.Flush();
 				gpgProc.StandardInput.Close();
 			}
+			return gpgProc;
+		}
+
+		private GpgResult CallGpg(string arguments, string input = null)
+		{
+			var gpgProc = CreateGpgProcess(arguments, input);
 			gpgProc.WaitForExit((int)gpgCallTimeout.TotalMilliseconds);
 
 			string stderrLine;
@@ -140,6 +187,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
 		public string Decrypt(string file)
 		{
+			gpgAgent?.EnsureAgentResponsive();
 			var result = CallGpg($"--decrypt \"{file}\"");
 			VerifyDecryption(result);
 			return result.Stdout;
@@ -153,6 +201,7 @@ namespace PassWinmenu.ExternalPrograms
 		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
 		public void DecryptToFile(string encryptedFile, string outputFile)
 		{
+			gpgAgent?.EnsureAgentResponsive();
 			var result = CallGpg($"--output \"{outputFile}\" --decrypt \"{encryptedFile}\"");
 			VerifyDecryption(result);
 		}
@@ -235,6 +284,7 @@ namespace PassWinmenu.ExternalPrograms
 
 		private void ListSecretKeys()
 		{
+			gpgAgent?.EnsureAgentResponsive();
 			var result = CallGpg("--list-secret-keys");
 			if (result.Stdout.Length == 0)
 			{
@@ -256,6 +306,11 @@ namespace PassWinmenu.ExternalPrograms
 		{
 			var output = CallGpg("--version");
 			return output.Stdout.Split(new []{"\r\n"}, StringSplitOptions.RemoveEmptyEntries).First();
+		}
+
+		public void UpdateAgentConfig(Dictionary<string, string> configKeys)
+		{
+			gpgAgent?.UpdateAgentConfig(configKeys, GetHomeDir());
 		}
 	}
 

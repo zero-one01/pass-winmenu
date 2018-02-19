@@ -67,12 +67,12 @@ namespace PassWinmenu
 			Log.Send("------------------------------");
 
 			AssignHotkeys(hotkeys);
-
-			var gpg = new GPG(ConfigManager.Config.Gpg.GpgPath);
-			var agent = new GpgAgent();
+			
+			var gpg = new GPG();
+			gpg.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{
-				agent.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys, gpg.GetHomeDir());
+				gpg.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys);
 			}
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
 			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
