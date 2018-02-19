@@ -285,24 +285,11 @@ namespace PassWinmenu.Windows
 			var selectionIndex = Options.IndexOf(Selected);
 			switch (e.Key)
 			{
+				case Key.Tab:
+					if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) goto case Key.Up;
+					else goto case Key.Down;
+					break;
 				case Key.Left:
-					e.Handled = true;
-					if (selectionIndex > 0)
-					{
-						var label = FindPrevious(selectionIndex);
-						Select(label);
-						HandleSelectionChange(label);
-					}
-					break;
-				case Key.Right:
-					e.Handled = true;
-					if (selectionIndex < Options.Count - 1)
-					{
-						var label = FindNext(selectionIndex);
-						Select(label);
-						HandleSelectionChange(label);
-					}
-					break;
 				case Key.Up:
 					e.Handled = true;
 					if (selectionIndex > 0)
@@ -312,6 +299,7 @@ namespace PassWinmenu.Windows
 						HandleSelectionChange(label);
 					}
 					break;
+				case Key.Right:
 				case Key.Down:
 					e.Handled = true;
 					if (selectionIndex < Options.Count - 1)
