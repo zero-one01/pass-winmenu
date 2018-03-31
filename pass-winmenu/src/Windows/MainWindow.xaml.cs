@@ -40,7 +40,7 @@ namespace PassWinmenu.Windows
 		protected MainWindow(MainWindowConfiguration configuration)
 		{
 			this.configuration = configuration;
-			StyleConfig = ConfigManager.Config.Style;
+			StyleConfig = ConfigManager.Config.Interface.Style;
 			InitializeComponent();
 
 			if (configuration.Orientation == Orientation.Vertical)

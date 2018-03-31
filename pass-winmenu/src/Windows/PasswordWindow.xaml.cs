@@ -15,24 +15,13 @@ namespace PassWinmenu.Windows
 			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			InitializeComponent();
 
-			// We'll keep supporting DefaultUsername for now, but eventually it'll have to go.
-			var defaultUsername = ConfigManager.Config.PasswordGeneration.DefaultUsername;
-			if (defaultUsername == null)
-			{
-				var now = DateTime.Now;
-				var extraContent = ConfigManager.Config.PasswordGeneration.DefaultContent
-					.Replace("$filename", filename)
-					.Replace("$date", now.ToString("yyyy-MM-dd"))
-					.Replace("$time", now.ToString("HH:mm:ss"));
+			var now = DateTime.Now;
+			var extraContent = ConfigManager.Config.PasswordStore.PasswordGeneration.DefaultContent
+				.Replace("$filename", filename)
+				.Replace("$date", now.ToString("yyyy-MM-dd"))
+				.Replace("$time", now.ToString("HH:mm:ss"));
 
-				ExtraContent.Text = extraContent;
-			}
-			else
-			{
-				var username = defaultUsername == "$filename" ? filename : defaultUsername;
-				ExtraContent.Text = $"Username: {username}\n";
-			}
-
+			ExtraContent.Text = extraContent;
 
 			RegeneratePassword();
 			Password.Focus();

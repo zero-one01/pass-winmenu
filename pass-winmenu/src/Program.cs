@@ -74,20 +74,20 @@ namespace PassWinmenu
 			{
 				gpg.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys);
 			}
-			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore, EncryptedFileExtension, gpg);
+			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore.Location, EncryptedFileExtension, gpg);
 			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
 
-			if (ConfigManager.Config.UseGit)
+			if (ConfigManager.Config.Git.UseGit)
 			{
 				try
 				{
-					if (ConfigManager.Config.SyncMode == SyncMode.NativeGit)
+					if (ConfigManager.Config.Git.SyncMode == SyncMode.NativeGit)
 					{
-						git = new Git(ConfigManager.Config.PasswordStore, ConfigManager.Config.GitPath);
+						git = new Git(ConfigManager.Config.PasswordStore.Location, ConfigManager.Config.Git.GitPath);
 					}
 					else
 					{
-						git = new Git(ConfigManager.Config.PasswordStore);
+						git = new Git(ConfigManager.Config.PasswordStore.Location);
 					}
 				}
 				catch (RepositoryNotFoundException)
@@ -111,9 +111,9 @@ namespace PassWinmenu
 		/// </summary>
 		private void RunInitialCheck()
 		{
-			if (!Directory.Exists(ConfigManager.Config.PasswordStore))
+			if (!Directory.Exists(ConfigManager.Config.PasswordStore.Location))
 			{
-				ShowErrorWindow($"Could not find the password store at {Path.GetFullPath(ConfigManager.Config.PasswordStore)}. Please make sure it exists.");
+				ShowErrorWindow($"Could not find the password store at {Path.GetFullPath(ConfigManager.Config.PasswordStore.Location)}. Please make sure it exists.");
 				Exit();
 				return;
 			}
@@ -367,7 +367,7 @@ namespace PassWinmenu
 			}
 
 			// Ask the user where the password file should be placed.
-			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore, windowConfig);
+			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore.Location, windowConfig);
 			pathWindow.ShowDialog();
 			if (!pathWindow.Success)
 			{
@@ -454,7 +454,7 @@ namespace PassWinmenu
 			menu.Items.Add("Push to Remote", null, (sender, args) => Task.Run((Action)CommitChanges));
 			menu.Items.Add("Pull from Remote", null, (sender, args) => Task.Run((Action)UpdatePasswordStore));
 			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Open Explorer", null, (sender, args) => Process.Start(ConfigManager.Config.PasswordStore));
+			menu.Items.Add("Open Explorer", null, (sender, args) => Process.Start(ConfigManager.Config.PasswordStore.Location));
 			menu.Items.Add("Open Shell", null, (sender, args) => Task.Run((Action)OpenPasswordShell));
 			menu.Items.Add(new ToolStripSeparator());
 			var startWithWindows = new ToolStripMenuItem("Start with Windows")
@@ -480,7 +480,7 @@ namespace PassWinmenu
 			var powershell = new ProcessStartInfo
 			{
 				FileName = "powershell",
-				WorkingDirectory = ConfigManager.Config.PasswordStore,
+				WorkingDirectory = ConfigManager.Config.PasswordStore.Location,
 				UseShellExecute = false
 			};
 
@@ -616,11 +616,11 @@ namespace PassWinmenu
 				return;
 			}
 			// Copy the newly generated password.
-			CopyToClipboard(password, ConfigManager.Config.ClipboardTimeout);
+			CopyToClipboard(password, ConfigManager.Config.Interface.ClipboardTimeout);
 
 			if (ConfigManager.Config.Notifications.Types.PasswordGenerated)
 			{
-				RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+				RaiseNotification($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 			}
 			// Add the password to Git
 			git?.AddPassword(passwordFileName + passwordManager.EncryptedFileExtension);
@@ -677,14 +677,14 @@ namespace PassWinmenu
 				return (string)Invoke((Func<string>)RequestPasswordFile);
 			}
 			// Find GPG-encrypted password files
-			var passFiles = passwordManager.GetPasswordFiles(ConfigManager.Config.PasswordFileMatch).ToList();
+			var passFiles = passwordManager.GetPasswordFiles(ConfigManager.Config.PasswordStore.PasswordFileMatch).ToList();
 			if (passFiles.Count == 0)
 			{
 				MessageBox.Show("Your password store doesn't appear to contain any passwords yet.", "Empty password store", MessageBoxButton.OK, MessageBoxImage.Information);
 				return null;
 			}
 			// Build a dictionary mapping display names to relative paths
-			var displayNameMap = passFiles.ToDictionary(val => val.Substring(0, val.Length - EncryptedFileExtension.Length).Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.DirectorySeparator));
+			var displayNameMap = passFiles.ToDictionary(val => val.Substring(0, val.Length - EncryptedFileExtension.Length).Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.Interface.DirectorySeparator));
 
 			var selection = ShowPasswordMenu(displayNameMap.Keys);
 			if (selection == null) return null;
@@ -710,7 +710,7 @@ namespace PassWinmenu
 			PasswordFileContent passFile;
 			try
 			{
-				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.FirstLineOnly);
+				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.PasswordStore.FirstLineOnly);
 			}
 			catch (GpgError e)
 			{
@@ -735,10 +735,10 @@ namespace PassWinmenu
 
 			if (copyToClipboard)
 			{
-				CopyToClipboard(passFile.Password, ConfigManager.Config.ClipboardTimeout);
+				CopyToClipboard(passFile.Password, ConfigManager.Config.Interface.ClipboardTimeout);
 				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
 				{
-					RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
+					RaiseNotification($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", ToolTipIcon.Info);
 				}
 			}
 			var usernameEntered = false;
@@ -765,7 +765,7 @@ namespace PassWinmenu
 			var selectedFile = RequestPasswordFile();
 			if (selectedFile == null) return;
 
-			if (ConfigManager.Config.PasswordEditor.UseBuiltin)
+			if (ConfigManager.Config.Interface.PasswordEditor.UseBuiltin)
 			{
 				EditWithEditWindow(selectedFile);
 			}
@@ -869,8 +869,8 @@ namespace PassWinmenu
 		/// <returns>A string containing the username if the password file contains one, null if no username was found.</returns>
 		private string GetUsername(string passwordFile, string extraContent)
 		{
-			var options = ConfigManager.Config.UsernameDetection.Options;
-			switch (ConfigManager.Config.UsernameDetection.Method)
+			var options = ConfigManager.Config.PasswordStore.UsernameDetection.Options;
+			switch (ConfigManager.Config.PasswordStore.UsernameDetection.Method)
 			{
 				case UsernameDetectionMethod.FileName:
 					return Path.GetFileName(passwordFile)?.Replace(EncryptedFileExtension, "");

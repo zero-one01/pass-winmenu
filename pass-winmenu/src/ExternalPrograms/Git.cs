@@ -89,9 +89,9 @@ namespace PassWinmenu.ExternalPrograms
 				RedirectStandardOutput = true,
 				CreateNoWindow = true
 			};
-			if (!String.IsNullOrEmpty(Configuration.ConfigManager.Config.SshPath))
+			if (!String.IsNullOrEmpty(Configuration.ConfigManager.Config.Git.SshPath))
 			{
-				psi.EnvironmentVariables.Add("GIT_SSH", Configuration.ConfigManager.Config.SshPath);
+				psi.EnvironmentVariables.Add("GIT_SSH", Configuration.ConfigManager.Config.Git.SshPath);
 			}
 			Process gitProc;
 			try

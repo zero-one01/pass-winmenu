@@ -21,15 +21,15 @@ namespace PassWinmenu.Windows
 		public static MainWindowConfiguration ParseMainWindowConfiguration(Config config)
 		{
 			var activeScreen = Screen.AllScreens.First(screen => screen.Bounds.Contains(Cursor.Position));
-			var selectedScreen = config.FollowCursor ? activeScreen : Screen.PrimaryScreen;
+			var selectedScreen = config.Interface.FollowCursor ? activeScreen : Screen.PrimaryScreen;
 
 			double left, top, width, height;
 			try
 			{
 				// The menu position may either be specified in pixels or percentage values.
 				// ParseSize takes care of parsing both into a double (representing pixel values).
-				left = selectedScreen.ParseSize(config.Style.OffsetLeft, Direction.Horizontal);
-				top = selectedScreen.ParseSize(config.Style.OffsetTop, Direction.Vertical);
+				left = selectedScreen.ParseSize(config.Interface.Style.OffsetLeft, Direction.Horizontal);
+				top = selectedScreen.ParseSize(config.Interface.Style.OffsetTop, Direction.Vertical);
 			}
 			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
 			{
@@ -37,8 +37,8 @@ namespace PassWinmenu.Windows
 			}
 			try
 			{
-				width = selectedScreen.ParseSize(config.Style.Width, Direction.Horizontal);
-				height = selectedScreen.ParseSize(config.Style.Height, Direction.Vertical);
+				width = selectedScreen.ParseSize(config.Interface.Style.Width, Direction.Horizontal);
+				height = selectedScreen.ParseSize(config.Interface.Style.Height, Direction.Vertical);
 			}
 			catch (Exception e) when (e is ArgumentNullException || e is FormatException || e is OverflowException)
 			{
@@ -47,7 +47,7 @@ namespace PassWinmenu.Windows
 
 			Orientation orientation;
 
-			if (!Enum.TryParse(config.Style.Orientation, true, out orientation))
+			if (!Enum.TryParse(config.Interface.Style.Orientation, true, out orientation))
 			{
 				throw new ConfigurationParseException("Unable to parse the menu orientation from the config file.");
 			}
