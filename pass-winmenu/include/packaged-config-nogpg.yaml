@@ -207,6 +207,19 @@ interface:
     # Amount of time (in seconds) your passwords should remain on the clipboard.
     clipboard-timeout: 30
 
+    hotkeys:
+    # Configure hotkeys for the password selection menu.
+    # Supported actions are 'select-next', 'select-previous', 'select-first',
+    # and 'select-last'.
+      - 
+        # Selects the next entry in the list
+        hotkey: 'tab'
+        action: 'select-next'
+      - 
+        # Selects the previous entry in the list
+        hotkey: 'shift tab'
+        action: 'select-previous'
+
     # Style settings.
     # All colour strings must be formatted as hexadecimal ARGB strings,
     # such as #AA00FF44. To 'unset' a colour, a fully transparent colour

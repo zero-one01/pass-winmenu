@@ -37,9 +37,9 @@ namespace PassWinmenu.Hotkeys
 		/// <param name="mod">The modifier keys that should be pressed.</param>
 		/// <param name="key">The keys that should be pressed.</param>
 		/// <param name="action">The action to be executed when the hotkey is pressed.</param>
-		public void AddHotKey(ModifierKeys mod, Keys key, Action action)
+		public void AddHotKey(ModifierKeys mod, Key key, Action action)
 		{
-			var success = NativeMethods.RegisterHotKey(handle, hotkeyIdCounter, (int)mod, (int)key);
+			var success = NativeMethods.RegisterHotKey(handle, hotkeyIdCounter, (int)mod, KeyInterop.VirtualKeyFromKey(key));
 			if (!success)
 			{
 				var errorCode = Marshal.GetLastWin32Error();

@@ -8,6 +8,20 @@
 
 		public double ClipboardTimeout { get; set; } = 30;
 
+		public HotkeyConfig[] Hotkeys { get; set; } =
+		{
+			new HotkeyConfig
+			{
+				Hotkey = "tab",
+				ActionString = "select-next"
+			},
+			new HotkeyConfig
+			{
+				Hotkey = "shift tab",
+				ActionString = "select-previous"
+			}
+		};
+
 		public PasswordEditorConfig PasswordEditor { get; set; } = new PasswordEditorConfig();
 
 		public StyleConfig Style { get; set; } = new StyleConfig();

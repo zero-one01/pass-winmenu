@@ -9,5 +9,9 @@
 		GitPush,
 		OpenShell,
 		ShowDebugInfo,
+		SelectNext,
+		SelectPrevious,
+		SelectFirst,
+		SelectLast
 	}
 }

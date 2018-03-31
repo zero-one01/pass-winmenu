@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace PassWinmenu.Hotkeys
@@ -8,7 +7,7 @@ namespace PassWinmenu.Hotkeys
 	internal struct KeyCombination
 	{
 		public ModifierKeys ModifierKeys;
-		public Keys Key;
+		public Key Key;
 
 		public override string ToString()
 		{
@@ -30,18 +29,18 @@ namespace PassWinmenu.Hotkeys
 				.Select(key => (key == "win" || key == "super") ? "windows" : key);
 
 			var mods = ModifierKeys.None;
-			var keys = Keys.None;
+			var keys = Key.None;
 			foreach (var keyStr in combination)
 			{
 				ModifierKeys parsedMod;
-				Keys parsedKey;
+				Key parsedKey;
 				if (Enum.TryParse(keyStr, true, out parsedMod))
 				{
 					mods |= parsedMod;
 				}
 				else if (Enum.TryParse(keyStr, true, out parsedKey))
 				{
-					if (keys == Keys.None)
+					if (keys == Key.None)
 						keys = parsedKey;
 					else
 						throw new ArgumentException("A hotkey may not consist of multiple non-modifier keys.");

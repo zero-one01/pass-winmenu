@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using PassWinmenu.Configuration;
+using PassWinmenu.Hotkeys;
 using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
+using Cursors = System.Windows.Input.Cursors;
 using FontFamily = System.Windows.Media.FontFamily;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using Label = System.Windows.Controls.Label;
+using Orientation = System.Windows.Controls.Orientation;
 
 namespace PassWinmenu.Windows
 {
@@ -278,36 +285,94 @@ namespace PassWinmenu.Windows
 
 		}
 
+
 		protected abstract void HandleSelect();
+
+		protected bool IsPressed(HotkeyConfig hotkey)
+		{
+			var combination = KeyCombination.Parse(hotkey.Hotkey);
+
+			if (combination.Key != Key.None)
+			{
+				if (!Keyboard.IsKeyDown(combination.Key)) return false;
+			}
+			return (Keyboard.Modifiers == combination.ModifierKeys);
+		}
+
+		private void SelectNext()
+		{
+			var selectionIndex = Options.IndexOf(Selected);
+			if (selectionIndex < Options.Count - 1)
+			{
+				var label = FindNext(selectionIndex);
+				Select(label);
+				HandleSelectionChange(label);
+			}
+		}
+
+		private void SelectPrevious()
+		{
+			var selectionIndex = Options.IndexOf(Selected);
+			if (selectionIndex > 0)
+			{
+				var label = FindPrevious(selectionIndex);
+				Select(label);
+				HandleSelectionChange(label);
+			}
+		}
+
+		private void SelectFirst()
+		{
+			var label = Options.First();
+			Select(label);
+			HandleSelectionChange(label);
+		}
+
+		private void SelectLast()
+		{
+			var label = Options.Last();
+			Select(label);
+			HandleSelectionChange(label);
+		}
 
 		private void SearchBox_OnPreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			var selectionIndex = Options.IndexOf(Selected);
+			var matches = ConfigManager.Config.Interface.Hotkeys.Where(IsPressed).ToList();
+
+			// Prefer manually defined shortcuts over default shortcuts.
+			if (matches.Any())
+			{
+				e.Handled = true;
+				foreach (var match in matches)
+				{
+					switch (match.Action)
+					{
+						case HotkeyAction.SelectNext:
+							SelectNext();
+							break;
+						case HotkeyAction.SelectPrevious:
+							SelectPrevious();
+							break;
+						case HotkeyAction.SelectFirst:
+							break;
+						case HotkeyAction.SelectLast:
+							break;
+					}
+				}
+				return;
+			}
+
 			switch (e.Key)
 			{
-				case Key.Tab:
-					if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) goto case Key.Up;
-					else goto case Key.Down;
-					break;
 				case Key.Left:
 				case Key.Up:
 					e.Handled = true;
-					if (selectionIndex > 0)
-					{
-						var label = FindPrevious(selectionIndex);
-						Select(label);
-						HandleSelectionChange(label);
-					}
+					SelectPrevious();
 					break;
 				case Key.Right:
 				case Key.Down:
 					e.Handled = true;
-					if (selectionIndex < Options.Count - 1)
-					{
-						var label = FindNext(selectionIndex);
-						Select(label);
-						HandleSelectionChange(label);
-					}
+					SelectNext();
 					break;
 				case Key.Enter:
 					e.Handled = true;
