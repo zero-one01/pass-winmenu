@@ -38,16 +38,34 @@ namespace PassWinmenu.ExternalPrograms
 				// If gpg-agent isn't running yet, it obviously can't be unresponsive, so we don't have to do anything here.
 				return;
 			}
-			// We have a gpg-agent, let's see if we can connect to it.
-			var proc = Process.Start(new ProcessStartInfo
+
+			var connectAgent = Path.Combine(gpgInstallDir, gpgConnectAgentFileName);
+			if (!File.Exists(connectAgent))
 			{
-				FileName = Path.Combine(gpgInstallDir, gpgConnectAgentFileName),
-				Arguments = "/bye",
-				UseShellExecute = false,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				CreateNoWindow = true,
-			});
+				Log.Send($"Unable to confirm that gpg-agent is alive. No connect-agent found at \"{connectAgent}\".", LogLevel.Warning);
+				return;
+			}
+
+			Process proc;
+			try
+			{
+				// We have a gpg-agent, let's see if we can connect to it.
+				proc = Process.Start(new ProcessStartInfo
+				{
+					FileName = connectAgent,
+					Arguments = "/bye",
+					UseShellExecute = false,
+					RedirectStandardOutput = true,
+					RedirectStandardError = true,
+					CreateNoWindow = true,
+				});
+			}
+			catch (Exception e)
+			{
+				Log.Send($"Unable to launch connect-agent process ({e.GetType().Name}: {e.Message})", LogLevel.Warning);
+				return;
+			}
+
 			
 			// Now check what the process returns.
 			var readTask = proc.StandardError.ReadLineAsync();
@@ -85,7 +103,7 @@ namespace PassWinmenu.ExternalPrograms
 				var matches = Process.GetProcesses().Where(p => p.MainModule.FileName == Path.Combine(Path.GetFullPath(gpgInstallDir), gpgAgentProcessName)).ToList();
 				if (matches.Any())
 				{
-					Log.Send($"Agent process with expected path \"{gpgInstallDir}\"");
+					Log.Send($"Agent process(es) found (\"{gpgInstallDir}\")");
 					// This should normally only return one match at most, but in certain cases
 					// GPG seems to be able to detect that the agent has become unresponsive, 
 					// and will start a new one without killing the old process.
