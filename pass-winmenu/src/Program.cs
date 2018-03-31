@@ -58,10 +58,15 @@ namespace PassWinmenu
 			EmbeddedResources.Load();
 			CreateNotifyIcon();
 			LoadConfigFile();
+
+#if DEBUG
+			Log.Initialise();
+#else
 			if (ConfigManager.Config.CreateLogFile)
 			{
 				Log.Initialise();
 			}
+#endif
 			Log.Send("------------------------------");
 			Log.Send($"Starting pass-winmenu {Version}");
 			Log.Send("------------------------------");
