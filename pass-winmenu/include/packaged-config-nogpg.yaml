@@ -115,7 +115,7 @@ gpg:
         config:
             # Set this to true to allow pass-winmenu to set some configuration keys in your
             # `gpg-agent.conf` file, allowing you to configure some features like password timeout.
-            allow-config-management: true
+            allow-config-management: false
             # Add the following configuration keys to `gpg-agent.conf`:
             keys:
                 # Remember your master password for up to one hour.
