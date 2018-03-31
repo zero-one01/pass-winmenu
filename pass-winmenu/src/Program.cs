@@ -24,6 +24,7 @@ namespace PassWinmenu
 	internal class Program : Form
 	{
 		private string Version => EmbeddedResources.Version;
+		public const string LastConfigVersion = "1.7";
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
@@ -160,10 +161,11 @@ namespace PassWinmenu
 
 		private void LoadConfigFile()
 		{
+			const string configFileName = "pass-winmenu.yaml";
 			ConfigManager.LoadResult result;
 			try
 			{
-				result = ConfigManager.Load("pass-winmenu.yaml");
+				result = ConfigManager.Load(configFileName);
 			}
 			catch (Exception e) when (e.InnerException != null)
 			{
@@ -196,7 +198,21 @@ namespace PassWinmenu
 					RaiseNotification("A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", ToolTipIcon.Error);
 					break;
 				case ConfigManager.LoadResult.NewFileCreated:
-					MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.");
+					var open = MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.\n\n" +
+					                "Would you like to open it now?", "New configuration file created", MessageBoxButton.YesNo);
+					if (open == MessageBoxResult.Yes) Process.Start(configFileName);
+					Exit();
+					return;
+				case ConfigManager.LoadResult.NeedsUpgrade:
+					var backedUpFile = ConfigManager.Backup(configFileName);
+					var openBoth = MessageBox.Show("The current configuration file is out of date. A new configuration file has been created, and the old file has been backed up.\n" +
+					                "Please edit the new configuration file according to your preferences and restart the application.\n\n" +
+					                "Would you like to open both files now?", "Configuration file out of date", MessageBoxButton.YesNo);
+					if (openBoth == MessageBoxResult.Yes)
+					{
+						Process.Start(configFileName);
+						Process.Start(backedUpFile);
+					}
 					Exit();
 					return;
 			}
