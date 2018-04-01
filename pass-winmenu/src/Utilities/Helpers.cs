@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace PassWinmenu.Utilities
 {
@@ -35,6 +36,43 @@ namespace PassWinmenu.Utilities
 			}
 			var directoryUri = new Uri(root);
 			return Uri.UnescapeDataString(directoryUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
+		}
+
+		/// <summary>
+		/// Takes an executable name and attempts to resolve it to a full path to that executable.
+		/// </summary>
+		internal static string ResolveExecutableName(string executable)
+		{
+			if (executable.Contains(Path.DirectorySeparatorChar) || executable.Contains(Path.AltDirectorySeparatorChar))
+			{
+				return Path.GetFullPath(executable);
+			}
+			else
+			{
+				return FindInPath(executable);
+			}
+		}
+
+		/// <summary>
+		///  Searches all directories in the PATH environment variables for a given executable, returning the first match.
+		/// </summary>
+		internal static string FindInPath(string fileName)
+		{
+			// The filename must end with with .exe
+			if (!fileName.EndsWith(".exe")) fileName = fileName + ".exe";
+
+			var path = Environment.GetEnvironmentVariable("PATH");
+			if (path == null) return null;
+
+			var directories = path.Split(';').Select(p => Path.GetFullPath(p.Trim()));
+
+			foreach (var dir in directories)
+			{
+				var nameToTest = Path.Combine(dir, fileName);
+				if (File.Exists(nameToTest)) return nameToTest;
+			}
+
+			return null;
 		}
 	}
 }

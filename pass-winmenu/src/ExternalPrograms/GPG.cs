@@ -35,6 +35,7 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				throw new ArgumentException("The GPG installation path is invalid.");
 			}
+			GpgExePath = gpgExePath;
 
 			string installDir = null;
 			if (gpgExePath == null)
@@ -46,21 +47,17 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			else
 			{
-				if (File.Exists(gpgExePath))
+				var resolved = Helpers.ResolveExecutableName(gpgExePath);
+				if (resolved == null || !File.Exists(resolved))
 				{
-					var directory = Path.GetDirectoryName(gpgExePath);
-					Log.Send("GPG executable found at the configured path. Assuming installation dir to be " + directory);
-					installDir = Path.GetFullPath(directory);
+					// Executable couldn't be found, most likely it doesn't exist. This is probably an error.
+					throw new ArgumentException("The GPG installation path is invalid.");
 				}
-				else
-				{
-					Log.Send("GPG executable not found. Restarting the GPG agent will not be possible.", LogLevel.Info);
-				}
+				GpgExePath = resolved;
+				installDir = Path.GetDirectoryName(resolved);
+				Log.Send("GPG executable found at the configured path. Assuming installation dir to be " + installDir);
 			}
-			if (installDir != null)
-			{
-				gpgAgent = new GpgAgent(installDir);
-			}
+			gpgAgent = new GpgAgent(installDir);
 		}
 
 		/// <summary>
