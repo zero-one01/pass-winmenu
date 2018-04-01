@@ -79,7 +79,7 @@ namespace PassWinmenu.ExternalPrograms
 					Log.Send("gpg-agent alive.");
 					return;
 				}
-				else if (readTask.Result.Contains("waiting for the agent"))
+				else if (readTask.Result.Contains("waiting for agent"))
 				{
 					Log.Send("gpg-agent is not running, waiting for it to start...");
 				}
