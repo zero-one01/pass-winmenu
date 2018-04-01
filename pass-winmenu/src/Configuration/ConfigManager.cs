@@ -84,11 +84,11 @@ namespace PassWinmenu.Configuration
 
 			// Find an unused name to which we can rename the old configuration file.
 			var root = string.IsNullOrEmpty(directory) ? name : Path.Combine(directory, name);
-			var newFileName = $"{root}-backup.{extension}";
+			var newFileName = $"{root}-backup{extension}";
 			var counter = 2;
 			while (File.Exists(newFileName))
 			{
-				newFileName =$"{root}-backup-{counter}.{extension}";
+				newFileName =$"{root}-backup-{counter}{extension}";
 			}
 
 			File.Move(fileName, newFileName);
