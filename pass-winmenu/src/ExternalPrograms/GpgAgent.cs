@@ -83,6 +83,10 @@ namespace PassWinmenu.ExternalPrograms
 				{
 					Log.Send("gpg-agent is not running, waiting for it to start...");
 				}
+				else if (readTask.Result.Contains("no running gpg-agent"))
+				{
+					Log.Send("gpg-agent is not running, waiting for it to start...");
+				}
 				else
 				{
 					Log.Send($"gpg-agent produced unexpected output: \"{readTask.Result}\"", LogLevel.Warning);
