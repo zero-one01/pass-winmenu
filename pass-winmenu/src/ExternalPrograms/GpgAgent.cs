@@ -19,6 +19,7 @@ namespace PassWinmenu.ExternalPrograms
 		private const string gpgAgentFileName = "gpg-agent.exe";
 		private const string gpgConnectAgentFileName = "gpg-connect-agent.exe";
 		private readonly TimeSpan agentConnectTimeout = TimeSpan.FromSeconds(2);
+		private readonly TimeSpan agentReadyTimeout = TimeSpan.FromSeconds(3);
 		private readonly string gpgInstallDir;
 
 
@@ -81,7 +82,7 @@ namespace PassWinmenu.ExternalPrograms
 				}
 				else if (readTask.Result.Contains("waiting for agent"))
 				{
-					Log.Send("gpg-agent is not running, waiting for it to start...");
+					Log.Send("waiting for agent to respond...");
 				}
 				else if (readTask.Result.Contains("no running gpg-agent"))
 				{
@@ -90,46 +91,55 @@ namespace PassWinmenu.ExternalPrograms
 				else
 				{
 					Log.Send($"gpg-agent produced unexpected output: \"{readTask.Result}\"", LogLevel.Warning);
-					Log.Send($"waiting for agent to start...");
+					Log.Send($"waiting for agent to respond...");
 				}
-				proc.WaitForExit();
-				Log.Send("gpg-agent ready.");
+
+				// Now wait for gpg-connect-agent to quit, indicating that gpg-agent is running and responsive.
+				if (proc.WaitForExit((int) agentReadyTimeout.TotalMilliseconds))
+				{
+					Log.Send("gpg-agent ready.");
+					return;
+				}
+				else
+				{
+					Log.Send($"gpg-agent failed to start/respond within {agentReadyTimeout.TotalSeconds:F} seconds, starting a new one", LogLevel.Warning);
+				}
 			}
 			else
 			{
 				Log.Send($"gpg-connect-agent failed to produce any output within {agentConnectTimeout.TotalSeconds:F} seconds", LogLevel.Warning);
-				Log.Send($"gpg-agent is most likely unresponsive and will be restarted", LogLevel.Warning);
-				// First, kill the connect-agent process.
-				proc.Kill();
-				// Now try to find the correct gpg-agent process.
-				// We'll start by looking for a process whose filename matches the installation directory we're working with.
-				// This means that if there are several gpg-agents running, we will ignore those that our gpg process likely won't try to connect to.
-				var matches = Process.GetProcesses().Where(p => p.MainModule.FileName == Path.Combine(Path.GetFullPath(gpgInstallDir), gpgAgentProcessName)).ToList();
-				if (matches.Any())
+			}
+			Log.Send($"gpg-agent is most likely unresponsive and will be restarted", LogLevel.Warning);
+			// First, kill the connect-agent process.
+			proc.Kill();
+			// Now try to find the correct gpg-agent process.
+			// We'll start by looking for a process whose filename matches the installation directory we're working with.
+			// This means that if there are several gpg-agents running, we will ignore those that our gpg process likely won't try to connect to.
+			var matches = Process.GetProcesses().Where(p => p.MainModule.FileName == Path.Combine(Path.GetFullPath(gpgInstallDir), gpgAgentProcessName)).ToList();
+			if (matches.Any())
+			{
+				Log.Send($"Agent process(es) found (\"{gpgInstallDir}\")");
+				// This should normally only return one match at most, but in certain cases
+				// GPG seems to be able to detect that the agent has become unresponsive, 
+				// and will start a new one without killing the old process.
+				foreach (var match in matches)
 				{
-					Log.Send($"Agent process(es) found (\"{gpgInstallDir}\")");
-					// This should normally only return one match at most, but in certain cases
-					// GPG seems to be able to detect that the agent has become unresponsive, 
-					// and will start a new one without killing the old process.
-					foreach (var match in matches)
-					{
-						Log.Send($" > killing gpg-agent {match.Id}, path: \"{match.MainModule.FileName}\"");
-						match.Kill();
-					}
-					// Now that we've killed the agent we presume to be unresponsive,
-					// we'll need to re-run our check in order to see if we're able to connect again.
-					// If that check fails, it'll fall back to the less surgically precise method below...
-					Log.Send($"Agent(s) killed, re-running gpg-agent check.");
-					EnsureAgentResponsive();
+					Log.Send($" > killing gpg-agent {match.Id} (started {match.StartTime:G}), path: \"{match.MainModule.FileName}\"");
+					match.Kill();
 				}
-				else
+				// Now that we've killed the agent we presume to be unresponsive,
+				// we'll need to re-run our check in order to see if we're able to connect again.
+				// If that check fails, it'll fall back to the less surgically precise method below...
+				Log.Send($"Agent(s) killed, re-running gpg-agent check.");
+				EnsureAgentResponsive();
+			}
+			else
+			{
+				// We didn't find any direct matches, so let's widen our search.
+				foreach (var match in Process.GetProcessesByName(gpgAgentProcessName))
 				{
-					// We didn't find any direct matches, so let's widen our search.
-					foreach (var match in Process.GetProcessesByName(gpgAgentProcessName))
-					{
-						Log.Send($" > killing gpg-agent {match.Id}, path: \"{match.MainModule.FileName}\"");
-						match.Kill();
-					}
+					Log.Send($" > killing gpg-agent {match.Id} (started {match.StartTime:G}), path: \"{match.MainModule.FileName}\"");
+					match.Kill();
 				}
 			}
 		}
