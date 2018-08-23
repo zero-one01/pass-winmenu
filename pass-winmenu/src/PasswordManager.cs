@@ -90,7 +90,7 @@ namespace PassWinmenu
 			if (passwordOnFirstLine)
 			{
 				// The first line contains the password, any other lines contain additional (contextual) content.
-				var match = Regex.Match(content, @"(.*?)(?:\r\n|\n)(.*)", RegexOptions.Singleline);
+				var match = Regex.Match(content, @"([^\n\r]*)(?:(?:\r\n|\n|\r)(.*))?", RegexOptions.Singleline);
 				var password = match.Groups[1].Value;
 				var extraContent = match.Groups[2].Value;
 
