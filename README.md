@@ -56,7 +56,7 @@ If you already have GPG installed, you may want to use that instead. In that cas
 
 ## Installation
 
-Installing pass-winmenu is as easy as downloading the zip file for the [latest release](https://github.com/Baggykiin/pass-winmenu/releases) and extracting it anywhere you want.
+Installing pass-winmenu is as easy as downloading the zip file for the [latest release](https://github.com/Baggykiin/pass-winmenu/releases) and extracting it anywhere you want. It is recommended that you download the regular release, unless you already have GPG installed and accessible from your commandline. In that case you can also use the `nogpg` release. A [Chocolatey package](https://chocolatey.org/packages/pass-winmenu) is also available.
 
 If this is your first time using `pass`, you'll want to create a password store and import/create your GPG keys next.
 This process is explained below.
