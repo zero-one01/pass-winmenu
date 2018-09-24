@@ -30,6 +30,7 @@ namespace PassWinmenu
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
+		private readonly DialogCreator dialogCreator = new DialogCreator();
 		private Git git;
 		private PasswordManager passwordManager;
 
@@ -45,7 +46,7 @@ namespace PassWinmenu
 			}
 			catch (Exception e)
 			{
-				ShowErrorWindow($"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})");
+				Notifications.ShowErrorWindow($"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})");
 				Exit();
 			}
 
@@ -71,6 +72,7 @@ namespace PassWinmenu
 			Log.Send("------------------------------");
 			Log.Send($"Starting pass-winmenu {Version}");
 			Log.Send("------------------------------");
+
 
 			AssignHotkeys(hotkeys);
 			
@@ -103,11 +105,11 @@ namespace PassWinmenu
 				}
 				catch (TypeInitializationException e) when (e.InnerException is DllNotFoundException)
 				{
-					ShowErrorWindow("The git2 DLL could not be found. Git support will be disabled.");
+					Notifications.ShowErrorWindow("The git2 DLL could not be found. Git support will be disabled.");
 				}
 				catch (Exception e)
 				{
-					ShowErrorWindow($"Failed to open the password store Git repository ({e.GetType().Name}: {e.Message}). Git support will be disabled.");
+					Notifications.ShowErrorWindow($"Failed to open the password store Git repository ({e.GetType().Name}: {e.Message}). Git support will be disabled.");
 				}
 			}
 		}
@@ -119,7 +121,7 @@ namespace PassWinmenu
 		{
 			if (!Directory.Exists(ConfigManager.Config.PasswordStore.Location))
 			{
-				ShowErrorWindow($"Could not find the password store at {Path.GetFullPath(ConfigManager.Config.PasswordStore.Location)}. Please make sure it exists.");
+				Notifications.ShowErrorWindow($"Could not find the password store at {Path.GetFullPath(ConfigManager.Config.PasswordStore.Location)}. Please make sure it exists.");
 				Exit();
 				return;
 			}
@@ -129,13 +131,13 @@ namespace PassWinmenu
 			}
 			catch (Win32Exception)
 			{
-				ShowErrorWindow("Could not find GPG. Make sure your gpg-path is set correctly.");
+				Notifications.ShowErrorWindow("Could not find GPG. Make sure your gpg-path is set correctly.");
 				Exit();
 				return;
 			}
 			catch (Exception e)
 			{
-				ShowErrorWindow($"Failed to initialise GPG. {e.GetType().Name}: {e.Message}");
+				Notifications.ShowErrorWindow($"Failed to initialise GPG. {e.GetType().Name}: {e.Message}");
 				Exit();
 				return;
 			}
@@ -149,7 +151,7 @@ namespace PassWinmenu
 					}
 					catch (GpgError err)
 					{
-						ShowErrorWindow(err.Message);
+						Notifications.ShowErrorWindow(err.Message);
 					}
 					// Ignore other exceptions. If it turns out GPG is misconfigured,
 					// these errors will surface upon decryption/encryption.
@@ -169,7 +171,7 @@ namespace PassWinmenu
 			}
 			catch (Exception e) when (e.InnerException != null)
 			{
-				ShowErrorWindow(
+				Notifications.ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
 					"Unable to load configuration file.");
 				Exit();
@@ -177,7 +179,7 @@ namespace PassWinmenu
 			}
 			catch (SemanticErrorException e)
 			{
-				ShowErrorWindow(
+				Notifications.ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
 					"Unable to load configuration file.");
 				Exit();
@@ -185,7 +187,7 @@ namespace PassWinmenu
 			}
 			catch (YamlException e)
 			{
-				ShowErrorWindow(
+				Notifications.ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
 					"Unable to load configuration file.");
 				Exit();
@@ -274,7 +276,7 @@ namespace PassWinmenu
 							hotkeyManager.AddHotKey(keys, OpenPasswordShell);
 							break;
 						case HotkeyAction.ShowDebugInfo:
-							hotkeyManager.AddHotKey(keys, ShowDebugInfo);
+							hotkeyManager.AddHotKey(keys, () => dialogCreator.ShowDebugInfo(git, passwordManager));
 							break;
 					}
 				}
@@ -300,95 +302,7 @@ namespace PassWinmenu
 			}
 		}
 
-		/// <summary>
-		/// Shows an error dialog to the user.
-		/// </summary>
-		/// <param name="message">The error message to be displayed.</param>
-		/// <param name="title">The window title of the error dialog.</param>
-		/// <remarks>
-		/// It might seem a bit inconsistent that some errors are sent as notifications, while others are
-		/// displayed in a MessageBox using the ShowErrorWindow method below.
-		/// The reasoning for this is explained here.
-		/// ShowErrorWindow is used for any error that results from an action initiated by a user and 
-		/// prevents that action for being completed successfully, as well as any error that forces the
-		/// application to exit.
-		/// Any other errors should be sent as notifications, which aren't as intrusive as an error dialog that
-		/// forces you to stop doing whatever you were doing and click OK before you're allowed to continue.
-		/// </remarks>
-		private void ShowErrorWindow(string message, string title = "An error occurred.")
-		{
-			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
-		}
 
-		private void ShowDebugInfo()
-		{
-			var gitData = "";
-			if (git != null)
-			{
-				gitData = $"\tbehind by:\t{git.GetTrackingDetails().BehindBy}\n" +
-				          $"\tahead by:\t\t{git.GetTrackingDetails().AheadBy}\n";
-			}
-
-			var debugInfo = $"gpg.exe path:\t\t{passwordManager.Gpg.GpgExePath}\n" +
-			                $"gpg version:\t\t{passwordManager.Gpg.GetVersion()}\n" +
-			                $"gpg homedir:\t\t{passwordManager.Gpg.GetConfiguredHomeDir()}\n" +
-			                $"password store:\t\t{passwordManager.GetPasswordFilePath(".").TrimEnd('.')}\n" +
-			                $"git enabled:\t\t{git != null}\n{gitData}";
-			MessageBox.Show(debugInfo, "Debugging information", MessageBoxButton.OK, MessageBoxImage.None);
-		}
-
-		/// <summary>
-		/// Opens the password menu and displays it to the user, allowing them to choose an existing password file.
-		/// </summary>
-		/// <param name="options">A list of options the user can choose from.</param>
-		/// <returns>One of the values contained in <paramref name="options"/>, or null if no option was chosen.</returns>
-		private string ShowPasswordMenu(IEnumerable<string> options)
-		{
-			MainWindowConfiguration windowConfig;
-			try
-			{
-				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
-			}
-			catch (ConfigurationParseException e)
-			{
-				RaiseNotification(e.Message, ToolTipIcon.Error);
-				return null;
-			}
-
-			var menu = new PasswordSelectionWindow(options, windowConfig);
-			menu.ShowDialog();
-			if (menu.Success)
-			{
-				return menu.GetSelection();
-			}
-			else
-			{
-				return null;
-			}
-		}
-
-		private string ShowFileSelectionWindow()
-		{
-			MainWindowConfiguration windowConfig;
-			try
-			{
-				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
-			}
-			catch (ConfigurationParseException e)
-			{
-				RaiseNotification(e.Message, ToolTipIcon.Error);
-				return null;
-			}
-
-			// Ask the user where the password file should be placed.
-			var pathWindow = new FileSelectionWindow(ConfigManager.Config.PasswordStore.Location, windowConfig);
-			pathWindow.ShowDialog();
-			if (!pathWindow.Success)
-			{
-				return null;
-			}
-			return pathWindow.GetSelection();
-		}
 
 		/// <summary>
 		/// Copies a string to the clipboard. If it still exists on the clipboard after the amount of time
@@ -418,7 +332,7 @@ namespace PassWinmenu
 			catch (Exception e)
 			{
 				Log.Send($"Password could not be copied to clipboard: {e.GetType().Name}: {e.Message}", LogLevel.Error);
-				ShowErrorWindow($"Failed to copy your password to the clipboard ({e.GetType().Name}: {e.Message}).");
+				Notifications.ShowErrorWindow($"Failed to copy your password to the clipboard ({e.GetType().Name}: {e.Message}).");
 			}
 
 			Task.Delay(TimeSpan.FromSeconds(timeout)).ContinueWith(_ =>
@@ -539,7 +453,7 @@ namespace PassWinmenu
 			}
 			catch (LibGit2SharpException e) when (e.Message == "unsupported URL protocol")
 			{
-				ShowErrorWindow("Unable to push your changes: Remote uses an unknown protocol.\n\n" +
+				Notifications.ShowErrorWindow("Unable to push your changes: Remote uses an unknown protocol.\n\n" +
 				                "If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 				return;
 			}
@@ -547,11 +461,11 @@ namespace PassWinmenu
 			{
 				if (e.GitError != null)
 				{
-					ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
+					Notifications.ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
 				}
 				else
 				{
-					ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
+					Notifications.ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
 				}
 			}
 			var details = git.GetTrackingDetails();
@@ -563,7 +477,7 @@ namespace PassWinmenu
 			}
 			catch (LibGit2SharpException e)
 			{
-				ShowErrorWindow($"Unable to rebase your changes onto the tracking branch:\n{e.Message}");
+				Notifications.ShowErrorWindow($"Unable to rebase your changes onto the tracking branch:\n{e.Message}");
 				return;
 			}
 			git.Push();
@@ -597,7 +511,7 @@ namespace PassWinmenu
 				Invoke((MethodInvoker)AddPassword);
 				return;
 			}
-			var passwordFileName = ShowFileSelectionWindow();
+			var passwordFileName = dialogCreator.ShowFileSelectionWindow();
 			// passwordFileName will be null if no file was selected
 			if (passwordFileName == null) return;
 
@@ -621,12 +535,12 @@ namespace PassWinmenu
 			}
 			catch (GpgException e)
 			{
-				ShowErrorWindow("Unable to encrypt your password: " + e.Message);
+				Notifications.ShowErrorWindow("Unable to encrypt your password: " + e.Message);
 				return;
 			}
 			catch (ConfigurationException e)
 			{
-				ShowErrorWindow("Unable to encrypt your password: " + e.Message);
+				Notifications.ShowErrorWindow("Unable to encrypt your password: " + e.Message);
 				return;
 			}
 			// Copy the newly generated password.
@@ -657,22 +571,22 @@ namespace PassWinmenu
 			}
 			catch (LibGit2SharpException e) when(e.Message == "unsupported URL protocol")
 			{
-				ShowErrorWindow("Unable to update the password store: Remote uses an unknown protocol.\n\n" +
-				                "If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
+				Notifications.ShowErrorWindow("Unable to update the password store: Remote uses an unknown protocol.\n\n" +
+				                              "If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 			}
 			catch (LibGit2SharpException e)
 			{
-				ShowErrorWindow($"Unable to update the password store:\n{e.Message}");
+				Notifications.ShowErrorWindow($"Unable to update the password store:\n{e.Message}");
 			}
 			catch (GitException e)
 			{
 				if (e.GitError != null)
 				{
-					ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
+					Notifications.ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
 				}
 				else
 				{
-					ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
+					Notifications.ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
 				}
 			}
 		}
@@ -700,7 +614,7 @@ namespace PassWinmenu
 			// Build a dictionary mapping display names to relative paths
 			var displayNameMap = passFiles.ToDictionary(val => val.Substring(0, val.Length - EncryptedFileExtension.Length).Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.Interface.DirectorySeparator));
 
-			var selection = ShowPasswordMenu(displayNameMap.Keys);
+			var selection = dialogCreator.ShowPasswordMenu(displayNameMap.Keys);
 			if (selection == null) return null;
 			return displayNameMap[selection];
 		}
@@ -728,22 +642,22 @@ namespace PassWinmenu
 			}
 			catch (GpgError e)
 			{
-				ShowErrorWindow("Password decryption failed: " + e.Message);
+				Notifications.ShowErrorWindow("Password decryption failed: " + e.Message);
 				return;
 			}
 			catch (GpgException e)
 			{
-				ShowErrorWindow("Password decryption failed. " + e.Message);
+				Notifications.ShowErrorWindow("Password decryption failed. " + e.Message);
 				return;
 			}
 			catch (ConfigurationException e)
 			{
-				ShowErrorWindow("Password decryption failed: " + e.Message);
+				Notifications.ShowErrorWindow("Password decryption failed: " + e.Message);
 				return;
 			}
 			catch (Exception e)
 			{
-				ShowErrorWindow($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}");
+				Notifications.ShowErrorWindow($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}");
 				return;
 			}
 
@@ -814,7 +728,7 @@ namespace PassWinmenu
 					}
 					catch (Exception e)
 					{
-						ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
+						Notifications.ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
 					}
 				}
 			}
@@ -832,7 +746,7 @@ namespace PassWinmenu
 			}
 			catch (Exception e)
 			{
-				ShowErrorWindow($"Unable to edit your password (decryption failed): {e.Message}");
+				Notifications.ShowErrorWindow($"Unable to edit your password (decryption failed): {e.Message}");
 				return;
 			}
 
@@ -843,7 +757,7 @@ namespace PassWinmenu
 			}
 			catch (Win32Exception e)
 			{
-				ShowErrorWindow($"Unable to open an editor to edit your password file ({e.Message}).");
+				Notifications.ShowErrorWindow($"Unable to open an editor to edit your password file ({e.Message}).");
 				File.Delete(plaintextFile);
 				return;
 			}

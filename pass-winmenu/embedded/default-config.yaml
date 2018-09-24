@@ -157,6 +157,13 @@ hotkeys:
         type-username: false
         type-password: false
   - 
+    hotkey: 'ctrl alt shift u'
+    action: 'password-field'
+    options:
+        copy-to-clipboard: true
+		field-name: 'username'
+        type-field: false
+  - 
     hotkey: 'ctrl alt shift p'
     action: 'decrypt-password'
     options:
