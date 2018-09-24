@@ -35,7 +35,7 @@ namespace PassWinmenu
 
 		public Program()
 		{
-			hotkeys = new HotkeyManager(Handle);
+			hotkeys = new HotkeyManager();
 			Name = "pass-winmenu (main window)";
 
 			try
@@ -223,13 +223,6 @@ namespace PassWinmenu
 			Close();
 			Application.Exit();
 			Environment.Exit(0);
-		}
-
-		protected override void WndProc(ref Message m)
-		{
-			base.WndProc(ref m);
-			// Pass window messages on to the hotkey handler.
-			hotkeys?.HandleWndProc(ref m);
 		}
 
 		protected override void SetVisibleCore(bool value)

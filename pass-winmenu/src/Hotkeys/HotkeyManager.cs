@@ -8,17 +8,16 @@ namespace PassWinmenu.Hotkeys
 {
 	internal class HotkeyManager : IDisposable
 	{
-		private int hotkeyIdCounter;
-		private readonly Dictionary<int, Action> hotkeyActions = new Dictionary<int, Action>();
-		private readonly IntPtr handle;
+		private readonly List<IDisposable> registrations = new List<IDisposable>();
+
+		private readonly IHotkeyRegistrar registrar;
 
 		/// <summary>
 		/// Create a new hotkey manager.
 		/// </summary>
-		/// <param name="hWnd">The window handle of the window to which the hotkeys should be assigned.</param>
-		public HotkeyManager(IntPtr hWnd)
+		public HotkeyManager()
 		{
-			handle = hWnd;
+			registrar = HotkeyRegistrars.Windows;
 		}
 
 		/// <summary>
@@ -28,57 +27,18 @@ namespace PassWinmenu.Hotkeys
 		/// <param name="action">The action to be executed when the hotkey is pressed.</param>
 		public void AddHotKey(KeyCombination keys, Action action)
 		{
-			AddHotKey(keys.ModifierKeys, keys.Key, action);
-		}
-
-		/// <summary>
-		/// Register a new hotkey with Windows.
-		/// </summary>
-		/// <param name="mod">The modifier keys that should be pressed.</param>
-		/// <param name="key">The keys that should be pressed.</param>
-		/// <param name="action">The action to be executed when the hotkey is pressed.</param>
-		public void AddHotKey(ModifierKeys mod, Key key, Action action)
-		{
-			var success = NativeMethods.RegisterHotKey(handle, hotkeyIdCounter, (int)mod, KeyInterop.VirtualKeyFromKey(key));
-			if (!success)
+			var reg = registrar.Register(keys.ModifierKeys, keys.Key, false, (sender, args) =>
 			{
-				var errorCode = Marshal.GetLastWin32Error();
-				if (errorCode == 1409)
-				{
-					throw new HotkeyException($"Failed to register the hotkey \"{mod}, {key}\". This hotkey has already been registered by a different application.");
-				}
-				else
-				{
-					throw new HotkeyException($"Failed to register the hotkey \"{mod} + {key}\". An unknown error (Win32 error code {errorCode}) occurred.");
-				}
-			}
-			if (!success) throw new InvalidOperationException();
-			hotkeyActions[hotkeyIdCounter] = action;
-			hotkeyIdCounter++;
-		}
-
-		/// <summary>
-		/// WndProc handler. This must be called from the WndProc handler of the
-		/// window to which the hotkeys are registered.
-		/// </summary>
-		/// <param name="message"></param>
-		public void HandleWndProc(ref Message message)
-		{
-			if (message.Msg == NativeMethods.WM_HOTKEY)
-			{
-				var id = message.WParam.ToInt32();
-				if (hotkeyActions.ContainsKey(id))
-				{
-					hotkeyActions[id]();
-				}
-			}
+				action.Invoke();
+			});
+			registrations.Add(reg);
 		}
 
 		public void Dispose()
 		{
-			foreach (var key in hotkeyActions.Keys)
+			foreach (var reg in registrations)
 			{
-				NativeMethods.UnregisterHotKey(handle, key);
+				reg.Dispose();
 			}
 		}
 	}

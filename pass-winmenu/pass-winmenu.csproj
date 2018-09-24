@@ -137,7 +137,6 @@
     <Compile Include="src\Hotkeys\HotkeyException.cs" />
     <Compile Include="src\Hotkeys\HotkeyManager.cs" />
     <Compile Include="src\Hotkeys\KeyCombination.cs" />
-    <Compile Include="src\Hotkeys\NativeMethods.cs" />
     <Compile Include="src\Configuration\Classes\Config.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\ScreenExtensions.cs" />
