@@ -87,20 +87,7 @@ namespace PassWinmenu
 		public PasswordFileContent DecryptPassword(string path, bool passwordOnFirstLine)
 		{
 			var content = DecryptText(path);
-			if (passwordOnFirstLine)
-			{
-				// The first line contains the password, any other lines contain additional (contextual) content.
-				var match = Regex.Match(content, @"([^\n\r]*)(?:(?:\r\n|\n|\r)(.*))?", RegexOptions.Singleline);
-				var password = match.Groups[1].Value;
-				var extraContent = match.Groups[2].Value;
-
-				return new PasswordFileContent(password, extraContent);
-			}
-			else
-			{
-				// Consider the contents of the entire file to be the password.
-				return new PasswordFileContent(content, null);
-			}
+			return new PasswordFileParser().Parse(content, !passwordOnFirstLine);
 
 		}
 
