@@ -25,8 +25,8 @@ namespace PassWinmenu
 	{
 		private string Version => EmbeddedResources.Version;
 		public const string LastConfigVersion = "1.7";
-		private const string EncryptedFileExtension = ".gpg";
-		private const string PlaintextFileExtension = ".txt";
+		public const string EncryptedFileExtension = ".gpg";
+		public const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
@@ -531,7 +531,7 @@ namespace PassWinmenu
 
 			try
 			{
-				passwordManager.EncryptPassword(new PasswordFileContent(password, extraContent), passwordFileName + passwordManager.EncryptedFileExtension);
+				passwordManager.EncryptPassword(new PasswordFileContent(null, password, extraContent), passwordFileName + passwordManager.EncryptedFileExtension);
 			}
 			catch (GpgException e)
 			{
@@ -672,7 +672,7 @@ namespace PassWinmenu
 			var usernameEntered = false;
 			if (typeUsername)
 			{
-				var username = GetUsername(selectedFile, passFile.ExtraContent);
+				var username = Actions.UsernameSelection.GetUsername(selectedFile, passFile.ExtraContent);
 				if (username != null)
 				{
 					EnterText(username, ConfigManager.Config.Output.DeadKeys);
@@ -789,34 +789,6 @@ namespace PassWinmenu
 			}
 		}
 
-		/// <summary>
-		/// Attepts to retrieve the username from a password file.
-		/// </summary>
-		/// <param name="passwordFile">The name of the password file.</param>
-		/// <param name="extraContent">The extra content of the password file.</param>
-		/// <returns>A string containing the username if the password file contains one, null if no username was found.</returns>
-		private string GetUsername(string passwordFile, string extraContent)
-		{
-			var options = ConfigManager.Config.PasswordStore.UsernameDetection.Options;
-			switch (ConfigManager.Config.PasswordStore.UsernameDetection.Method)
-			{
-				case UsernameDetectionMethod.FileName:
-					return Path.GetFileName(passwordFile)?.Replace(EncryptedFileExtension, "");
-				case UsernameDetectionMethod.LineNumber:
-					var extraLines = extraContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-					var lineNumber = options.LineNumber - 2;
-					if (lineNumber <= 1) RaiseNotification("Failed to read username from password file: username-detection.options.line-number must be set to 2 or higher.", ToolTipIcon.Warning);
-					return lineNumber < extraLines.Length ? extraLines[lineNumber] : null;
-				case UsernameDetectionMethod.Regex:
-					var rgxOptions = options.RegexOptions.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
-					rgxOptions = rgxOptions | (options.RegexOptions.Multiline ? RegexOptions.Multiline : RegexOptions.None);
-					rgxOptions = rgxOptions | (options.RegexOptions.Singleline ? RegexOptions.Singleline : RegexOptions.None);
-					var match = Regex.Match(extraContent, options.Regex, rgxOptions);
-					return match.Groups["username"].Success ? match.Groups["username"].Value : null;
-				default:
-					throw new ArgumentOutOfRangeException("username-detection.method", "Invalid username detection method.");
-			}
-		}
 
 		/// <summary>
 		/// Sends text directly to the topmost window, as if it was entered by the user.

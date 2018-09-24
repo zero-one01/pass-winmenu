@@ -95,6 +95,7 @@
   <ItemGroup>
     <Compile Include="src\Actions\DecryptAction.cs" />
     <Compile Include="src\Actions\IAction.cs" />
+    <Compile Include="src\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfigFile.cs" />

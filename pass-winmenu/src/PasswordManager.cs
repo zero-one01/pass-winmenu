@@ -11,13 +11,15 @@ namespace PassWinmenu
 {
 	internal struct PasswordFileContent
 	{
+		public string Name { get; }
 		public string Password { get; }
 		public string ExtraContent { get; }
 
-		public PasswordFileContent(string password, string extraContent)
+		public PasswordFileContent(string name, string password, string metaData)
 		{
+			Name = name;
 			Password = password;
-			ExtraContent = extraContent;
+			ExtraContent = metaData;
 		}
 	}
 	internal class PasswordManager
@@ -94,12 +96,12 @@ namespace PassWinmenu
 				var password = match.Groups[1].Value;
 				var extraContent = match.Groups[2].Value;
 
-				return new PasswordFileContent(password, extraContent);
+				return new PasswordFileContent(Path.GetFileName(path), password, extraContent);
 			}
 			else
 			{
 				// Consider the contents of the entire file to be the password.
-				return new PasswordFileContent(content, null);
+				return new PasswordFileContent(Path.GetFileName(path), content, null);
 			}
 
 		}
