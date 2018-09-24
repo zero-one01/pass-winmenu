@@ -24,8 +24,7 @@ namespace PassWinmenu.Hotkeys
 			private sealed class Adaptor<T> : IKeyEventSource
 				where T : UIElement
 			{
-				public static Adaptor<T> Create<T>(T element)
-					where T : UIElement
+				public static Adaptor<T> Create(T element)
 				{
 					return new Adaptor<T>(element);
 				}
