@@ -76,15 +76,15 @@ namespace PassWinmenu.Utilities
 			return null;
 		}
 
-        /// <summary>
-        /// Retrieves an <see cref="Exception"/> representing the last Win32
-        /// error.
-        /// </summary>
-        internal static Exception LastWin32Exception()
-        {
-            return Marshal.GetExceptionForHR(
-                Marshal.GetHRForLastWin32Error()
-                );
-        }
+		/// <summary>
+		/// Retrieves an <see cref="Exception"/> representing the last Win32
+		/// error.
+		/// </summary>
+		internal static Exception LastWin32Exception()
+		{
+			return Marshal.GetExceptionForHR(
+				Marshal.GetHRForLastWin32Error()
+				);
+		}
 	}
 }
