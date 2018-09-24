@@ -36,6 +36,7 @@ namespace PassWinmenu
 
 		public Program()
 		{
+			var h = Handle; // magic, do not touch
 			hotkeys = new HotkeyManager();
 			Name = "pass-winmenu (main window)";
 
