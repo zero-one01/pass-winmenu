@@ -5,6 +5,7 @@
 		DecryptPassword,
 		AddPassword,
 		EditPassword,
+		PasswordField,
 		GitPull,
 		GitPush,
 		OpenShell,

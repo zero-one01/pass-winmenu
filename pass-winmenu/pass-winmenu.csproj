@@ -98,7 +98,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Actions\DecryptAction.cs" />
+    <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
+    <Compile Include="src\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfigFile.cs" />
@@ -123,6 +126,7 @@
     <Compile Include="src\Configuration\Classes\UsernameDetectionRegexOptions.cs" />
     <Compile Include="src\Configuration\ConfigurationException.cs" />
     <Compile Include="src\Configuration\ConfigurationParseException.cs" />
+    <Compile Include="src\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\GpgAgent.cs" />
     <Compile Include="src\Hotkeys\Hotkey.cs" />
@@ -133,6 +137,7 @@
     <Compile Include="src\Hotkeys\HotkeyRegistrars.Windows.MessageWindow.cs" />
     <Compile Include="src\Hotkeys\IHotkeyRegistrar.cs" />
     <Compile Include="src\Logger.cs" />
+    <Compile Include="src\Notifications.cs" />
     <Compile Include="src\PasswordFileParser.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerationOptions.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
@@ -229,7 +234,6 @@
   <ItemGroup>
     <EmbeddedResource Include="embedded\version.txt" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

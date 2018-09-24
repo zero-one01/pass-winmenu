@@ -11,13 +11,15 @@ namespace PassWinmenu
 {
 	internal struct PasswordFileContent
 	{
+		public string Name { get; }
 		public string Password { get; }
 		public string ExtraContent { get; }
 
-		public PasswordFileContent(string password, string extraContent)
+		public PasswordFileContent(string name, string password, string metaData)
 		{
+			Name = name;
 			Password = password;
-			ExtraContent = extraContent;
+			ExtraContent = metaData;
 		}
 	}
 	internal class PasswordManager
