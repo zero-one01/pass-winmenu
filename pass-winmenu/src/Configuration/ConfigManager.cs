@@ -38,7 +38,7 @@ namespace PassWinmenu.Configuration
 				return LoadResult.NewFileCreated;
 			}
 
-			var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention());
+			var deserialiser = BuildDeserialiser();
 
 			using (var reader = File.OpenText(fileName))
 			{
@@ -59,11 +59,18 @@ namespace PassWinmenu.Configuration
 			return LoadResult.Success;
 		}
 
+		private static IDeserializer BuildDeserialiser()
+		{
+			var builder = new DeserializerBuilder()
+				.WithNamingConvention(new HyphenatedNamingConvention());
+			return builder.Build();
+		}
+
 		public static void Reload(string fileName)
 		{
 			try
 			{
-				var deserialiser = new Deserializer(namingConvention: new HyphenatedNamingConvention());
+				var deserialiser = BuildDeserialiser();
 				using (var reader = File.OpenText(fileName))
 				{
 					var newConfig = deserialiser.Deserialize<Config>(reader);
