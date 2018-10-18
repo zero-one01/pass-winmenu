@@ -76,6 +76,12 @@
     <Reference Include="LibGit2Sharp, Version=0.24.0.0, Culture=neutral, PublicKeyToken=7cbde695407f0333, processorArchitecture=MSIL">
       <HintPath>..\packages\LibGit2Sharp.0.24.0\lib\net40\LibGit2Sharp.dll</HintPath>
     </Reference>
+    <Reference Include="McSherry.SemanticVersioning, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\McSherry.SemanticVersioning.1.2.1\lib\net45\McSherry.SemanticVersioning.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -92,6 +98,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfigFile.cs" />
@@ -109,6 +116,7 @@
     <Compile Include="src\Configuration\Classes\PasswordStoreConfig.cs" />
     <Compile Include="src\Configuration\Classes\StyleConfig.cs" />
     <Compile Include="src\Configuration\Classes\SyncMode.cs" />
+    <Compile Include="src\Configuration\Classes\UpdateCheckingConfig.cs" />
     <Compile Include="src\Configuration\Classes\UsernameDetectionConfig.cs" />
     <Compile Include="src\Configuration\Classes\UsernameDetectionMethod.cs" />
     <Compile Include="src\Configuration\Classes\UsernameDetectionOptions.cs" />
@@ -130,6 +138,13 @@
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
     <Compile Include="src\PasswordManager.cs" />
     <Compile Include="src\PinentryWatcher.cs" />
+    <Compile Include="src\UpdateChecking\Chocolatey\ChocolateyUpdateSource.cs" />
+    <Compile Include="src\UpdateChecking\GitHub\GitHubUpdateSource.cs" />
+    <Compile Include="src\UpdateChecking\GitHub\ReleasesResponse.cs" />
+    <Compile Include="src\UpdateChecking\IUpdateSource.cs" />
+    <Compile Include="src\UpdateChecking\ProgramVersion.cs" />
+    <Compile Include="src\UpdateChecking\UpdateChecker.cs" />
+    <Compile Include="src\UpdateChecking\UpdateException.cs" />
     <Compile Include="src\Utilities\Disposable.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\DirectoryInfoExtensions.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\KeyEventArgsExtensions.cs" />
@@ -214,6 +229,7 @@
   <ItemGroup>
     <EmbeddedResource Include="embedded\version.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

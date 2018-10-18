@@ -2,17 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using LibGit2Sharp;
+using McSherry.SemanticVersioning;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
+using PassWinmenu.UpdateChecking;
+using PassWinmenu.UpdateChecking.GitHub;
 using PassWinmenu.Windows;
 using YamlDotNet.Core;
 using Application = System.Windows.Forms.Application;
@@ -23,13 +30,14 @@ namespace PassWinmenu
 {
 	internal class Program : Form
 	{
-		private string Version => EmbeddedResources.Version;
+		public static string Version => EmbeddedResources.Version;
 		public const string LastConfigVersion = "1.7";
 		private const string EncryptedFileExtension = ".gpg";
 		private const string PlaintextFileExtension = ".txt";
 		private readonly NotifyIcon icon = new NotifyIcon();
 		private readonly HotkeyManager hotkeys;
 		private readonly StartupLink startupLink = new StartupLink("pass-winmenu");
+		private UpdateChecker updateChecker;
 		private Git git;
 		private PasswordManager passwordManager;
 
@@ -72,7 +80,7 @@ namespace PassWinmenu
 			Log.Send($"Starting pass-winmenu {Version}");
 			Log.Send("------------------------------");
 
-			AssignHotkeys(hotkeys);
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 			
 			var gpg = new GPG();
 			gpg.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
@@ -110,6 +118,33 @@ namespace PassWinmenu
 					ShowErrorWindow($"Failed to open the password store Git repository ({e.GetType().Name}: {e.Message}). Git support will be disabled.");
 				}
 			}
+			InitialiseUpdateChecker();
+
+			AssignHotkeys(hotkeys);
+		}
+
+		private void InitialiseUpdateChecker()
+		{
+			if (!ConfigManager.Config.Application.UpdateChecking.CheckForUpdates) return;
+
+#if CHOCOLATEY
+			var updateSource = new ChocolateyUpdateSource();
+#else
+			var updateSource = new GitHubUpdateSource();
+#endif
+			var versionString = Version.Split('-').First();
+
+			updateChecker = new UpdateChecker(updateSource, SemanticVersion.Parse(versionString, ParseMode.Lenient));
+			updateChecker.UpdateAvailable += (sender, args) =>
+			{
+				// If the update contains important vulnerability fixes, always display a notification.
+				if (ConfigManager.Config.Notifications.Types.UpdateAvailable || args.Version.Important)
+				{
+					icon.ContextMenuStrip.Items[0].Visible = true;
+					RaiseNotification($"A new update ({args.Version.VersionNumber.ToString(SemanticVersionFormat.Concise)}) is available.", ToolTipIcon.Info);
+				}
+			};
+			updateChecker.Start();
 		}
 
 		/// <summary>
@@ -275,6 +310,9 @@ namespace PassWinmenu
 							break;
 						case HotkeyAction.ShowDebugInfo:
 							hotkeyManager.AddHotKey(keys, ShowDebugInfo);
+							break;
+						case HotkeyAction.CheckForUpdates:
+							hotkeyManager.AddHotKey(keys, updateChecker.CheckForUpdates);
 							break;
 					}
 				}
@@ -461,6 +499,13 @@ namespace PassWinmenu
 			var menu = new ContextMenuStrip();
 			menu.Items.Add(new ToolStripLabel("pass-winmenu " + Version));
 			menu.Items.Add(new ToolStripSeparator());
+
+			var downloadUpdate = new ToolStripMenuItem("Download Update");
+			downloadUpdate.Click += (sender, args) => Process.Start(updateChecker.LatestVersion.Value.ReleaseNotes.ToString());
+			downloadUpdate.BackColor = Color.Beige;
+			//downloadUpdate.Visible = false;
+
+			menu.Items.Add(downloadUpdate);
 			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
 			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)AddPassword));
 			menu.Items.Add("Edit Password File", null, (sender, args) => Task.Run(() => EditPassword()));
