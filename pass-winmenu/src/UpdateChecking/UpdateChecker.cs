@@ -49,13 +49,19 @@ namespace PassWinmenu.UpdateChecking
 		/// </summary>
 		public void CheckForUpdates()
 		{
+			Log.Send("Checking for available updates...", LogLevel.Debug);
 			var update = GetUpdate();
-			if (update == null) return;
+			if (update == null)
+			{
+				Log.Send("No update found.", LogLevel.Debug);
+				return;
+			}
 
 			// Stop automatic update checking if we've found an update.
 			timer.Stop();
 			timer.Dispose();
 			LatestVersion = update;
+			Log.Send($"New update found: {update.Value.VersionNumber}", LogLevel.Debug);
 			NotifyUpdate(update.Value);
 		}
 
