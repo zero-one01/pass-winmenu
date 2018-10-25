@@ -80,7 +80,7 @@ namespace PassWinmenu.UpdateChecking
 			{
 				return latestVersion;
 			}
-			return latestVersion;
+			return null;
 		}
 
 		/// <summary>
