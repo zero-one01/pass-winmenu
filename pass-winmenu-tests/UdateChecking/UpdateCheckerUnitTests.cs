@@ -105,9 +105,12 @@ namespace PassWinmenu.UdateChecking
 			};
 			checker.Start();
 
-			// Allow the update checker to raise the event.
-			Thread.Sleep(100);
-
+			// Wait a while to see if the event is raised.
+			for (var i = 0; i < 20; i++)
+			{
+				Thread.Sleep(50);
+				if (raised) return true;
+			}
 			return raised;
 		}
 
