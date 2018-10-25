@@ -142,7 +142,7 @@ namespace PassWinmenu
 				// If the update contains important vulnerability fixes, always display a notification.
 				if (ConfigManager.Config.Notifications.Types.UpdateAvailable || args.Version.Important)
 				{
-					icon.ContextMenuStrip.Items[0].Visible = true;
+					icon.ContextMenuStrip.Items[2].Visible = true;
 					RaiseNotification($"A new update ({args.Version.VersionNumber.ToString(SemanticVersionFormat.Concise)}) is available.", ToolTipIcon.Info);
 				}
 			};
@@ -505,7 +505,7 @@ namespace PassWinmenu
 			var downloadUpdate = new ToolStripMenuItem("Download Update");
 			downloadUpdate.Click += (sender, args) => Process.Start(updateChecker.LatestVersion.Value.ReleaseNotes.ToString());
 			downloadUpdate.BackColor = Color.Beige;
-			//downloadUpdate.Visible = false;
+			downloadUpdate.Visible = false;
 
 			menu.Items.Add(downloadUpdate);
 			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
