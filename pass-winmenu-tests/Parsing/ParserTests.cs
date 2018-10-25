@@ -56,13 +56,17 @@ namespace PassWinmenu.Parsing
 			Assert.AreEqual(parsedCrlf.Password, "password");
 			Assert.AreEqual(parsedCrlf.ExtraContent, string.Empty);
 
-			var parsedCr = p.Parse(crlf, false);
+			var parsedCr = p.Parse(cr, false);
 			Assert.AreEqual(parsedCr.Password, "password");
 			Assert.AreEqual(parsedCr.ExtraContent, string.Empty);
 
-			var parsedLf = p.Parse(crlf, false);
+			var parsedLf = p.Parse(lf, false);
 			Assert.AreEqual(parsedLf.Password, "password");
 			Assert.AreEqual(parsedLf.ExtraContent, string.Empty);
+
+			var parsedNone = p.Parse(none, false);
+			Assert.AreEqual(parsedNone.Password, "password");
+			Assert.AreEqual(parsedNone.ExtraContent, string.Empty);
 		}
 	}
 }
