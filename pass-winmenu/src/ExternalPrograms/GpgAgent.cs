@@ -149,6 +149,12 @@ namespace PassWinmenu.ExternalPrograms
 		/// </summary>
 		public void UpdateAgentConfig(Dictionary<string, string> keys, string homeDir)
 		{
+			if (!Directory.Exists(homeDir))
+			{
+				Log.Send("GPG homedir does not exist, config file cannot be updated.", LogLevel.Warning);
+				return;
+			}
+
 			var agentConf = Path.Combine(homeDir, gpgAgentConfigFileName);
 			if (!File.Exists(agentConf))
 			{

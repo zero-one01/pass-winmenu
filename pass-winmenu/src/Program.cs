@@ -53,6 +53,8 @@ namespace PassWinmenu
 			}
 			catch (Exception e)
 			{
+				Log.Send("Could not start pass-winmenu: An exception occurred.", LogLevel.Error);
+				Log.ReportException(e);
 				ShowErrorWindow($"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})");
 				Exit();
 			}
