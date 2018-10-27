@@ -36,10 +36,12 @@ cp "bin/Release/pass-winmenu.exe" "$PKGDIR/pass-winmenu.exe"
 
 if($WithGpg){
 	tools/7za.exe x -aos "include/GnuPG.zip" "-o$INCLUDEDIR"
-	cp "include/packaged-config.yaml" "$PKGDIR/pass-winmenu.yaml"
+	cp "embedded/default-config.yaml" "$PKGDIR/pass-winmenu.yaml"
+	tools/patch.exe "$PKGDIR/pass-winmenu.yaml" "include/packaged-config.patch"
 }else{
 	$ZIPNAME="pass-winmenu-nogpg.zip"
-	cp "include/packaged-config-nogpg.yaml" "$PKGDIR/pass-winmenu.yaml"
+	cp "embedded/default-config.yaml" "$PKGDIR/pass-winmenu.yaml"
+	tools/patch.exe "$PKGDIR/pass-winmenu.yaml" "include/packaged-config-nogpg.patch"
 }
 
 if($Package){
