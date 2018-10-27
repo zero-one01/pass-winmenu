@@ -1,13 +1,21 @@
+# This scripts combines all the files necessary to run pass-winmenu as a standalone program,
+# and can package them into a ZIP file as well.
+
 param(
+# Re-copy all dependencies and libraries to the package directory 
+# (normally they are maintained between builds).
 	[switch]$Clean,
+# Combine all required files into a ZIP file.
 	[switch]$Package,
+# Compress the resulting zip file. Only makes sense with -Package.
 	[switch]$Compress,
+# Include a standalone version of GPG in the dependencies.
 	[switch]$WithGpg
 )
 
 $PKGDIR="bin/Release-Packaged"
-$ZIPDIR="bin/pass-winmenu.zip"
 $INCLUDEDIR="$PKGDIR/lib"
+$ZIPDIR="bin/"
 $ZIPNAME="pass-winmenu.zip"
 
 if($Clean){
@@ -45,16 +53,19 @@ if($WithGpg){
 }
 
 if($Package){
-	if(Test-Path "$ZIPDIR"){
-		echo "Removing old package: $ZIPDIR"
-		rm "$ZIPDIR"
+	$ZIPPATH = "$ZIPDIR$ZIPNAME"
+	if(Test-Path "$ZIPPATH"){
+		echo "Removing old package: $ZIPPATH"
+		rm "$ZIPPATH"
 	}
-	cd bin
+	$STARTDIR=$PWD
+	cd $ZIPDIR
 	if($Compress){
+		# These options seem to result in the smallest file size.
 		../tools/7za.exe a -mm=Deflate -mfb=258 -mpass=15 "$ZIPNAME" "Release-Packaged/*"
 	}else{
 		../tools/7za.exe a "$ZIPNAME" "Release-Packaged/*"
 	}
 	../tools/7za.exe rn "$ZIPNAME" "Release-Packaged" "pass-winmenu"
-	cd ..
+	cd $STARTDIR
 }
