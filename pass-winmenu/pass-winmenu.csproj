@@ -98,7 +98,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Actions\DecryptAction.cs" />
+    <Compile Include="src\Actions\Actions.cs" />
+    <Compile Include="src\Actions\EditAction.cs" />
     <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Clipboard.cs" />
@@ -129,6 +130,7 @@
     <Compile Include="src\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\GpgAgent.cs" />
+    <Compile Include="src\ExternalPrograms\ICryptoService.cs" />
     <Compile Include="src\Hotkeys\Hotkey.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.KeyEventSource.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.UI.cs" />
@@ -136,6 +138,7 @@
     <Compile Include="src\Hotkeys\HotkeyRegistrars.Windows.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.Windows.MessageWindow.cs" />
     <Compile Include="src\Hotkeys\IHotkeyRegistrar.cs" />
+    <Compile Include="src\INotificationService.cs" />
     <Compile Include="src\Logger.cs" />
     <Compile Include="src\Notifications.cs" />
     <Compile Include="src\PasswordFileParser.cs" />
@@ -169,6 +172,7 @@
     <Compile Include="src\StartupLink.cs" />
     <Compile Include="src\Utilities\Helpers.cs" />
     <Compile Include="src\Utilities\NativeMethods.cs" />
+    <Compile Include="src\WindowsUtilities.cs" />
     <Compile Include="src\Windows\EditWindow.xaml.cs">
       <DependentUpon>EditWindow.xaml</DependentUpon>
     </Compile>

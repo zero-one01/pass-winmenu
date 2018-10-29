@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PassWinmenu.Parsing
+namespace PassWinmenu.Tests
 {
 	[TestClass]
 	public class ParserTests
@@ -13,10 +13,10 @@ namespace PassWinmenu.Parsing
 		{
 			var text = "";
 			var p = new PasswordFileParser();
-			var parsed = p.Parse(text, false);
+			var parsed = p.Parse(null, text, false);
 
 			Assert.AreEqual(parsed.Password, string.Empty);
-			Assert.AreEqual(parsed.ExtraContent, string.Empty);
+			Assert.AreEqual(parsed.Metadata, string.Empty);
 		}
 
 		[TestMethod, TestCategory(Category)]
@@ -28,17 +28,17 @@ namespace PassWinmenu.Parsing
 
 			var p = new PasswordFileParser();
 
-			var parsedCrlf = p.Parse(crlf, false);
+			var parsedCrlf = p.Parse(null, crlf, false);
 			Assert.AreEqual(parsedCrlf.Password, "password");
-			Assert.AreEqual(parsedCrlf.ExtraContent, "meta-data");
+			Assert.AreEqual(parsedCrlf.Metadata, "meta-data");
 
-			var parsedCr = p.Parse(crlf, false);
+			var parsedCr = p.Parse(null, cr, false);
 			Assert.AreEqual(parsedCr.Password, "password");
-			Assert.AreEqual(parsedCr.ExtraContent, "meta-data");
+			Assert.AreEqual(parsedCr.Metadata, "meta-data");
 
-			var parsedLf = p.Parse(crlf, false);
+			var parsedLf = p.Parse(null, lf, false);
 			Assert.AreEqual(parsedLf.Password, "password");
-			Assert.AreEqual(parsedLf.ExtraContent, "meta-data");
+			Assert.AreEqual(parsedLf.Metadata, "meta-data");
 		}
 
 		[TestMethod, TestCategory(Category)]
@@ -52,21 +52,21 @@ namespace PassWinmenu.Parsing
 
 			var p = new PasswordFileParser();
 
-			var parsedCrlf = p.Parse(crlf, false);
+			var parsedCrlf = p.Parse(null, crlf, false);
 			Assert.AreEqual(parsedCrlf.Password, "password");
-			Assert.AreEqual(parsedCrlf.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedCrlf.Metadata, string.Empty);
 
-			var parsedCr = p.Parse(cr, false);
+			var parsedCr = p.Parse(null, cr, false);
 			Assert.AreEqual(parsedCr.Password, "password");
-			Assert.AreEqual(parsedCr.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedCr.Metadata, string.Empty);
 
-			var parsedLf = p.Parse(lf, false);
+			var parsedLf = p.Parse(null, lf, false);
 			Assert.AreEqual(parsedLf.Password, "password");
-			Assert.AreEqual(parsedLf.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedLf.Metadata, string.Empty);
 
-			var parsedNone = p.Parse(none, false);
+			var parsedNone = p.Parse(null, none, false);
 			Assert.AreEqual(parsedNone.Password, "password");
-			Assert.AreEqual(parsedNone.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedNone.Metadata, string.Empty);
 		}
 	}
 }

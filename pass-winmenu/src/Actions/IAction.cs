@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace PassWinmenu.Actions
 {
-	interface IAction
+	internal interface IAction
 	{
-
+		void Run();
 	}
 }

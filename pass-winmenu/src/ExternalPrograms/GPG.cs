@@ -12,7 +12,7 @@ namespace PassWinmenu.ExternalPrograms
 	/// <summary>
 	/// Simple wrapper over GPG.
 	/// </summary>
-	internal class GPG
+	internal class GPG : ICryptoService
 	{
 		private const string statusMarker = "[GNUPG:] ";
 		private const string gpgDefaultInstallDir = @"C:\Program Files (x86)\gnupg\bin";

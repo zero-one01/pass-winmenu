@@ -5,16 +5,45 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using PassWinmenu.Configuration;
 using MessageBox = System.Windows.MessageBox;
 
 namespace PassWinmenu
 {
-	static class Notifications
+	internal class Notifications : INotificationService
 	{
-		public static void Raise(string message, Severity level)
+		public NotifyIcon Icon { get; set; }
+
+		private const int ToolTipTimeoutMs = 5000;
+
+		public Notifications(NotifyIcon icon)
 		{
-			// TODO: Implement from here
-			throw new NotImplementedException();
+			Icon = icon ?? throw new ArgumentNullException(nameof(icon));
+		}
+
+		public void Raise(string message, Severity level)
+		{
+			if (ConfigManager.Config.Notifications.Enabled)
+			{
+				Icon.ShowBalloonTip(ToolTipTimeoutMs, "pass-winmenu", message, GetIconForSeverity(level));
+			}
+		}
+
+		private ToolTipIcon GetIconForSeverity(Severity severity)
+		{
+			switch (severity)
+			{
+				case Severity.None:
+					return ToolTipIcon.None;
+				case Severity.Info:
+					return ToolTipIcon.Info;
+				case Severity.Warning:
+					return ToolTipIcon.Warning;
+				case Severity.Error:
+					return ToolTipIcon.Error;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(severity), severity, null);
+			}
 		}
 
 		/// <summary>
@@ -32,7 +61,7 @@ namespace PassWinmenu
 		/// Any other errors should be sent as notifications, which aren't as intrusive as an error dialog that
 		/// forces you to stop doing whatever you were doing and click OK before you're allowed to continue.
 		/// </remarks>
-		public static void ShowErrorWindow(string message, string title = "An error occurred.")
+		public void ShowErrorWindow(string message, string title = "An error occurred.")
 		{
 			MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
 		}

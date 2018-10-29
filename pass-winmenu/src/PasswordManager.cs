@@ -9,19 +9,32 @@ using PassWinmenu.Utilities.ExtensionMethods;
 
 namespace PassWinmenu
 {
-	internal struct PasswordFileContent
+	internal class DecryptedPasswordFile : PasswordFile
 	{
-		public string Name { get; }
-		public string Password { get; }
-		public string ExtraContent { get; }
+		public string Content => $"{Password}\n{Metadata}";
 
-		public PasswordFileContent(string name, string password, string metaData)
+		public string Password { get; }
+		public string Metadata { get; }
+
+		public DecryptedPasswordFile(string relativePath, string password, string metaData) : base(relativePath)
 		{
-			Name = name;
 			Password = password;
-			ExtraContent = metaData;
+			Metadata = metaData;
 		}
 	}
+
+	internal class PasswordFile
+	{
+		public string FullPath => Path.GetFullPath(RelativePath);
+		public string RelativePath { get; }
+		public string Name => Path.GetFileName(RelativePath);
+
+		public PasswordFile(string relativePath)
+		{
+			RelativePath = relativePath;
+		}
+	}
+
 	internal class PasswordManager
 	{
 		internal const string GpgIdFileName = ".gpg-id";
@@ -29,31 +42,30 @@ namespace PassWinmenu
 		private readonly PinentryWatcher pinentryWatcher = new PinentryWatcher();
 		private readonly DirectoryInfo passwordStoreDirectory;
 
-		public GPG Gpg { get; }
+		public ICryptoService Crypto { get; }
 		public bool PinentryFixEnabled { get; set; }
 		public readonly string EncryptedFileExtension;
 
-		public PasswordManager(string passwordStore, string encryptedFileExtension, GPG gpg)
+		public PasswordManager(string passwordStore, string encryptedFileExtension, GPG crypto)
 		{
 			var normalised = Helpers.NormaliseDirectory(passwordStore);
 			passwordStoreDirectory = new DirectoryInfo(normalised);
 
 			EncryptedFileExtension = encryptedFileExtension;
-			Gpg = gpg;
+			Crypto = crypto;
 		}
 
 		/// <summary>
 		/// Generates an encrypted password file at the specified path.
 		/// If the path contains directories that do not exist, they will be created automatically.
 		/// </summary>
-		/// <param name="fileContent">
-		/// A <see cref="PasswordFileContent"/> instance specifying the contents
+		/// <param name="file">
+		/// A <see cref="DecryptedPasswordFile"/> instance specifying the contents
 		/// of the password file to be generated.
 		/// </param>
-		/// <param name="path">A relative path specifying where in the password store the password file should be generated.</param>
-		public void EncryptPassword(PasswordFileContent fileContent, string path)
+		public void EncryptPassword(DecryptedPasswordFile file)
 		{
-			EncryptText($"{fileContent.Password}\n{fileContent.ExtraContent}", path);
+			EncryptText(file.Content, file.RelativePath);
 		}
 
 		/// <summary>
@@ -66,7 +78,7 @@ namespace PassWinmenu
 		{
 			var fullPath = GetPasswordFilePath(path);
 			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-			Gpg.Encrypt(text, fullPath, GetGpgIds(fullPath));
+			Crypto.Encrypt(text, fullPath, GetGpgIds(fullPath));
 		}
 
 		public string DecryptText(string path)
@@ -75,7 +87,7 @@ namespace PassWinmenu
 			if (!File.Exists(fullPath)) throw new ArgumentException($"The password file \"{fullPath}\" does not exist.");
 
 			if(PinentryFixEnabled) pinentryWatcher.BumpPinentryWindow();
-			return Gpg.Decrypt(fullPath);
+			return Crypto.Decrypt(fullPath);
 		}
 
 		/// <summary>
@@ -86,11 +98,11 @@ namespace PassWinmenu
 		/// Any content in the remaining lines will be considered metadata.
 		/// If set to false, the contents of the entire file are considered to be the password.</param>
 		/// <returns></returns>
-		public PasswordFileContent DecryptPassword(string path, bool passwordOnFirstLine)
+		public DecryptedPasswordFile DecryptPassword(string path, bool passwordOnFirstLine)
 		{
 			var content = DecryptText(path);
-			return new PasswordFileParser().Parse(content, !passwordOnFirstLine);
-
+			var file = new PasswordFile(path);
+			return new PasswordFileParser().Parse(file, content, !passwordOnFirstLine);
 		}
 
 		/// <summary>
@@ -98,13 +110,13 @@ namespace PassWinmenu
 		/// is used to produce the path to the encrypted file.
 		/// </summary>
 		/// <param name="file">A relative path pointing to the encrypted file in the password store.</param>
-		public string EncryptFile(string file)
+		public PasswordFile EncryptFile(string file)
 		{
 			var fullFilePath = GetPasswordFilePath(file);
 			if (!File.Exists(fullFilePath)) throw new ArgumentException($"The unencrypted file \"{fullFilePath}\" does not exist.");
-			Gpg.EncryptFile(fullFilePath, fullFilePath + EncryptedFileExtension, GetGpgIds(file));
+			Crypto.EncryptFile(fullFilePath, fullFilePath + EncryptedFileExtension, GetGpgIds(file));
 
-			return fullFilePath + EncryptedFileExtension;
+			return new PasswordFile(file + EncryptedFileExtension);
 		}
 
 		/// <summary>
@@ -127,7 +139,7 @@ namespace PassWinmenu
 			if (!File.Exists(encryptedFileName)) throw new ArgumentException($"The encrypted file \"{encryptedFileName}\" does not exist.");
 
 			if(PinentryFixEnabled) pinentryWatcher.BumpPinentryWindow();
-			Gpg.DecryptToFile(encryptedFileName, decryptedFileName);
+			Crypto.DecryptToFile(encryptedFileName, decryptedFileName);
 			return decryptedFileName;
 		}
 
@@ -167,7 +179,7 @@ namespace PassWinmenu
 		public IEnumerable<string> GetPasswordFiles(string pattern)
 		{
 			var files = Directory.EnumerateFiles(passwordStoreDirectory.FullName, "*", SearchOption.AllDirectories);
-			var matchingFiles = files.Where(f => Regex.IsMatch(Path.GetFileName(f), pattern)).ToArray();
+			var matchingFiles = files.Where(f => Regex.IsMatch(Path.GetFileName(f), pattern));
 			var relativeNames = matchingFiles.Select(p => Helpers.GetRelativePath(p, passwordStoreDirectory.FullName));
 
 			return relativeNames;
