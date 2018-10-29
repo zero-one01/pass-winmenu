@@ -43,7 +43,15 @@ namespace PassWinmenu.ExternalPrograms
 
 		public BranchTrackingDetails GetTrackingDetails() => repo.Head.TrackingDetails;
 
-		private Signature BuildSignature() => repo.Config.BuildSignature(DateTimeOffset.Now);
+		private Signature BuildSignature()
+		{
+			var sig = repo.Config.BuildSignature(DateTimeOffset.Now);
+			if(sig == null){
+				throw new GitException("Could not build Git signature. Make sure 'user.name' and 'user.email' are configured for the repository.");
+			}
+			return sig;
+		}
+		
 
 		/// <summary>
 		/// Rebases the current branch onto the branch it is tracking.
@@ -59,7 +67,7 @@ namespace PassWinmenu.ExternalPrograms
 			if (result.Status != RebaseStatus.Complete)
 			{
 				repo.Rebase.Abort();
-				throw new InvalidOperationException($"Could not rebase {head.FriendlyName} onto {head.TrackedBranch.FriendlyName}");
+				throw new GitException($"Could not rebase {head.FriendlyName} onto {head.TrackedBranch.FriendlyName}");
 			}
 			else if (result.CompletedStepCount > 0)
 			{
