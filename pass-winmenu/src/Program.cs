@@ -532,7 +532,7 @@ namespace PassWinmenu
 
 			menu.Items.Add(startWithWindows);
 			menu.Items.Add("About", null, (sender, args) => Process.Start("https://github.com/Baggykiin/pass-winmenu#readme"));
-			menu.Items.Add("Quit", null, (sender, args) => Close());
+			menu.Items.Add("Quit", null, (sender, args) => Exit());
 			icon.ContextMenuStrip = menu;
 		}
 
