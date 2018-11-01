@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -7,30 +6,28 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using LibGit2Sharp;
 using McSherry.SemanticVersioning;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.UpdateChecking;
 using PassWinmenu.UpdateChecking.GitHub;
+using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
 using YamlDotNet.Core;
 using Application = System.Windows.Forms.Application;
-using Clipboard = System.Windows.Clipboard;
 using MessageBox = System.Windows.MessageBox;
 
 namespace PassWinmenu
 {
-	internal class Program : Form
+	internal sealed class Program : Form
 	{
 		public static string Version => EmbeddedResources.Version;
+
 		public const string LastConfigVersion = "1.7";
 		public const string EncryptedFileExtension = ".gpg";
 		public const string PlaintextFileExtension = ".txt";
@@ -68,7 +65,7 @@ namespace PassWinmenu
 		/// <summary>
 		/// Loads all required resources.
 		/// </summary>
-		protected void Initialise()
+		private void Initialise()
 		{
 			EmbeddedResources.Load();
 			CreateNotifyIcon();
@@ -96,9 +93,9 @@ namespace PassWinmenu
 			}
 
 			notificationService = new Notifications(icon);
-			dialogCreator = new DialogCreator(notificationService);
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore.Location, EncryptedFileExtension, gpg);
 			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
+			dialogCreator = new DialogCreator(notificationService, passwordManager, git);
 
 			if (ConfigManager.Config.Git.UseGit)
 			{
@@ -284,50 +281,12 @@ namespace PassWinmenu
 		{
 			try
 			{
-				foreach (var hotkey in ConfigManager.Config.Hotkeys ?? new HotkeyConfig[]{})
-				{
-					var keys = KeyCombination.Parse(hotkey.Hotkey);
-					HotkeyAction action;
-					try
-					{
-						// Reading the Action variable will cause it to be parsed from hotkey.ActionString.
-						// If this fails, an ArgumentException is thrown.
-						action = hotkey.Action;
-					}
-					catch (ArgumentException)
-					{
-						notificationService.Raise($"Invalid hotkey configuration in config.yaml.\nThe action \"{hotkey.ActionString}\" is not known.", Severity.Error);
-						continue;
-					}
-					switch (action)
-					{
-						case HotkeyAction.DecryptPassword:
-							hotkeyManager.AddHotKey(keys, () => DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
-							break;
-						case HotkeyAction.AddPassword:
-							hotkeyManager.AddHotKey(keys, AddPassword);
-							break;
-						case HotkeyAction.EditPassword:
-							hotkeyManager.AddHotKey(keys, EditPassword);
-							break;
-						case HotkeyAction.GitPull:
-							hotkeyManager.AddHotKey(keys, UpdatePasswordStore);
-							break;
-						case HotkeyAction.GitPush:
-							hotkeyManager.AddHotKey(keys, CommitChanges);
-							break;
-						case HotkeyAction.OpenShell:
-							// TODO: fetch GPG from somewhere else
-							hotkeyManager.AddHotKey(keys, () => dialogCreator.OpenPasswordShell((GPG)passwordManager.Crypto));
-							break;
-						case HotkeyAction.ShowDebugInfo:
-							hotkeyManager.AddHotKey(keys, () => dialogCreator.ShowDebugInfo(git, passwordManager));
-							break;
-						case HotkeyAction.CheckForUpdates:
-							hotkeyManager.AddHotKey(keys, updateChecker.CheckForUpdates);
-							break;
-					}
-				}
+				hotkeyManager.AssignHotkeys(
+					ConfigManager.Config.Hotkeys ?? new HotkeyConfig[0],
+					dialogCreator,
+					updateChecker,
+					notificationService,
+					this);
 			}
 			catch (Exception e) when (e is ArgumentException || e is HotkeyException)
 			{
@@ -364,15 +323,15 @@ namespace PassWinmenu
 
 			menu.Items.Add(downloadUpdate);
 			menu.Items.Add("Decrypt Password", null, (sender, args) => Task.Run(() => DecryptPassword(true, false, false)));
-			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)AddPassword));
-			menu.Items.Add("Edit Password File", null, (sender, args) => Task.Run(() => EditPassword()));
+			menu.Items.Add("Add new Password", null, (sender, args) => Task.Run((Action)dialogCreator.AddPassword));
+			menu.Items.Add("Edit Password File", null, (sender, args) => Task.Run((Action)dialogCreator.EditPassword));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Push to Remote", null, (sender, args) => Task.Run((Action)CommitChanges));
 			menu.Items.Add("Pull from Remote", null, (sender, args) => Task.Run((Action)UpdatePasswordStore));
 			menu.Items.Add(new ToolStripSeparator());
 			menu.Items.Add("Open Explorer", null, (sender, args) => Process.Start(ConfigManager.Config.PasswordStore.Location));
 			// TODO: Fetch GPG from somewhere else
-			menu.Items.Add("Open Shell", null, (sender, args) => Task.Run(() => dialogCreator.OpenPasswordShell((GPG)passwordManager.Crypto)));
+			menu.Items.Add("Open Shell", null, (sender, args) => Task.Run(() => dialogCreator.OpenPasswordShell()));
 			menu.Items.Add(new ToolStripSeparator());
 			var startWithWindows = new ToolStripMenuItem("Start with Windows")
 			{
@@ -396,7 +355,7 @@ namespace PassWinmenu
 		/// Commits all local changes and pushes them to remote.
 		/// Also pulls any upcoming changes from remote.
 		/// </summary>
-		private void CommitChanges()
+		public void CommitChanges()
 		{
 			if (git == null)
 			{
@@ -461,62 +420,9 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Adds a new password to the password store.
-		/// </summary>
-		private void AddPassword()
-		{
-			if (InvokeRequired)
-			{
-				Invoke((MethodInvoker)AddPassword);
-				return;
-			}
-			var passwordFilePath = dialogCreator.ShowFileSelectionWindow();
-			// passwordFileName will be null if no file was selected
-			if (passwordFilePath == null) return;
-
-			// Display the password generation window.
-			string password;
-			string extraContent;
-			using (var passwordWindow = new PasswordWindow(Path.GetFileName(passwordFilePath)))
-			{
-				passwordWindow.ShowDialog();
-				if (!passwordWindow.DialogResult.GetValueOrDefault())
-				{
-					return;
-				}
-				password = passwordWindow.Password.Text;
-				extraContent = passwordWindow.ExtraContent.Text.Replace(Environment.NewLine, "\n");
-			}
-
-			try
-			{
-				passwordManager.EncryptPassword(new DecryptedPasswordFile(passwordFilePath + passwordManager.EncryptedFileExtension, password, extraContent));
-			}
-			catch (GpgException e)
-			{
-				notificationService.ShowErrorWindow("Unable to encrypt your password: " + e.Message);
-				return;
-			}
-			catch (ConfigurationException e)
-			{
-				notificationService.ShowErrorWindow("Unable to encrypt your password: " + e.Message);
-				return;
-			}
-			// Copy the newly generated password.
-			clipboard.Place(password, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
-
-			if (ConfigManager.Config.Notifications.Types.PasswordGenerated)
-			{
-				notificationService.Raise($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
-			}
-			// Add the password to Git
-			git?.AddPassword(passwordFilePath + passwordManager.EncryptedFileExtension);
-		}
-
-		/// <summary>
 		/// Updates the password store so it's in sync with remote again.
 		/// </summary>
-		private void UpdatePasswordStore()
+		public void UpdatePasswordStore()
 		{
 			if (git == null)
 			{
@@ -551,139 +457,10 @@ namespace PassWinmenu
 		}
 
 
-		private void EditPassword()
-		{
-			var selectedFile = RequestPasswordFile();
-			if (selectedFile == null) return;
-
-			if (ConfigManager.Config.Interface.PasswordEditor.UseBuiltin)
-			{
-				EditWithEditWindow(selectedFile);
-			}
-			else
-			{
-				EditWithTextEditor(selectedFile);
-			}
-		}
-
-		private void EditWithEditWindow(string selectedFile)
-		{
-			if (InvokeRequired)
-			{
-				Invoke((Action<string>)EditWithEditWindow, selectedFile);
-				return;
-			}
-
-			var content = passwordManager.DecryptText(selectedFile);
-			using (var window = new EditWindow(selectedFile, content))
-			{
-				if (window.ShowDialog() ?? false)
-				{
-					try
-					{
-						File.Delete(passwordManager.GetPasswordFilePath(selectedFile));
-						passwordManager.EncryptText(window.PasswordContent.Text, selectedFile);
-						git?.EditPassword(selectedFile);
-						if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
-						{
-							notificationService.Raise($"Password file \"{selectedFile}\" has been updated.", Severity.Info);
-						}
-					}
-					catch (Exception e)
-					{
-						notificationService.ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
-					}
-				}
-			}
-		}
-
-		private void EditWithTextEditor(string selectedFile)
-		{
-			string decryptedFile, plaintextFile;
-			try
-			{
-				decryptedFile = passwordManager.DecryptFile(selectedFile);
-				plaintextFile = decryptedFile + PlaintextFileExtension;
-				// Add a plaintext extension to the decrypted file so it can be opened with a text editor
-				File.Move(decryptedFile, plaintextFile);
-			}
-			catch (Exception e)
-			{
-				notificationService.ShowErrorWindow($"Unable to edit your password (decryption failed): {e.Message}");
-				return;
-			}
-
-			// Open the file in the user's default editor
-			try
-			{
-				Process.Start(plaintextFile);
-			}
-			catch (Win32Exception e)
-			{
-				notificationService.ShowErrorWindow($"Unable to open an editor to edit your password file ({e.Message}).");
-				File.Delete(plaintextFile);
-				return;
-			}
-
-			var result = MessageBox.Show(
-				"Please keep this window open until you're done editing the password file.\n" +
-				"Then click Yes to save your changes, or No to discard them.",
-				$"Save changes to {Path.GetFileName(selectedFile)}?",
-				MessageBoxButton.YesNo,
-				MessageBoxImage.Information);
-
-			if (result == MessageBoxResult.Yes)
-			{
-				var selectedFilePath = passwordManager.GetPasswordFilePath(selectedFile);
-				File.Delete(selectedFilePath);
-				// Remove the plaintext extension again before re-encrypting the file
-				File.Move(plaintextFile, decryptedFile);
-				passwordManager.EncryptFile(decryptedFile);
-				File.Delete(decryptedFile);
-				git?.EditPassword(selectedFile);
-				if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
-				{
-					notificationService.Raise($"Password file \"{selectedFile}\" has been updated.", Severity.Info);
-				}
-			}
-			else
-			{
-				File.Delete(plaintextFile);
-			}
-		}
-
-		/// <summary>
-		/// Asks the user to choose a password file.
-		/// </summary>
-		/// <returns>
-		/// The path to the chosen password file (relative to the password directory),
-		/// or null if the user didn't choose anything.
-		/// </returns>
-		private string RequestPasswordFile()
-		{
-			if (InvokeRequired)
-			{
-				return (string)Invoke((Func<string>)RequestPasswordFile);
-			}
-			// Find GPG-encrypted password files
-			var passFiles = passwordManager.GetPasswordFiles(ConfigManager.Config.PasswordStore.PasswordFileMatch).ToList();
-			if (passFiles.Count == 0)
-			{
-				MessageBox.Show("Your password store doesn't appear to contain any passwords yet.", "Empty password store", MessageBoxButton.OK, MessageBoxImage.Information);
-				return null;
-			}
-			// Build a dictionary mapping display names to relative paths
-			var displayNameMap = passFiles.ToDictionary(val => val.Substring(0, val.Length - EncryptedFileExtension.Length).Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.Interface.DirectorySeparator));
-
-			var selection = dialogCreator.ShowPasswordMenu(displayNameMap.Keys);
-			if (selection == null) return null;
-			return displayNameMap[selection];
-		}
-
 		/// <summary>
 		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
 		/// </summary>
-		private void DecryptPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
+		public void DecryptPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
 		{
 			// We need to be on the main thread for this.
 			if (InvokeRequired)
@@ -692,7 +469,7 @@ namespace PassWinmenu
 				return;
 			}
 
-			var selectedFile = RequestPasswordFile();
+			var selectedFile = dialogCreator.RequestPasswordFile();
 			// If the user cancels their selection, the password decryption should be cancelled too.
 			if (selectedFile == null) return;
 

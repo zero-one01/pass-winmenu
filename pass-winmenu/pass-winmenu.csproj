@@ -102,7 +102,8 @@
     <Compile Include="src\Actions\EditAction.cs" />
     <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
-    <Compile Include="src\Clipboard.cs" />
+    <Compile Include="src\ExternalPrograms\ISyncService.cs" />
+    <Compile Include="src\WinApi\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfigFile.cs" />
@@ -127,7 +128,7 @@
     <Compile Include="src\Configuration\Classes\UsernameDetectionRegexOptions.cs" />
     <Compile Include="src\Configuration\ConfigurationException.cs" />
     <Compile Include="src\Configuration\ConfigurationParseException.cs" />
-    <Compile Include="src\DialogCreator.cs" />
+    <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\GpgAgent.cs" />
     <Compile Include="src\ExternalPrograms\ICryptoService.cs" />
@@ -138,9 +139,9 @@
     <Compile Include="src\Hotkeys\HotkeyRegistrars.Windows.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.Windows.MessageWindow.cs" />
     <Compile Include="src\Hotkeys\IHotkeyRegistrar.cs" />
-    <Compile Include="src\INotificationService.cs" />
+    <Compile Include="src\WinApi\INotificationService.cs" />
     <Compile Include="src\Logger.cs" />
-    <Compile Include="src\Notifications.cs" />
+    <Compile Include="src\WinApi\Notifications.cs" />
     <Compile Include="src\PasswordFileParser.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerationOptions.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
@@ -182,6 +183,7 @@
     <Compile Include="src\Windows\PasswordWindow.xaml.cs">
       <DependentUpon>PasswordWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="src\Windows\WindowManager.cs" />
     <Page Include="src\Windows\EditWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

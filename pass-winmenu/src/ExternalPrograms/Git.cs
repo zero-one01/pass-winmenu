@@ -7,10 +7,11 @@ using LibGit2Sharp;
 
 namespace PassWinmenu.ExternalPrograms
 {
+	/// <inheritdoc cref="IDisposable" />
 	/// <summary>
 	/// Simple wrapper over git.
 	/// </summary>
-	internal class Git : IDisposable
+	internal class Git : IDisposable, ISyncService
 	{
 		private readonly Repository repo;
 		private readonly FetchOptions fetchOptions;

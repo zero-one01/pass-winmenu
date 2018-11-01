@@ -1,4 +1,4 @@
-﻿namespace PassWinmenu
+﻿namespace PassWinmenu.WinApi
 {
 	internal interface INotificationService
 	{
