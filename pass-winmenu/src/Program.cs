@@ -137,16 +137,24 @@ namespace PassWinmenu
 			var versionString = Version.Split('-').First();
 
 			updateChecker = new UpdateChecker(updateSource, SemanticVersion.Parse(versionString, ParseMode.Lenient));
-			updateChecker.UpdateAvailable += (sender, args) =>
-			{
-				// If the update contains important vulnerability fixes, always display a notification.
-				if (ConfigManager.Config.Notifications.Types.UpdateAvailable || args.Version.Important)
-				{
-					icon.ContextMenuStrip.Items[2].Visible = true;
-					RaiseNotification($"A new update ({args.Version.VersionNumber.ToString(SemanticVersionFormat.Concise)}) is available.", ToolTipIcon.Info);
-				}
-			};
+			updateChecker.UpdateAvailable += (sender, args) => NotifyUpdateAVailable(args);
 			updateChecker.Start();
+		}
+
+		private void NotifyUpdateAVailable(UpdateAvailableEventArgs args)
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new Action<UpdateAvailableEventArgs>(NotifyUpdateAVailable));
+				return;
+			}
+
+			// If the update contains important vulnerability fixes, always display a notification.
+			if (ConfigManager.Config.Notifications.Types.UpdateAvailable || args.Version.Important)
+			{
+				icon.ContextMenuStrip.Items[2].Visible = true;
+				RaiseNotification($"A new update ({args.Version.VersionNumber.ToString(SemanticVersionFormat.Concise)}) is available.", ToolTipIcon.Info);
+			}
 		}
 
 		/// <summary>
