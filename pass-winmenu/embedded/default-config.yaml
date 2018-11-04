@@ -17,12 +17,42 @@ password-store:
     # compared. All matching files are considered password files.
     password-file-match: '.*\.gpg$'
     # Only consider the first line in the password file to be the actual password;
-    # all other lines are considered metadata. This is the recommended behavour,
+    # all other lines are considered metadata. This is the recommended behaviour,
     # as many password managers for pass will work the same way.
     first-line-only: true
 
     password-generation:
-        # This template allows you to alter the default extra content that's
+        # Default length for newly generated passwords.
+        length: 20
+        # Defines which character groups can be used to generate passwords.
+        # Each entry represents an group that can be toggled individually in the
+        # password generation window.
+        character-groups:
+          - 
+            # The category name to be displayed in the password generation window.
+            name: Symbols
+            # The set of characters this group contains.
+            characters: '!"#$%&''()*+,-./:;<=>?@[\]^_`{|}~'
+            # When this is set to false, the checkbox for this group will be
+            # set to unchecked by default.
+            enabled: true
+          - 
+            name: Numeric
+            characters: '0123456789'
+            enabled: true
+          - 
+            name: Lowercase
+            characters: 'abcdefghijklmnopqrstuvwxyz'
+            enabled: true
+          - 
+            name: Uppercase
+            characters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            enabled: true
+          - 
+            name: Whitespace
+            characters: ' '
+            enabled: false
+        # This template allows you to alter the default metadata that's
         # added to new password files. Note that this is a multiline string;
         # any leading spaces will be ignored.
         # A few variables can be inserted into the string:
@@ -113,15 +143,15 @@ gpg:
         # you need it.
         preload: true
         config:
-            # Set this to true to allow pass-winmenu to set some configuration keys in your
-            # `gpg-agent.conf` file, allowing you to configure some features like password timeout.
+            # Set this to true to allow pass-winmenu to manage some configuration keys in your
+            # `gpg-agent.conf` file, allowing you to configure features like password timeout.
             allow-config-management: false
             # Add the following configuration keys to `gpg-agent.conf`:
             keys:
-                # Remember your master password for up to one hour.
+                # Remember your GPG passphrase for up to one hour.
                 # Every time you decrypt a password within this one-hour timespan, the timer will reset.
                 default-cache-ttl: 7200
-                # This is the maximum amount of time gpg-agent will remember your master password.
+                # This is the maximum amount of time gpg-agent will remember your passphrase
                 # Once this amount of time has expired, gpg-agent will always ask you to re-enter it.
                 max-cache-ttl: 127800
 
@@ -157,13 +187,6 @@ hotkeys:
         type-username: false
         type-password: false
   - 
-    hotkey: 'ctrl alt shift u'
-    action: 'password-field'
-    options:
-        copy-to-clipboard: true
-		field-name: 'username'
-        type-field: false
-  - 
     hotkey: 'ctrl alt shift p'
     action: 'decrypt-password'
     options:
@@ -197,7 +220,6 @@ notifications:
         # ...a new update can be downloaded
         update-available: true
 
-
 application:
     update-checking:
         # Should we check for updates?
@@ -207,7 +229,6 @@ application:
         # notify you in case any potential vulnerabilities have been fixed
         # in an upcoming update.
         check-for-updates: true
-
 
 interface:
     # If set to true, the menu will be opened on the same screen the mouse cursor

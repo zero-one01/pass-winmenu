@@ -1,30 +1,65 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using PassWinmenu.Configuration;
 using PassWinmenu.PasswordGeneration;
 
 namespace PassWinmenu.Windows
 {
-	public sealed partial class PasswordWindow : IDisposable
+	internal sealed partial class PasswordWindow : IDisposable
 	{
-		private readonly PasswordGenerator passwordGenerator = new PasswordGenerator();
+		private readonly PasswordGenerator passwordGenerator;
 
-		public PasswordWindow(string filename)
+		public PasswordWindow(string filename, PasswordGenerationConfig options)
 		{
 			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			InitializeComponent();
 
+			passwordGenerator = new PasswordGenerator(options);
+			CreateCheckboxes();
+
+			Title = "Add new password";
+
+			AddDefaultMetadata(filename);
+			RegeneratePassword();
+			Password.Focus();
+		}
+
+		private void CreateCheckboxes()
+		{
+			int colCount = 3;
+			int index = 0;
+			foreach (var charGroup in passwordGenerator.Options.CharacterGroups)
+			{
+				int x = index % colCount;
+				int y = index / colCount;
+
+				var cbx = new CheckBox
+				{
+					Name = charGroup.Name,
+					Content = charGroup.Name,
+					Margin = new Thickness(x * 100, y * 20, 0, 0),
+					HorizontalAlignment = HorizontalAlignment.Left,
+					IsChecked = charGroup.Enabled,
+				};
+				cbx.Unchecked += HandleCheckedChanged;
+				cbx.Checked += HandleCheckedChanged;
+				CharacterGroups.Children.Add(cbx);
+
+				index++;
+			}
+		}
+
+		private void AddDefaultMetadata(string filename)
+		{
 			var now = DateTime.Now;
 			var extraContent = ConfigManager.Config.PasswordStore.PasswordGeneration.DefaultContent
 				.Replace("$filename", filename)
 				.Replace("$date", now.ToString("yyyy-MM-dd"))
 				.Replace("$time", now.ToString("HH:mm:ss"));
-
 			ExtraContent.Text = extraContent;
-
-			RegeneratePassword();
-			Password.Focus();
 		}
 
 		private void RegeneratePassword()
@@ -61,11 +96,8 @@ namespace PassWinmenu.Windows
 
 		private void HandleCheckedChanged(object sender, RoutedEventArgs e)
 		{
-			passwordGenerator.Options.AllowSymbols = Cbx_Symbols?.IsChecked ?? false;
-			passwordGenerator.Options.AllowNumbers = Cbx_Numbers?.IsChecked ?? false;
-			passwordGenerator.Options.AllowLower = Cbx_Lower?.IsChecked ?? false;
-			passwordGenerator.Options.AllowUpper = Cbx_Upper?.IsChecked ?? false;
-			passwordGenerator.Options.AllowWhitespace = Cbx_Whitespace?.IsChecked ?? false;
+			var checkbox = (CheckBox)sender;
+			passwordGenerator.Options.CharacterGroups.First(c => c.Name == checkbox.Name).Enabled = checkbox.IsChecked ?? false;
 
 			RegeneratePassword();
 		}

@@ -525,15 +525,5 @@ namespace PassWinmenu
 				WindowsUtilities.EnterText(passFile.Password, ConfigManager.Config.Output.DeadKeys);
 			}
 		}
-
-
-
-		[STAThread]
-		public static void Main(string[] args)
-		{
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new Program());
-		}
 	}
 }

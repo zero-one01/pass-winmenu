@@ -1,76 +1,80 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
+using PassWinmenu.Configuration;
 
 namespace PassWinmenu.PasswordGeneration
 {
 	internal class PasswordGenerator : IDisposable
 	{
-		public PasswordGenerationOptions Options { get; }
+		public PasswordGenerationConfig Options { get; }
 
 		private readonly RNGCryptoServiceProvider csprng = new RNGCryptoServiceProvider();
-		private int bufferIndex;
-		private readonly byte[] buffer = new byte[1024];
 
-		public PasswordGenerator() : this(new PasswordGenerationOptions()) { }
+		public PasswordGenerator() : this(new PasswordGenerationConfig()) { }
 
-		public PasswordGenerator(PasswordGenerationOptions options)
+		public PasswordGenerator(PasswordGenerationConfig options)
 		{
 			Options = options;
-			// Initialise the buffer with random bytes.
-			csprng.GetNonZeroBytes(buffer);
 		}
 
-		public string GeneratePassword(int length = 20)
+		public string GeneratePassword()
 		{
-			if (!Options.AllowSymbols && !Options.AllowNumbers && !Options.AllowLower && !Options.AllowUpper) return null;
+			if (!Options.CharacterGroups.Any(g => g.Enabled)) return null;
 
-			var chars = new char[length];
-
-			for (var i = 0; i < length;)
+			// Build a complete set of all characters in all enabled groups
+			var completeCharSet = new HashSet<int>();
+			foreach (var group in Options.CharacterGroups.Where(g => g.Enabled))
 			{
-				var ch = NextCharacter(32, 127);
-				if (((char.IsSymbol(ch) || char.IsPunctuation(ch)) && Options.AllowSymbols)
-					|| (char.IsNumber(ch) && Options.AllowNumbers)
-					|| (char.IsLower(ch) && Options.AllowLower)
-					|| (char.IsUpper(ch) && Options.AllowUpper)
-					|| (char.IsWhiteSpace(ch) && Options.AllowWhitespace))
-				{
-					chars[i++] = ch;
-				}
+				completeCharSet.UnionWith(group.CharacterSet);
 			}
-			return new string(chars);
+
+			// Transfor the set into a list, to assign an index to each character.
+			var charList = completeCharSet.ToList();
+
+			// Generate as many random list indices as we need to build a password.
+			var indices = GetIntegers(charList.Count, Options.Length);
+
+			// Transform the list of indices into a list of characters.
+			var characters = indices.Select(i => charList[i]).ToArray();
+
+			var password = string.Join("", characters.Select(char.ConvertFromUtf32));
+			return password;
+		}
+
+
+		/// <summary>
+		/// Generates a list of cryptographically secure randomly generated integers.
+		/// </summary>
+		private IEnumerable<int> GetIntegers(int max, int count)
+		{
+			if (max < 0)
+			{
+				throw new ArgumentException("Max value must be positive.", nameof(max));
+			}
+
+			for (var i = 0; i < count; i++)
+			{
+				yield return GetRandomInteger(max);
+			}
 		}
 
 		/// <summary>
-		/// Advances the index to the next position in the buffer,
-		/// regenerating a new buffer if the end is reached.
+		/// Generates a cryptographically secure random number less than the given maximum value.
 		/// </summary>
-		private void MoveNext()
+		private int GetRandomInteger(int maxValue)
 		{
-			if (++bufferIndex >= buffer.Length)
-			{
-				csprng.GetNonZeroBytes(buffer);
-				bufferIndex = 0;
-			}
-		}
+			// Generate a random uint64 using 8 random bytes.
+			var bytes = new byte[8];
+			csprng.GetBytes(bytes);
+			var randomNumber = BitConverter.ToUInt64(bytes, 0);
 
-		/// <summary>
-		/// Returns the next suitable random character from the buffer.
-		/// </summary>
-		private char NextCharacter(byte min, byte max)
-		{
-			if (min >= max) throw new ArgumentException($"'{nameof(min)}' cannot be greater than {nameof(max)}");
+			// Convert the random integer into a fraction of its maximum possible value.
+			var fraction = randomNumber / (double)ulong.MaxValue;
 
-			// Search the buffer for the first byte within the given bounds.
-			while (buffer[bufferIndex] < min || buffer[bufferIndex] >= max)
-			{
-				MoveNext();
-			}
-			// We've found a byte matching our requirements;
-			// return it and advance the buffer index.
-			var found = (char)buffer[bufferIndex];
-			MoveNext();
-			return found;
+			
+			return (int)(fraction * maxValue);
 		}
 
 		public void Dispose()
