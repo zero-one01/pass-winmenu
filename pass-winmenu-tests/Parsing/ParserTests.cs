@@ -13,7 +13,7 @@ namespace PassWinmenu.Tests
 		{
 			var text = "";
 			var p = new PasswordFileParser();
-			var parsed = p.Parse(null, text, false);
+			var parsed = p.Parse(new PasswordFile(""), text, false);
 
 			Assert.AreEqual(parsed.Password, string.Empty);
 			Assert.AreEqual(parsed.Metadata, string.Empty);
@@ -28,15 +28,15 @@ namespace PassWinmenu.Tests
 
 			var p = new PasswordFileParser();
 
-			var parsedCrlf = p.Parse(null, crlf, false);
+			var parsedCrlf = p.Parse(new PasswordFile(""), crlf, false);
 			Assert.AreEqual(parsedCrlf.Password, "password");
 			Assert.AreEqual(parsedCrlf.Metadata, "meta-data");
 
-			var parsedCr = p.Parse(null, cr, false);
+			var parsedCr = p.Parse(new PasswordFile(""), cr, false);
 			Assert.AreEqual(parsedCr.Password, "password");
 			Assert.AreEqual(parsedCr.Metadata, "meta-data");
 
-			var parsedLf = p.Parse(null, lf, false);
+			var parsedLf = p.Parse(new PasswordFile(""), lf, false);
 			Assert.AreEqual(parsedLf.Password, "password");
 			Assert.AreEqual(parsedLf.Metadata, "meta-data");
 		}
@@ -52,19 +52,19 @@ namespace PassWinmenu.Tests
 
 			var p = new PasswordFileParser();
 
-			var parsedCrlf = p.Parse(null, crlf, false);
+			var parsedCrlf = p.Parse(new PasswordFile(""), crlf, false);
 			Assert.AreEqual(parsedCrlf.Password, "password");
 			Assert.AreEqual(parsedCrlf.Metadata, string.Empty);
 
-			var parsedCr = p.Parse(null, cr, false);
+			var parsedCr = p.Parse(new PasswordFile(""), cr, false);
 			Assert.AreEqual(parsedCr.Password, "password");
 			Assert.AreEqual(parsedCr.Metadata, string.Empty);
 
-			var parsedLf = p.Parse(null, lf, false);
+			var parsedLf = p.Parse(new PasswordFile(""), lf, false);
 			Assert.AreEqual(parsedLf.Password, "password");
 			Assert.AreEqual(parsedLf.Metadata, string.Empty);
 
-			var parsedNone = p.Parse(null, none, false);
+			var parsedNone = p.Parse(new PasswordFile(""), none, false);
 			Assert.AreEqual(parsedNone.Password, "password");
 			Assert.AreEqual(parsedNone.Metadata, string.Empty);
 		}
