@@ -182,7 +182,7 @@ namespace PassWinmenu.Windows
 			EnsureStaThread();
 
 			var content = passwordManager.DecryptText(selectedFile);
-			using (var window = new EditWindow(selectedFile, content))
+			using (var window = new EditWindow(selectedFile, content, ConfigManager.Config.PasswordStore.PasswordGeneration))
 			{
 				if (window.ShowDialog() ?? false)
 				{
@@ -290,7 +290,7 @@ namespace PassWinmenu.Windows
 			// Display the password generation window.
 			string password;
 			string extraContent;
-			using (var passwordWindow = new PasswordWindow(Path.GetFileName(passwordFilePath)))
+			using (var passwordWindow = new PasswordWindow(Path.GetFileName(passwordFilePath), ConfigManager.Config.PasswordStore.PasswordGeneration))
 			{
 				passwordWindow.ShowDialog();
 				if (!passwordWindow.DialogResult.GetValueOrDefault())

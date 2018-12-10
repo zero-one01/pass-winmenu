@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Windows.Media;
 
 namespace PassWinmenu.Utilities
 {
@@ -85,6 +86,26 @@ namespace PassWinmenu.Utilities
 			return Marshal.GetExceptionForHR(
 				Marshal.GetHRForLastWin32Error()
 				);
+		}
+
+		/// <summary>
+		/// Converts an ARGB hex colour code into a Color object.
+		/// </summary>
+		/// <param name="str">A hexadecimal colour code string (such as #AAFF00FF)</param>
+		/// <returns>A colour object created from the colour code.</returns>
+		internal static Color ColourFromString(string str)
+		{
+			return (Color)ColorConverter.ConvertFromString(str);
+		}
+
+		/// <summary>
+		/// Converts an ARGB hex colour code into a SolidColorBrush object.
+		/// </summary>
+		/// <param name="colour">A hexadecimal colour code string (such as #AAFF00FF)</param>
+		/// <returns>A SolidColorBrush created from a Colour object created from the colour code.</returns>
+		internal static SolidColorBrush BrushFromColourString(string colour)
+		{
+			return new SolidColorBrush(Helpers.ColourFromString(colour));
 		}
 	}
 }

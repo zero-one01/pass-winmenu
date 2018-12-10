@@ -102,6 +102,7 @@
     <Compile Include="src\Actions\EditAction.cs" />
     <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
+    <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\WinApi\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
@@ -155,6 +156,7 @@
     <Compile Include="src\UpdateChecking\UpdateChecker.cs" />
     <Compile Include="src\UpdateChecking\UpdateException.cs" />
     <Compile Include="src\Utilities\Disposable.cs" />
+    <Compile Include="src\Utilities\ExecutionTimer.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\DirectoryInfoExtensions.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\KeyEventArgsExtensions.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\StringExtensions.cs" />
@@ -183,20 +185,19 @@
     <Compile Include="src\Windows\PasswordWindow.xaml.cs">
       <DependentUpon>PasswordWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="src\Windows\SelectionWindow.xaml.cs">
+      <DependentUpon>SelectionWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\Windows\WindowManager.cs" />
     <Page Include="src\Windows\EditWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="src\Windows\MainWindow.xaml">
+    <Page Include="src\Windows\PasswordWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="src\Windows\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="src\Windows\PasswordWindow.xaml">
+    <Page Include="src\Windows\SelectionWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

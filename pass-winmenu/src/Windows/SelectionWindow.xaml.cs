@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using PassWinmenu.Configuration;
 using PassWinmenu.Hotkeys;
+using PassWinmenu.Utilities;
 using Color = System.Windows.Media.Color;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using Cursors = System.Windows.Input.Cursors;
@@ -20,9 +21,9 @@ using Orientation = System.Windows.Controls.Orientation;
 namespace PassWinmenu.Windows
 {
 	/// <summary>
-	/// Interaction logic for MainWindow.xaml
+	/// Interaction logic for SelectionWindow.xaml
 	/// </summary>
-	internal abstract partial class MainWindow
+	internal abstract partial class SelectionWindow
 	{
 		protected readonly List<Label> Options = new List<Label>();
 		/// <summary>
@@ -38,78 +39,92 @@ namespace PassWinmenu.Windows
 		private bool isClosing;
 		private bool firstActivation = true;
 		private MainWindowConfiguration configuration;
-
-		protected readonly StyleConfig StyleConfig;
+		private readonly StyleConfig styleConfig;
 
 		/// <summary>
 		/// Initialises the window with the provided options.
 		/// </summary>
-		protected MainWindow(MainWindowConfiguration configuration)
+		protected SelectionWindow(MainWindowConfiguration configuration)
 		{
+			TimerHelper.Current.TakeSnapshot("mainwnd-creating");
 			this.configuration = configuration;
-			StyleConfig = ConfigManager.Config.Interface.Style;
 			InitializeComponent();
 
-			if (configuration.Orientation == Orientation.Vertical)
+			if (configuration.Orientation == Orientation.Horizontal)
 			{
-				WrapPanel.Orientation = Orientation.Vertical;
-				// In order to prevent its content from wrapping, the WrapPanel should be added to a ScrollViewer.
-				var scrollViewer = new ScrollViewer
-				{
-					VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
-					Content = WrapPanel,
-					Margin = new Thickness
-					{
-						Top = 25,
-						Right = WrapPanel.Margin.Right,
-						Bottom = WrapPanel.Margin.Bottom,
-						Left = WrapPanel.Margin.Left
-					}
-				};
-				// The WrapPanel must be removed from the grid before its ScrollViewer can be added.
-				Grid.Children.Remove(WrapPanel);
-				Grid.Children.Add(scrollViewer);
-
-				// Reorient the searchbox so its margins match those of the WrapPanel.
-				SearchBox.Margin = new Thickness(5, 5, 5, 5);
-			}
-			else
-			{
-				Grid.Children.Remove(SearchBox);
-				WrapPanel.Children.Add(SearchBox);
+				WrapPanel.Orientation = Orientation.Horizontal;
 			}
 
-			SearchBox.CaretBrush = BrushFromColourString(StyleConfig.CaretColour);
-			SearchBox.Background = BrushFromColourString(StyleConfig.Search.BackgroundColour);
-			SearchBox.Foreground = BrushFromColourString(StyleConfig.Search.TextColour);
-			SearchBox.BorderThickness = new Thickness(StyleConfig.Search.BorderWidth);
-			SearchBox.BorderBrush = BrushFromColourString(StyleConfig.Search.BorderColour);
-			SearchBox.FontSize = StyleConfig.FontSize;
-			SearchBox.FontFamily = new FontFamily(StyleConfig.FontFamily);
+			styleConfig = ConfigManager.Config.Interface.Style;
+			SearchBox.CaretBrush = Helpers.BrushFromColourString(styleConfig.CaretColour);
+			SearchBox.Background = Helpers.BrushFromColourString(styleConfig.Search.BackgroundColour);
+			SearchBox.Foreground = Helpers.BrushFromColourString(styleConfig.Search.TextColour);
+			SearchBox.BorderThickness = new Thickness(styleConfig.Search.BorderWidth);
+			SearchBox.BorderBrush = Helpers.BrushFromColourString(styleConfig.Search.BorderColour);
+			SearchBox.FontSize = styleConfig.FontSize;
+			SearchBox.FontFamily = new FontFamily(styleConfig.FontFamily);
 
-			Background = BrushFromColourString(StyleConfig.BackgroundColour);
+			Background = Helpers.BrushFromColourString(styleConfig.BackgroundColour);
 
-			BorderBrush = BrushFromColourString(StyleConfig.BorderColour);
+			BorderBrush = Helpers.BrushFromColourString(styleConfig.BorderColour);
 			BorderThickness = new Thickness(1);
+			TimerHelper.Current.TakeSnapshot("mainwnd-created");
+		}
+
+		protected override void OnInitialized(EventArgs e)
+		{
+			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-start");
+			base.OnInitialized(e);
+			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-base-end");
 		}
 
 		protected override void OnContentRendered(EventArgs e)
 		{
+			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-start");
 			var transfomedPos = PointFromScreen(configuration.Position);
 			var transformedDims = PointFromScreen(configuration.Dimensions);
+			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-transformed");
 
 			Left = transfomedPos.X;
 			Top = transfomedPos.Y;
 			Width = transformedDims.X;
 			Height = transformedDims.Y;
 
+			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-end");
 			base.OnContentRendered(e);
+			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-base-end");
 		}
 
 		/// <summary>
 		/// Handles text input in the textbox.
 		/// </summary>
 		protected abstract void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e);
+
+		/// <summary>
+		/// Redraws the labels, using the given strings.
+		/// </summary>
+		/// <param name="options"></param>
+		protected void RedrawLabels(IEnumerable<string> options)
+		{
+			var sizeTest = CreateLabel("size-test");
+			sizeTest.Measure(new Size(double.MaxValue, double.MaxValue));
+			var labelHeight = sizeTest.DesiredSize.Height;
+
+			var labelCount = Height / labelHeight;
+
+			ClearLabels();
+			var first = true;
+			foreach (var option in options.Take((int)labelCount))
+			{
+				var label = CreateLabel(option);
+				AddLabel(label);
+				if (first)
+				{
+					first = false;
+					Select(label);
+				}
+			}
+		}
 
 		/// <summary>
 		/// Selects a label; deselecting the previously selected label.
@@ -121,15 +136,14 @@ namespace PassWinmenu.Windows
 
 			if (Selected != null)
 			{
-				Selected.Background = BrushFromColourString(StyleConfig.Options.BackgroundColour);
-				Selected.Foreground = BrushFromColourString(StyleConfig.Options.TextColour);
-				Selected.BorderThickness = new Thickness(StyleConfig.Options.BorderWidth);
+				Selected.Background = Helpers.BrushFromColourString(styleConfig.Options.BackgroundColour);
+				Selected.Foreground = Helpers.BrushFromColourString(styleConfig.Options.TextColour);
+				Selected.BorderThickness = new Thickness(styleConfig.Options.BorderWidth);
 			}
 			Selected = label;
-			Selected.Background = BrushFromColourString(StyleConfig.Selection.BackgroundColour);
-			Selected.Foreground = BrushFromColourString(StyleConfig.Selection.TextColour);
-			Selected.BorderThickness = new Thickness(StyleConfig.Selection.BorderWidth);
-			Selected.BringIntoView();
+			Selected.Background = Helpers.BrushFromColourString(styleConfig.Selection.BackgroundColour);
+			Selected.Foreground = Helpers.BrushFromColourString(styleConfig.Selection.TextColour);
+			Selected.BorderThickness = new Thickness(styleConfig.Selection.BorderWidth);
 		}
 
 		/// <summary>
@@ -146,10 +160,10 @@ namespace PassWinmenu.Windows
 			var label = new Label
 			{
 				Content = content,
-				FontSize = StyleConfig.FontSize,
-				FontFamily = new FontFamily(StyleConfig.FontFamily),
-				Background = BrushFromColourString(StyleConfig.Options.BackgroundColour),
-				Foreground = BrushFromColourString(StyleConfig.Options.TextColour),
+				FontSize = styleConfig.FontSize,
+				FontFamily = new FontFamily(styleConfig.FontFamily),
+				Background = Helpers.BrushFromColourString(styleConfig.Options.BackgroundColour),
+				Foreground = Helpers.BrushFromColourString(styleConfig.Options.TextColour),
 				Padding = new Thickness(0, 0, 0, 2),
 				Margin = new Thickness(7, 0, 7, 0),
 				Cursor = Cursors.Hand
@@ -187,25 +201,7 @@ namespace PassWinmenu.Windows
 			Options.Clear();
 		}
 
-		/// <summary>
-		/// Converts an ARGB hex colour code into a Color object.
-		/// </summary>
-		/// <param name="str">A hexadecimal colour code string (such as #AAFF00FF)</param>
-		/// <returns>A colour object created from the colour code.</returns>
-		private static Color ColourFromString(string str)
-		{
-			return (Color)ColorConverter.ConvertFromString(str);
-		}
 
-		/// <summary>
-		/// Converts an ARGB hex colour code into a SolidColorBrush object.
-		/// </summary>
-		/// <param name="colour">A hexadecimal colour code string (such as #AAFF00FF)</param>
-		/// <returns>A SolidColorBrush created from a Colour object created from the colour code.</returns>
-		protected static SolidColorBrush BrushFromColourString(string colour)
-		{
-			return new SolidColorBrush(ColourFromString(colour));
-		}
 
 		protected override void OnActivated(EventArgs e)
 		{
@@ -382,6 +378,18 @@ namespace PassWinmenu.Windows
 					e.Handled = true;
 					Close();
 					break;
+			}
+		}
+
+		private void WrapPanel_OnMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			if (e.Delta > 0)
+			{
+				SelectPrevious();
+			}
+			else if (e.Delta < 0)
+			{
+				SelectNext();
 			}
 		}
 	}

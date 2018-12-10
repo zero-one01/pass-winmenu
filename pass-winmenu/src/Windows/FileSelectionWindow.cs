@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -6,7 +7,7 @@ using System.Windows.Controls;
 
 namespace PassWinmenu.Windows
 {
-	internal class FileSelectionWindow : MainWindow
+	internal class FileSelectionWindow : SelectionWindow
 	{
 		private readonly DirectoryAutocomplete autocomplete;
 		private readonly string baseDirectory;
@@ -15,24 +16,14 @@ namespace PassWinmenu.Windows
 		{
 			this.baseDirectory = baseDirectory;
 			autocomplete = new DirectoryAutocomplete(baseDirectory);
+		}
+		
+		protected override void OnContentRendered(EventArgs e)
+		{
+			base.OnContentRendered(e);
+
 			var completions = autocomplete.GetCompletionList("");
 			RedrawLabels(completions);
-		}
-
-		private void RedrawLabels(IEnumerable<string> options)
-		{
-			ClearLabels();
-			var first = true;
-			foreach (var option in options)
-			{
-				var label = CreateLabel(option);
-				AddLabel(label);
-				if (first)
-				{
-					first = false;
-					Select(label);
-				}
-			}
 		}
 
 		protected override void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)

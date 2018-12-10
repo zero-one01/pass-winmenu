@@ -2,22 +2,26 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using PassWinmenu.Utilities;
 
 namespace PassWinmenu.Windows
 {
-	internal class PasswordSelectionWindow : MainWindow
+	internal class PasswordSelectionWindow : SelectionWindow
 	{
+		private List<string> options;
+
 		public PasswordSelectionWindow(IEnumerable<string> options, MainWindowConfiguration configuration) : base(configuration)
 		{
-			foreach (var option in options)
-			{
-				var label = CreateLabel(option);
-				AddLabel(label);
-			}
+			this.options = options.ToList();
+		}
 
-			Select(Options.First());
+		protected override void OnContentRendered(EventArgs e)
+		{
+			base.OnContentRendered(e);
+			RedrawLabels(options);
 		}
 
 		protected override void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -26,27 +30,13 @@ namespace PassWinmenu.Windows
 			// to search, for example, for reddit.com/username by entering "re us"
 			var terms = SearchBox.Text.ToLower(CultureInfo.CurrentCulture).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-			var firstSelectionFound = false;
-			foreach (var option in Options)
-			{
-				var content = ((string)option.Content).ToLower(CultureInfo.CurrentCulture);
 
-				// The option is only a match if it contains every term in the terms array.
-				if (terms.All(term => content.Contains(term)))
-				{
-					// The first matched item should be pre-selected for convenience.
-					if (!firstSelectionFound)
-					{
-						firstSelectionFound = true;
-						Select(option);
-					}
-					option.Visibility = Visibility.Visible;
-				}
-				else
-				{
-					option.Visibility = Visibility.Collapsed;
-				}
-			}
+			var matching = options.Where((option) =>
+			{
+				var content = option.ToLower(CultureInfo.CurrentCulture);
+				return terms.All(term => content.Contains(term));
+			});
+			RedrawLabels(matching);
 		}
 
 		protected override void HandleSelect()
