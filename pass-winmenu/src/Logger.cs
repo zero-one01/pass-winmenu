@@ -94,11 +94,14 @@ namespace PassWinmenu
 		{
 			var submissionTime = DateTime.Now;
 			var line = $"[{submissionTime:HH:mm:ss.fff}] {message}";
-			History.Add(new LogLine
+			lock (History)
 			{
-				DateTime = submissionTime,
-				Message = message
-			});
+				History.Add(new LogLine
+				{
+					DateTime = submissionTime,
+					Message = message
+				});
+			}
 #if DEBUG
 			Console.WriteLine(line);
 #endif
