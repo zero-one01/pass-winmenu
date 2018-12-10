@@ -99,7 +99,9 @@ namespace PassWinmenu
 				DateTime = submissionTime,
 				Message = message
 			});
+#if DEBUG
 			Console.WriteLine(line);
+#endif
 			writer?.WriteLine(line);
 		}
 
