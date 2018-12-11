@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using PassWinmenu.Configuration;
+using PassWinmenu.PasswordManagement;
 
 namespace PassWinmenu
 {
@@ -14,7 +15,7 @@ namespace PassWinmenu
 		/// Extracts the username and any possible metadata from a password file
 		/// by auto-detecting the correct line-endings.
 		/// </summary>
-		/// <param name="file">A <see cref="PasswordFile"/> specifyign the location of the file to be decrypted.</param>
+		/// <param name="file">A <see cref="PasswordFile"/> specifying the location of the file to be decrypted.</param>
 		/// <param name="content">Content of the password file</param>
 		/// <param name="entireFile">If set to true, any line endings are considered to be part of the password.</param>
 		/// <returns>A <see cref="DecryptedPasswordFile"/> structure containing the password and metadata</returns>
@@ -37,7 +38,7 @@ namespace PassWinmenu
 		}
 
 		/// <summary>
-		/// Attepts to retrieve the username from a password file.
+		/// Attempts to retrieve the username from a password file.
 		/// </summary>
 		/// <param name="passwordFile">The name of the password file.</param>
 		/// <param name="extraContent">The extra content of the password file.</param>

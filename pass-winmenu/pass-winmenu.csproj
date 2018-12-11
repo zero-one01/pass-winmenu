@@ -59,8 +59,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
+    <StartupObject>PassWinmenu.Entry</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>embedded\pass-winmenu.ico</ApplicationIcon>
@@ -98,12 +97,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Actions\Actions.cs" />
+    <Compile Include="src\Actions\ActionDispatcher.cs" />
     <Compile Include="src\Actions\EditAction.cs" />
     <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
+    <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
+    <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
+    <Compile Include="src\PasswordManagement\PasswordFile.cs" />
     <Compile Include="src\WinApi\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />
@@ -129,6 +131,7 @@
     <Compile Include="src\Configuration\Classes\UsernameDetectionRegexOptions.cs" />
     <Compile Include="src\Configuration\ConfigurationException.cs" />
     <Compile Include="src\Configuration\ConfigurationParseException.cs" />
+    <Compile Include="src\WinApi\KeyboardEmulator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
     <Compile Include="src\Entry.cs" />
@@ -146,7 +149,7 @@
     <Compile Include="src\WinApi\Notifications.cs" />
     <Compile Include="src\PasswordFileParser.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
-    <Compile Include="src\PasswordManager.cs" />
+    <Compile Include="src\PasswordManagement\PasswordManager.cs" />
     <Compile Include="src\PinentryWatcher.cs" />
     <Compile Include="src\UpdateChecking\Chocolatey\ChocolateyUpdateSource.cs" />
     <Compile Include="src\UpdateChecking\GitHub\GitHubUpdateSource.cs" />
@@ -168,19 +171,19 @@
     <Compile Include="src\Utilities\ExtensionMethods\ScreenExtensions.cs" />
     <Compile Include="src\ExternalPrograms\Git.cs" />
     <Compile Include="src\ExternalPrograms\GPG.cs" />
-    <Compile Include="src\Program.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="src\Program.cs" />
     <Compile Include="src\EmbeddedResources.cs" />
     <Compile Include="src\StartupLink.cs" />
     <Compile Include="src\Utilities\Helpers.cs" />
     <Compile Include="src\Utilities\NativeMethods.cs" />
-    <Compile Include="src\WindowsUtilities.cs" />
     <Compile Include="src\Windows\EditWindow.xaml.cs">
       <DependentUpon>EditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
-    <Compile Include="src\Windows\MainWindowConfiguration.cs" />
+    <Compile Include="src\Windows\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="src\Windows\SelectionWindowConfiguration.cs" />
     <Compile Include="src\Windows\PasswordSelectionWindow.cs" />
     <Compile Include="src\Windows\PasswordWindow.xaml.cs">
       <DependentUpon>PasswordWindow.xaml</DependentUpon>
@@ -192,6 +195,10 @@
     <Page Include="src\Windows\EditWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="src\Windows\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="src\Windows\PasswordWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

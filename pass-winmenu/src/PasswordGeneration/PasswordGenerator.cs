@@ -30,7 +30,7 @@ namespace PassWinmenu.PasswordGeneration
 				completeCharSet.UnionWith(group.CharacterSet);
 			}
 
-			// Transfor the set into a list, to assign an index to each character.
+			// Transform the set into a list, to assign an index to each character.
 			var charList = completeCharSet.ToList();
 
 			// Generate as many random list indices as we need to build a password.

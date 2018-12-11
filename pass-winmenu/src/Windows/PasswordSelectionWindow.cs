@@ -2,18 +2,15 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using PassWinmenu.Utilities;
 
 namespace PassWinmenu.Windows
 {
 	internal class PasswordSelectionWindow : SelectionWindow
 	{
-		private List<string> options;
+		private readonly List<string> options;
 
-		public PasswordSelectionWindow(IEnumerable<string> options, MainWindowConfiguration configuration) : base(configuration)
+		public PasswordSelectionWindow(IEnumerable<string> options, SelectionWindowConfiguration configuration) : base(configuration)
 		{
 			this.options = options.ToList();
 		}

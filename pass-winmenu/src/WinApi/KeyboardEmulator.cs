@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Windows.Forms;
 
-namespace PassWinmenu
+namespace PassWinmenu.WinApi
 {
-	static class WindowsUtilities
+	static class KeyboardEmulator
 	{
 		/// <summary>
 		/// Sends text directly to the topmost window, as if it was entered by the user.
@@ -32,6 +28,11 @@ namespace PassWinmenu
 			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~' };
 			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
 			SendKeys.Send(escaped);
+		}
+
+		internal static void EnterRawText(string text)
+		{
+			SendKeys.Send(text);
 		}
 	}
 }

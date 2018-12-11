@@ -71,6 +71,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmbeddedResources\EmbeddedResourcesTests.cs" />
     <Compile Include="External\ConfigFileTests.cs" />
     <Compile Include="Hotkeys\DummyHotkeyRegistrar.cs" />
     <Compile Include="Hotkeys\DummyKeyEventSource.cs" />

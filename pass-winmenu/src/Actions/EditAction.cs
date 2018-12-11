@@ -12,7 +12,7 @@ namespace PassWinmenu.Actions
 	{
 
 
-		public EditAction(Actions actions)
+		public EditAction(ActionDispatcher actions)
 		{
 
 		}

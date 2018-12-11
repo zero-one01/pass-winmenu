@@ -8,17 +8,17 @@ using Orientation = System.Windows.Controls.Orientation;
 
 namespace PassWinmenu.Windows
 {
-	internal class MainWindowConfiguration
+	internal class SelectionWindowConfiguration
 	{
 		public Point Position { get; set; }
 		public Point Dimensions { get; set; }
 		public Orientation Orientation { get; set; }
 
 		/// <summary>
-		/// Builds a MainWindowConfiguration object according to the config settings.
+		/// Builds a SelectionWindowConfiguration object according to the config settings.
 		/// </summary>
 		/// <returns></returns>
-		public static MainWindowConfiguration ParseMainWindowConfiguration(Config config)
+		public static SelectionWindowConfiguration ParseMainWindowConfiguration(Config config)
 		{
 			var activeScreen = Screen.AllScreens.First(screen => screen.Bounds.Contains(Cursor.Position));
 			var selectedScreen = config.Interface.FollowCursor ? activeScreen : Screen.PrimaryScreen;
@@ -52,7 +52,7 @@ namespace PassWinmenu.Windows
 				throw new ConfigurationParseException("Unable to parse the menu orientation from the config file.");
 			}
 
-			return new MainWindowConfiguration
+			return new SelectionWindowConfiguration
 			{
 				Dimensions = new Point(width, height),
 				Position = new Point(left + selectedScreen.Bounds.Left, top + selectedScreen.Bounds.Top),

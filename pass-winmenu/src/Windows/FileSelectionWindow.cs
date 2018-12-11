@@ -12,7 +12,7 @@ namespace PassWinmenu.Windows
 		private readonly DirectoryAutocomplete autocomplete;
 		private readonly string baseDirectory;
 
-		public FileSelectionWindow(string baseDirectory, MainWindowConfiguration configuration) : base(configuration)
+		public FileSelectionWindow(string baseDirectory, SelectionWindowConfiguration configuration) : base(configuration)
 		{
 			this.baseDirectory = baseDirectory;
 			autocomplete = new DirectoryAutocomplete(baseDirectory);

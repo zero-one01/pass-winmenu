@@ -10,5 +10,6 @@ namespace PassWinmenu.ExternalPrograms
 		void Fetch();
 		void Push();
 		void Rebase();
+		BranchTrackingDetails GetTrackingDetails();
 	}
 }

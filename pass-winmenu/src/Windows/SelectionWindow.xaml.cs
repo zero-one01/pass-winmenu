@@ -4,19 +4,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using PassWinmenu.Configuration;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.Utilities;
-using Color = System.Windows.Media.Color;
-using ColorConverter = System.Windows.Media.ColorConverter;
-using Cursors = System.Windows.Input.Cursors;
-using FontFamily = System.Windows.Media.FontFamily;
-using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-using Label = System.Windows.Controls.Label;
-using Orientation = System.Windows.Controls.Orientation;
 
 namespace PassWinmenu.Windows
 {
@@ -38,13 +30,13 @@ namespace PassWinmenu.Windows
 
 		private bool isClosing;
 		private bool firstActivation = true;
-		private MainWindowConfiguration configuration;
+		private readonly SelectionWindowConfiguration configuration;
 		private readonly StyleConfig styleConfig;
 
 		/// <summary>
 		/// Initialises the window with the provided options.
 		/// </summary>
-		protected SelectionWindow(MainWindowConfiguration configuration)
+		protected SelectionWindow(SelectionWindowConfiguration configuration)
 		{
 			TimerHelper.Current.TakeSnapshot("mainwnd-creating");
 			this.configuration = configuration;
@@ -350,8 +342,10 @@ namespace PassWinmenu.Windows
 							SelectPrevious();
 							break;
 						case HotkeyAction.SelectFirst:
+							SelectFirst();
 							break;
 						case HotkeyAction.SelectLast:
+							SelectLast();
 							break;
 					}
 				}

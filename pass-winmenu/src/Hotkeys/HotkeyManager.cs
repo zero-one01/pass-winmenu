@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using System.Windows.Input;
+using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
-using PassWinmenu.UpdateChecking;
 using PassWinmenu.WinApi;
-using PassWinmenu.Windows;
 
 namespace PassWinmenu.Hotkeys
 {
 	internal class HotkeyManager : IDisposable
 	{
 		private readonly List<IDisposable> registrations = new List<IDisposable>();
-
 		private readonly IHotkeyRegistrar registrar;
 
 		/// <summary>
@@ -46,7 +41,7 @@ namespace PassWinmenu.Hotkeys
 			}
 		}
 
-		public void AssignHotkeys(IEnumerable<HotkeyConfig> config, DialogCreator dialogCreator, UpdateChecker updateChecker, INotificationService notificationService, Program program)
+		public void AssignHotkeys(IEnumerable<HotkeyConfig> config, ActionDispatcher actionDispatcher, INotificationService notificationService)
 		{
 			foreach (var hotkey in config)
 			{
@@ -66,28 +61,28 @@ namespace PassWinmenu.Hotkeys
 				switch (action)
 				{
 					case HotkeyAction.DecryptPassword:
-						AddHotKey(keys, () => program.DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
+						AddHotKey(keys, () => actionDispatcher.DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
 						break;
 					case HotkeyAction.AddPassword:
-						AddHotKey(keys, dialogCreator.AddPassword);
+						AddHotKey(keys, actionDispatcher.AddPassword);
 						break;
 					case HotkeyAction.EditPassword:
-						AddHotKey(keys, dialogCreator.EditPassword);
+						AddHotKey(keys, actionDispatcher.EditPassword);
 						break;
 					case HotkeyAction.GitPull:
-						AddHotKey(keys, program.UpdatePasswordStore);
+						AddHotKey(keys, actionDispatcher.UpdatePasswordStore);
 						break;
 					case HotkeyAction.GitPush:
-						AddHotKey(keys, program.CommitChanges);
+						AddHotKey(keys, actionDispatcher.CommitChanges);
 						break;
 					case HotkeyAction.OpenShell:
-						AddHotKey(keys, dialogCreator.OpenPasswordShell);
+						AddHotKey(keys, actionDispatcher.OpenPasswordShell);
 						break;
 					case HotkeyAction.ShowDebugInfo:
-						AddHotKey(keys, dialogCreator.ShowDebugInfo);
+						AddHotKey(keys, actionDispatcher.ShowDebugInfo);
 						break;
 					case HotkeyAction.CheckForUpdates:
-						AddHotKey(keys, updateChecker.CheckForUpdates);
+						AddHotKey(keys, actionDispatcher.CheckForUpdates);
 						break;
 				}
 			}

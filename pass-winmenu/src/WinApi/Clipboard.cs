@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using Clipboard = System.Windows.Clipboard;
+using System.Windows;
 
-namespace PassWinmenu
+namespace PassWinmenu.WinApi
 {
 	public class ClipboardHelper
 	{
-		public ClipboardHelper()
-		{
-
-		}
-
 		/// <summary>
 		/// Copies a string to the clipboard. If it still exists on the clipboard after the amount of time
 		/// specified in <paramref name="timeout"/>, it will be removed again.
@@ -50,13 +44,7 @@ namespace PassWinmenu
 
 		public string GetText()
 		{
-			if (!Clipboard.ContainsText())
-			{
-				return null;
-				//throw new InvalidOperationException("Clipboard does not contain any text.");
-			}
-
-			return Clipboard.GetText();
+			return Clipboard.ContainsText() ? Clipboard.GetText() : null;
 		}
 	}
 }

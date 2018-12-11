@@ -7,35 +7,9 @@ using PassWinmenu.ExternalPrograms;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
 
-namespace PassWinmenu
+namespace PassWinmenu.PasswordManagement
 {
-	internal class DecryptedPasswordFile : PasswordFile
-	{
-		public string Content => $"{Password}\n{Metadata}";
-
-		public string Password { get; }
-		public string Metadata { get; }
-
-		public DecryptedPasswordFile(string relativePath, string password, string metaData) : base(relativePath)
-		{
-			Password = password;
-			Metadata = metaData;
-		}
-	}
-
-	internal class PasswordFile
-	{
-		public string FullPath => Path.GetFullPath(RelativePath);
-		public string RelativePath { get; }
-		public string Name => Path.GetFileName(RelativePath);
-
-		public PasswordFile(string relativePath)
-		{
-			RelativePath = relativePath;
-		}
-	}
-
-	internal class PasswordManager
+	internal class PasswordManager : IPasswordManager
 	{
 		internal const string GpgIdFileName = ".gpg-id";
 

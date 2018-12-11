@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
+using PassWinmenu.PasswordManagement;
 using PassWinmenu.WinApi;
 
 namespace PassWinmenu.Windows
@@ -36,10 +37,10 @@ namespace PassWinmenu.Windows
 		/// <returns>The path to the file that the user has chosen</returns>
 		public string ShowFileSelectionWindow()
 		{
-			MainWindowConfiguration windowConfig;
+			SelectionWindowConfiguration windowConfig;
 			try
 			{
-				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
+				windowConfig = SelectionWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
 			}
 			catch (ConfigurationParseException e)
 			{
@@ -64,10 +65,10 @@ namespace PassWinmenu.Windows
 		/// <returns>One of the values contained in <paramref name="options"/>, or null if no option was chosen.</returns>
 		public string ShowPasswordMenu(IEnumerable<string> options)
 		{
-			MainWindowConfiguration windowConfig;
+			SelectionWindowConfiguration windowConfig;
 			try
 			{
-				windowConfig = MainWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
+				windowConfig = SelectionWindowConfiguration.ParseMainWindowConfiguration(ConfigManager.Config);
 			}
 			catch (ConfigurationParseException e)
 			{
@@ -81,19 +82,13 @@ namespace PassWinmenu.Windows
 			{
 				return menu.GetSelection();
 			}
-			else
-			{
-				return null;
-			}
+			return null;
 		}
 
 		/// <summary>
 		/// Opens a password shell in which the user can manage their passwords.
+		/// A gpg() function will be created in the shell and pointed to the local GPG installation.
 		/// </summary>
-		/// <param name="gpg">
-		/// A reference to an existing GPG installation.
-		/// A gpg() function will be created in the shell and pointed to this installation.
-		/// </param>
 		internal void OpenPasswordShell()
 		{
 			var powershell = new ProcessStartInfo
@@ -171,7 +166,7 @@ namespace PassWinmenu.Windows
 			// Build a dictionary mapping display names to relative paths
 			var displayNameMap = passFiles.ToDictionary(val => val.Substring(0, val.Length - Program.EncryptedFileExtension.Length).Replace(Path.DirectorySeparatorChar.ToString(), ConfigManager.Config.Interface.DirectorySeparator));
 
-			var selection = this.ShowPasswordMenu(displayNameMap.Keys);
+			var selection = ShowPasswordMenu(displayNameMap.Keys);
 			if (selection == null) return null;
 			return displayNameMap[selection];
 		}
