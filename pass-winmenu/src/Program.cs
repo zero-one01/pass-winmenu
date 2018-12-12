@@ -53,7 +53,6 @@ namespace PassWinmenu
 				notificationService.ShowErrorWindow($"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})");
 				Exit();
 			}
-
 		}
 
 		/// <summary>
@@ -287,12 +286,6 @@ namespace PassWinmenu
 				notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
 				Exit();
 			}
-		}
-
-		public void EnterMainLoop()
-		{
-			var main = new MainWindow();
-			main.ShowDialog();
 		}
 
 		public static void Exit()

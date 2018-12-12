@@ -93,6 +93,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\Actions\ActionDispatcher.cs" />
     <Compile Include="src\Actions\EditAction.cs" />
     <Compile Include="src\Actions\IAction.cs" />
@@ -130,7 +134,6 @@
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
-    <Compile Include="src\Entry.cs" />
     <Compile Include="src\ExternalPrograms\GpgAgent.cs" />
     <Compile Include="src\ExternalPrograms\ICryptoService.cs" />
     <Compile Include="src\Hotkeys\Hotkey.cs" />
@@ -174,10 +177,12 @@
     <Compile Include="src\Utilities\NativeMethods.cs" />
     <Compile Include="src\Windows\EditWindow.xaml.cs">
       <DependentUpon>EditWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
     <Compile Include="src\Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\Windows\SelectionWindowConfiguration.cs" />
     <Compile Include="src\Windows\PasswordSelectionWindow.cs" />
@@ -189,19 +194,19 @@
     </Compile>
     <Compile Include="src\Windows\WindowManager.cs" />
     <Page Include="src\Windows\EditWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="src\Windows\MainWindow.xaml">
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="src\Windows\PasswordWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="src\Windows\SelectionWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
