@@ -16,7 +16,7 @@
 		         TextWrapping="NoWrap"
 		         TextChanged="SearchBox_OnTextChanged"/>
 		<StackPanel Name="WrapPanel"
-		            Margin="0,25,0,0"
+		            Margin="0,20,0,0"
 		            Orientation="Vertical" MouseWheel="WrapPanel_OnMouseWheel">
 
 		</StackPanel>

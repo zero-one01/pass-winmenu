@@ -38,8 +38,11 @@ namespace PassWinmenu.Windows
 
 		protected override void HandleSelect()
 		{
-			Success = true;
-			Close();
+			if (Selected != null)
+			{
+				Success = true;
+				Close();
+			}
 		}
 	}
 }

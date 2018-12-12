@@ -102,7 +102,13 @@ namespace PassWinmenu.Windows
 			sizeTest.Measure(new Size(double.MaxValue, double.MaxValue));
 			var labelHeight = sizeTest.DesiredSize.Height;
 
-			var labelCount = Height / labelHeight;
+			var labelCount = WrapPanel.ActualHeight / labelHeight;
+
+			if (true)
+			{
+				var usedHeight = ((int)labelCount) * labelHeight;
+				WrapPanel.Height = usedHeight;
+			}
 
 			ClearLabels();
 			var first = true;
