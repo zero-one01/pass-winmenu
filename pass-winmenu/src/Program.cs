@@ -24,18 +24,18 @@ namespace PassWinmenu
 	internal sealed class Program : IDisposable
 	{
 		public static string Version => EmbeddedResources.Version;
-		public static bool QuitRequested { get; set; }
 
 		public const string LastConfigVersion = "1.7";
 		public const string EncryptedFileExtension = ".gpg";
 		public const string PlaintextFileExtension = ".txt";
 
-		private readonly ClipboardHelper clipboard = new ClipboardHelper();
+		private ClipboardHelper clipboard;
 		private ActionDispatcher actionDispatcher;
 		private HotkeyManager hotkeys;
 		private DialogCreator dialogCreator;
 		private UpdateChecker updateChecker;
 		private Git git;
+		private GPG gpg;
 		private PasswordManager passwordManager;
 		private Notifications notificationService;
 
@@ -88,7 +88,7 @@ namespace PassWinmenu
 			LoadConfigFile();
 
 			// Create the GPG wrapper.
-			var gpg = new GPG();
+			gpg = new GPG();
 			gpg.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{
@@ -101,6 +101,7 @@ namespace PassWinmenu
 			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore.Location, EncryptedFileExtension, gpg);
 			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
 
+			clipboard = new ClipboardHelper();
 			dialogCreator = new DialogCreator(notificationService, passwordManager, git);
 			actionDispatcher = new ActionDispatcher(notificationService, passwordManager, dialogCreator, clipboard, git);
 
@@ -176,8 +177,7 @@ namespace PassWinmenu
 			}
 			try
 			{
-				// TODO: fetch GPG from somewhere else
-				((GPG)passwordManager.Crypto).GetVersion();
+				Log.Send("Using GPG version " + gpg.GetVersion());
 			}
 			catch (Win32Exception)
 			{
@@ -197,8 +197,7 @@ namespace PassWinmenu
 				{
 					try
 					{
-						// TODO: fetch GPG from somewhere else
-						((GPG)passwordManager.Crypto).StartAgent();
+						gpg.StartAgent();
 					}
 					catch (GpgError err)
 					{
@@ -298,7 +297,7 @@ namespace PassWinmenu
 
 		public static void Exit()
 		{
-			QuitRequested = true;
+			Environment.Exit(0);
 		}
 
 		public void Dispose()

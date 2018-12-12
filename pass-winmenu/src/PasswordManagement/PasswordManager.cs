@@ -43,7 +43,7 @@ namespace PassWinmenu.PasswordManagement
 		}
 
 		/// <summary>
-		/// Generates an ecrypted password file at the specified path.
+		/// Generates an encrypted password file at the specified path.
 		/// If the path contains directories that do not exist, they will be created automatically.
 		/// </summary>
 		/// <param name="text">The text to be encrypted.</param>
