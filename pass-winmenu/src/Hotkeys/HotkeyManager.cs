@@ -63,6 +63,9 @@ namespace PassWinmenu.Hotkeys
 					case HotkeyAction.DecryptPassword:
 						AddHotKey(keys, () => actionDispatcher.DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
 						break;
+					case HotkeyAction.PasswordField:
+						AddHotKey(keys, () => actionDispatcher.DecryptPasswordField(hotkey.Options.CopyToClipboard, hotkey.Options.TypeField));
+						break;
 					case HotkeyAction.AddPassword:
 						AddHotKey(keys, actionDispatcher.AddPassword);
 						break;

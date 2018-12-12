@@ -33,7 +33,20 @@ namespace PassWinmenu
 				var password = match.Groups[1].Value;
 				var extraContent = match.Groups[2].Value;
 
-				return new DecryptedPasswordFile(file.RelativePath, password, extraContent);
+				var keys = ExtractKeys(extraContent);
+
+				return new DecryptedPasswordFile(file.RelativePath, password, extraContent, keys.ToList());
+			}
+		}
+
+		private IEnumerable<KeyValuePair<string, string>> ExtractKeys(string metadata)
+		{
+			var matches = Regex.Matches(metadata, @"([A-z0-9-_]+): (.*?)([\r\n]+|$)", RegexOptions.Singleline);
+			foreach (Match match in matches)
+			{
+				var key = match.Groups[1].Value;
+				var value = match.Groups[2].Value;
+				yield return new KeyValuePair<string, string>(key, value);
 			}
 		}
 

@@ -27,12 +27,12 @@ namespace PassWinmenu.WinApi
 			// SendKeys.Send expects special characters to be escaped by wrapping them with curly braces.
 			var specialCharacters = new[] { '{', '}', '[', ']', '(', ')', '+', '^', '%', '~' };
 			var escaped = string.Concat(text.Select(c => specialCharacters.Contains(c) ? $"{{{c}}}" : c.ToString()));
-			SendKeys.Send(escaped);
+			SendKeys.SendWait(escaped);
 		}
 
 		internal static void EnterRawText(string text)
 		{
-			SendKeys.Send(text);
+			SendKeys.SendWait(text);
 		}
 	}
 }

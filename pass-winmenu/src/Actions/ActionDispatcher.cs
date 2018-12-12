@@ -47,6 +47,19 @@ namespace PassWinmenu.Actions
 		}
 
 		/// <summary>
+		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
+		/// </summary>
+		public void DecryptPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
+		{
+			dialogCreator.DecryptPassword(copyToClipboard, typeUsername, typePassword);
+		}
+
+		public void DecryptPasswordField(bool copyToClipboard, bool type)
+		{
+			dialogCreator.GetKey(copyToClipboard, type);
+		}
+
+		/// <summary>
 		/// Commits all local changes and pushes them to remote.
 		/// Also pulls any upcoming changes from remote.
 		/// </summary>
@@ -164,68 +177,6 @@ namespace PassWinmenu.Actions
 				{
 					notificationService.ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
 				}
-			}
-		}
-
-		/// <summary>
-		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
-		/// </summary>
-		public void DecryptPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
-		{
-			var selectedFile = dialogCreator.RequestPasswordFile();
-			// If the user cancels their selection, the password decryption should be cancelled too.
-			if (selectedFile == null) return;
-
-			DecryptedPasswordFile passFile;
-			try
-			{
-				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.PasswordStore.FirstLineOnly);
-			}
-			catch (GpgError e)
-			{
-				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
-				return;
-			}
-			catch (GpgException e)
-			{
-				notificationService.ShowErrorWindow("Password decryption failed. " + e.Message);
-				return;
-			}
-			catch (ConfigurationException e)
-			{
-				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
-				return;
-			}
-			catch (Exception e)
-			{
-				notificationService.ShowErrorWindow($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}");
-				return;
-			}
-
-			if (copyToClipboard)
-			{
-				clipboard.Place(passFile.Password, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
-				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
-				{
-					notificationService.Raise($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
-				}
-			}
-			var usernameEntered = false;
-			if (typeUsername)
-			{
-				var username = new PasswordFileParser().GetUsername(selectedFile, passFile.Metadata);
-				if (username != null)
-				{
-					KeyboardEmulator.EnterText(username, ConfigManager.Config.Output.DeadKeys);
-					usernameEntered = true;
-				}
-			}
-			if (typePassword)
-			{
-				// If a username has also been entered, press Tab to switch to the password field.
-				if (usernameEntered) KeyboardEmulator.EnterRawText("{TAB}");
-
-				KeyboardEmulator.EnterText(passFile.Password, ConfigManager.Config.Output.DeadKeys);
 			}
 		}
 	}

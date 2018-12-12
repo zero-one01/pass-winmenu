@@ -320,5 +320,139 @@ namespace PassWinmenu.Windows
 			// Add the password to Git
 			syncService?.AddPassword(passwordFilePath + passwordManager.EncryptedFileExtension);
 		}
+
+
+		/// <summary>
+		/// Asks the user to choose a password file, decrypts it, and copies the resulting value to the clipboard.
+		/// </summary>
+		public void DecryptPassword(bool copyToClipboard, bool typeUsername, bool typePassword)
+		{
+			var selectedFile = RequestPasswordFile();
+			// If the user cancels their selection, the password decryption should be cancelled too.
+			if (selectedFile == null) return;
+
+			DecryptedPasswordFile passFile;
+			try
+			{
+				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.PasswordStore.FirstLineOnly);
+			}
+			catch (GpgError e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
+				return;
+			}
+			catch (GpgException e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed. " + e.Message);
+				return;
+			}
+			catch (ConfigurationException e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
+				return;
+			}
+			catch (Exception e)
+			{
+				notificationService.ShowErrorWindow($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}");
+				return;
+			}
+
+			if (copyToClipboard)
+			{
+				clipboard.Place(passFile.Password, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
+				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
+				{
+					notificationService.Raise($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
+				}
+			}
+			var usernameEntered = false;
+			if (typeUsername)
+			{
+				var username = new PasswordFileParser().GetUsername(selectedFile, passFile.Metadata);
+				if (username != null)
+				{
+					KeyboardEmulator.EnterText(username, ConfigManager.Config.Output.DeadKeys);
+					usernameEntered = true;
+				}
+			}
+			if (typePassword)
+			{
+				// If a username has also been entered, press Tab to switch to the password field.
+				if (usernameEntered) KeyboardEmulator.EnterRawText("{TAB}");
+
+				KeyboardEmulator.EnterText(passFile.Password, ConfigManager.Config.Output.DeadKeys);
+			}
+		}
+
+		public void GetKey(bool copyToClipboard, bool type)
+		{
+			var selectedFile = RequestPasswordFile();
+
+			DecryptedPasswordFile passFile;
+			try
+			{
+				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.PasswordStore.FirstLineOnly);
+			}
+			catch (GpgError e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
+				return;
+			}
+			catch (GpgException e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed. " + e.Message);
+				return;
+			}
+			catch (ConfigurationException e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
+				return;
+			}
+			catch (Exception e)
+			{
+				notificationService.ShowErrorWindow($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}");
+				return;
+			}
+
+			var keys = passFile.Keys.Select(k => k.Key).Distinct();
+
+			var selection = ShowPasswordMenu(keys);
+			if (selection == null) return;
+
+			var values = passFile.Keys.Where(k => k.Key == selection).ToList();
+
+			if (values.Count == 0)
+			{
+				return;
+			}
+
+			string chosenValue;
+			if (values.Count > 1)
+			{
+				chosenValue = ShowPasswordMenu(values.Select(v => v.Value));
+				if (chosenValue == null)
+				{
+					return;
+				}
+			}
+			else
+			{
+				chosenValue = values[0].Value;
+			}
+
+
+			if (copyToClipboard)
+			{
+				clipboard.Place(chosenValue, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
+				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
+				{
+					notificationService.Raise($"The key has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
+				}
+			}
+			if (type)
+			{
+				KeyboardEmulator.EnterText(chosenValue, ConfigManager.Config.Output.DeadKeys);
+			}
+		}
 	}
 }
