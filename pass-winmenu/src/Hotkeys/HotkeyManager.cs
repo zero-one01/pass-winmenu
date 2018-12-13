@@ -64,7 +64,10 @@ namespace PassWinmenu.Hotkeys
 						AddHotKey(keys, () => actionDispatcher.DecryptPassword(hotkey.Options.CopyToClipboard, hotkey.Options.TypeUsername, hotkey.Options.TypePassword));
 						break;
 					case HotkeyAction.PasswordField:
-						AddHotKey(keys, () => actionDispatcher.DecryptPasswordField(hotkey.Options.CopyToClipboard, hotkey.Options.TypeField));
+						AddHotKey(keys, () => actionDispatcher.DecryptPasswordField(hotkey.Options.CopyToClipboard, hotkey.Options.Type, hotkey.Options.FieldName));
+						break;
+					case HotkeyAction.DecryptMetadata:
+						AddHotKey(keys, () => actionDispatcher.DecryptMetadata(hotkey.Options.CopyToClipboard, hotkey.Options.Type));
 						break;
 					case HotkeyAction.AddPassword:
 						AddHotKey(keys, actionDispatcher.AddPassword);
@@ -87,6 +90,8 @@ namespace PassWinmenu.Hotkeys
 					case HotkeyAction.CheckForUpdates:
 						AddHotKey(keys, actionDispatcher.CheckForUpdates);
 						break;
+					default:
+						throw new ArgumentOutOfRangeException();
 				}
 			}
 		}

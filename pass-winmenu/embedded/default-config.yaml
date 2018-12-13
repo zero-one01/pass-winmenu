@@ -195,9 +195,12 @@ hotkeys:
         type-password: true
     # Example configuration of an 'add password' hotkey. Uncomment to enable.
 #  - 
-#    hotkey: 'ctrl alt o'
+#    hotkey: 'ctrl alt shift n'
 #    action: 'add-password'
-
+    # Example configuration of a 'decrypt key' hotkey. Uncomment to enable.
+#  - 
+#    hotkey: 'ctrl alt shift u'
+#    action: 'add-password'
 
 # Notification-related settings.
 notifications:

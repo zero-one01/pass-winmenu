@@ -54,9 +54,14 @@ namespace PassWinmenu.Actions
 			dialogCreator.DecryptPassword(copyToClipboard, typeUsername, typePassword);
 		}
 
-		public void DecryptPasswordField(bool copyToClipboard, bool type)
+		public void DecryptMetadata(bool copyToClipboard, bool type)
 		{
-			dialogCreator.GetKey(copyToClipboard, type);
+			dialogCreator.DecryptMetadata(copyToClipboard, type);
+		}
+
+		public void DecryptPasswordField(bool copyToClipboard, bool type, string fieldName = null)
+		{
+			dialogCreator.GetKey(copyToClipboard, type, fieldName);
 		}
 
 		/// <summary>

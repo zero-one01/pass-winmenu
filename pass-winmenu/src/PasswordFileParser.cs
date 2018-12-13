@@ -80,6 +80,7 @@ namespace PassWinmenu
 		}
 	}
 
+	[Serializable]
 	internal class PasswordParseException : Exception
 	{
 		public PasswordParseException(string message) : base(message)

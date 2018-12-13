@@ -384,7 +384,50 @@ namespace PassWinmenu.Windows
 			}
 		}
 
-		public void GetKey(bool copyToClipboard, bool type)
+		public void DecryptMetadata(bool copyToClipboard, bool type)
+		{
+			var selectedFile = RequestPasswordFile();
+			DecryptedPasswordFile passFile;
+			try
+			{
+				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.PasswordStore.FirstLineOnly);
+			}
+			catch (GpgError e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
+				return;
+			}
+			catch (GpgException e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed. " + e.Message);
+				return;
+			}
+			catch (ConfigurationException e)
+			{
+				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
+				return;
+			}
+			catch (Exception e)
+			{
+				notificationService.ShowErrorWindow($"Password decryption failed: An error occurred: {e.GetType().Name}: {e.Message}");
+				return;
+			}
+
+			if (copyToClipboard)
+			{
+				clipboard.Place(passFile.Metadata, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
+				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
+				{
+					notificationService.Raise($"The key has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
+				}
+			}
+			if (type)
+			{
+				KeyboardEmulator.EnterText(passFile.Metadata, ConfigManager.Config.Output.DeadKeys);
+			}
+		}
+
+		public void GetKey(bool copyToClipboard, bool type, string key)
 		{
 			var selectedFile = RequestPasswordFile();
 
@@ -414,12 +457,15 @@ namespace PassWinmenu.Windows
 				return;
 			}
 
-			var keys = passFile.Keys.Select(k => k.Key).Distinct();
+			if (string.IsNullOrWhiteSpace(key))
+			{
+				var keys = passFile.Keys.Select(k => k.Key).Distinct();
+				var selection = ShowPasswordMenu(keys);
+				if (selection == null) return;
+				key = selection;
+			}
 
-			var selection = ShowPasswordMenu(keys);
-			if (selection == null) return;
-
-			var values = passFile.Keys.Where(k => k.Key == selection).ToList();
+			var values = passFile.Keys.Where(k => k.Key == key).ToList();
 
 			if (values.Count == 0)
 			{

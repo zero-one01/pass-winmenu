@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace PassWinmenu.UpdateChecking
 {
+	[Serializable]
 	internal class UpdateException : Exception
 	{
 		public UpdateException(string message) : base(message) { }

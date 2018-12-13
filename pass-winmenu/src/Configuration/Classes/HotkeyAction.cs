@@ -2,19 +2,20 @@
 {
 	internal enum HotkeyAction
 	{
-		DecryptPassword,
-		AddPassword,
-		EditPassword,
-		PasswordField,
-		GitPull,
-		GitPush,
-		OpenShell,
-		SelectNext,
-		SelectPrevious,
-		SelectFirst,
-		SelectLast,
+		DecryptPassword, // Decrypt a password
+		AddPassword, // Add a new password
+		EditPassword, // Edit a password
+		DecryptMetadata, // Fetch the metadata from a password
+		PasswordField, // Fetch the field from a metadata key
+		GitPull, // Run `git pull` on the password store
+		GitPush, // Run `git push` on the password store
+		OpenShell, // Open a shell with GPG access in your password store
+		SelectNext, // Select the next entry in the password menu
+		SelectPrevious, // Select the previous entry in the password menu
+		SelectFirst, // Select the first entry in the password menu
+		SelectLast, // Select the last entry in the password menu
 		// Debugging actions
-		ShowDebugInfo,
-		CheckForUpdates,
+		ShowDebugInfo, // Show a window with some debug information.
+		CheckForUpdates, // Force an update check.
 	}
 }
