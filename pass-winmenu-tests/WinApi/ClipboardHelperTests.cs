@@ -1,20 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PassWinmenu;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace PassWinmenu.WinApi
 {
-	[TestClass()]
+	[TestClass]
 	public class ClipboardHelperTests
 	{
 		private const string Category = "Windows API: Clipboard Helper";
-
 
 		[TestMethod, TestCategory(Category)]
 		public void ClipboardHelper_PlacesText()
@@ -32,7 +27,8 @@ namespace PassWinmenu.WinApi
 		[TestMethod, TestCategory(Category)]
 		public void ClipboardHelper_RemovesText()
 		{
-			// TODO: re-enable this test when the clipboard helper uses the correct threading code
+			// TODO: Find a way to test this.
+			// The code below doesn't work because we have no Application reference.
 			return;
 
 			var clipboard = new ClipboardHelper();
@@ -42,9 +38,18 @@ namespace PassWinmenu.WinApi
 
 			clipboard.Place(content, TimeSpan.FromSeconds(1));
 			Assert.AreNotEqual(beforeText, clipboard.GetText());
-
 			Thread.Sleep(1100);
-			Assert.AreEqual(beforeText, clipboard.GetText());
+
+			var waitAttempts = 20;
+			for (var i = 0; i < waitAttempts && clipboard.GetText() == content; i++)
+			{
+				Thread.Sleep(100);
+			}
+			var clipText = clipboard.GetText();
+
+			Assert.AreNotEqual(clipText, content, "Clipboard was not cleared.");
+
+			Assert.AreEqual(beforeText, clipText);
 		}
 	}
 }

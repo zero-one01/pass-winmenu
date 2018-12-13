@@ -24,21 +24,23 @@ namespace PassWinmenu.WinApi
 
 			Task.Delay(timeout).ContinueWith(_ =>
 			{
-				// TODO: Invoke this
-				try
+				Application.Current.Dispatcher.Invoke(() =>
 				{
-					// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
-					// If the clipboard did not previously contain any text, it is simply cleared.
-					if (Clipboard.ContainsText() && Clipboard.GetText() == text)
+					try
 					{
-						Log.Send("Restoring previous clipboard contents");
-						Clipboard.SetDataObject(previousData);
+						// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
+						// If the clipboard did not previously contain any text, it is simply cleared.
+						if (Clipboard.ContainsText() && Clipboard.GetText() == text)
+						{
+							Log.Send("Restoring previous clipboard contents");
+							Clipboard.SetDataObject(previousData);
+						}
 					}
-				}
-				catch (Exception e)
-				{
-					Log.Send($"Failed to restore previous clipboard contents: An exception occurred ({e.GetType().Name}: {e.Message})", LogLevel.Error);
-				}
+					catch (Exception e)
+					{
+						Log.Send($"Failed to restore previous clipboard contents: An exception occurred ({e.GetType().Name}: {e.Message})", LogLevel.Error);
+					}
+				});
 			});
 		}
 
