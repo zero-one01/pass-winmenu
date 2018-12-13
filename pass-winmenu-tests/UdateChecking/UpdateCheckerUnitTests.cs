@@ -78,7 +78,7 @@ namespace PassWinmenu.UdateChecking
 
 			// Validate that the event has been raised now.
 			Thread.Sleep(checkAgainMs);
-			for (int i = 0; i < 10 && !raised; i++)
+			for (int i = 0; i < checkAttempts && !raised; i++)
 			{
 				Thread.Sleep(checkAgainMs);
 			}
