@@ -17,7 +17,7 @@ namespace PassWinmenu.Windows
 	/// </summary>
 	internal abstract partial class SelectionWindow
 	{
-		private const int scrollBoundary = 3;
+		private const int scrollBoundary = 0;
 		private int scrollOffset = 0;
 		private List<string> optionStrings = new List<string>();
 		protected readonly List<Label> Options = new List<Label>();
@@ -29,6 +29,8 @@ namespace PassWinmenu.Windows
 		/// True if the user has chosen one of the options, false otherwise.
 		/// </summary>
 		public bool Success { get; protected set; }
+
+		public string SearchHint { get; set; } = "Search...";
 
 
 		private bool isClosing;
@@ -44,13 +46,17 @@ namespace PassWinmenu.Windows
 			TimerHelper.Current.TakeSnapshot("mainwnd-creating");
 			this.configuration = configuration;
 			InitializeComponent();
+			Visibility = Visibility.Collapsed;
 
 			if (configuration.Orientation == Orientation.Horizontal)
 			{
 				WrapPanel.Orientation = Orientation.Horizontal;
 			}
 
+
 			styleConfig = ConfigManager.Config.Interface.Style;
+
+			SearchBox.BorderBrush = Helpers.BrushFromColourString("#FFFF00FF");
 			SearchBox.CaretBrush = Helpers.BrushFromColourString(styleConfig.CaretColour);
 			SearchBox.Background = Helpers.BrushFromColourString(styleConfig.Search.BackgroundColour);
 			SearchBox.Foreground = Helpers.BrushFromColourString(styleConfig.Search.TextColour);
@@ -62,6 +68,7 @@ namespace PassWinmenu.Windows
 			Background = Helpers.BrushFromColourString(styleConfig.BackgroundColour);
 
 			BorderBrush = Helpers.BrushFromColourString(styleConfig.BorderColour);
+
 			BorderThickness = new Thickness(1);
 			TimerHelper.Current.TakeSnapshot("mainwnd-created");
 		}
@@ -69,6 +76,7 @@ namespace PassWinmenu.Windows
 		protected override void OnInitialized(EventArgs e)
 		{
 			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-start");
+
 			base.OnInitialized(e);
 			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-base-end");
 		}
@@ -77,18 +85,16 @@ namespace PassWinmenu.Windows
 		{
 			// Position window
 			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-start");
-			var transfomedPos = PointFromScreen(configuration.Position);
+			var transformedPos = PointFromScreen(configuration.Position);
 			var transformedDims = PointFromScreen(configuration.Dimensions);
 			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-transformed");
 
-			Left = transfomedPos.X;
-			Top = transfomedPos.Y;
+			Left = transformedPos.X;
+			Top = transformedPos.Y;
 			Width = transformedDims.X;
 			Height = transformedDims.Y;
+			Visibility = Visibility.Visible;
 
-			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-end");
-			base.OnContentRendered(e);
-			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-base-end");
 
 			// Create labels
 			var sizeTest = CreateLabel("size-test");
@@ -108,6 +114,9 @@ namespace PassWinmenu.Windows
 				var label = CreateLabel($"label_{i}");
 				AddLabel(label);
 			}
+			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-end");
+			base.OnContentRendered(e);
+			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-base-end");
 		}
 
 		/// <summary>
@@ -182,7 +191,6 @@ namespace PassWinmenu.Windows
 				Background = Helpers.BrushFromColourString(styleConfig.Options.BackgroundColour),
 				Foreground = Helpers.BrushFromColourString(styleConfig.Options.TextColour),
 				Padding = new Thickness(0, 0, 0, 2),
-				Margin = new Thickness(7, 0, 7, 0),
 				Cursor = Cursors.Hand
 			};
 			label.MouseLeftButtonUp += (sender, args) =>
@@ -303,7 +311,7 @@ namespace PassWinmenu.Windows
 			if (selectionIndex < Options.Count)
 			{
 				// Number of options that we're out of the scrolling bounds
-				var boundsOffset = selectionIndex + scrollBoundary + 1 - Options.Count;
+				var boundsOffset = selectionIndex + scrollBoundary + 2 - Options.Count;
 
 				if (boundsOffset <= 0 || scrollOffset + Options.Count >= optionStrings.Count)
 				{
@@ -328,7 +336,7 @@ namespace PassWinmenu.Windows
 			if (selectionIndex >= 0)
 			{
 				// Number of options that we're out of the scrolling bounds
-				var boundsOffset = scrollBoundary - selectionIndex;
+				var boundsOffset = scrollBoundary + 1 - selectionIndex;
 
 				if (boundsOffset <= 0 || scrollOffset - 1 < 0)
 				{

@@ -25,13 +25,24 @@ namespace PassWinmenu.Windows
 		{
 			// We split on spaces to allow the user to quickly search for a certain term, as it allows them
 			// to search, for example, for reddit.com/username by entering "re us"
-			var terms = SearchBox.Text.ToLower(CultureInfo.CurrentCulture).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
+			var terms = SearchBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
 			var matching = options.Where((option) =>
 			{
-				var content = option.ToLower(CultureInfo.CurrentCulture);
-				return terms.All(term => content.Contains(term));
+				var lcOption = option.ToLower(CultureInfo.CurrentCulture);
+				return terms.All(term =>
+				{
+					// Perform case-sensitive matching if the user entered an uppercase character.
+					if (term.Any(char.IsUpper))
+					{
+						if (option.Contains(term)) return true;
+					}
+					else
+					{
+						if (lcOption.Contains(term)) return true;
+					}
+					return false;
+				});
 			});
 			RedrawLabels(matching);
 		}

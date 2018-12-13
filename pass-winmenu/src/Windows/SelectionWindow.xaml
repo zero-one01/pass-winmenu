@@ -5,25 +5,48 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="pass-winmenu (menu)"
-        Width="500" Height="30" Left="0" Top="0" ResizeMode="NoResize" 
-        WindowStartupLocation="Manual"  AllowsTransparency="True" WindowStyle="None"
+        Width="500" Height="60" Left="0" Top="0" ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        AllowsTransparency="True"
+        WindowStyle="None"
         x:ClassModifier="internal"
         MouseWheel="OnMouseWheel"
         >
 	<Grid Name="Grid">
 		<TextBox x:Name="SearchBox"
-		         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
-		         MinWidth="1"
-		         Margin="5,5,5,5"
+		         Margin="5,5,5,0"
 		         TextWrapping="NoWrap"
-		         TextChanged="SearchBox_OnTextChanged"/>
+		         Height="20"
+		         VerticalAlignment="Top"
+		         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
+		         TextChanged="SearchBox_OnTextChanged">
+			<TextBox.Style>
+				<Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+					<Style.Resources>
+						<VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+							<VisualBrush.Visual>
+								<Label Content="Search..." Foreground="LightGray" />
+							</VisualBrush.Visual>
+						</VisualBrush>
+					</Style.Resources>
+					<Style.Triggers>
+						<Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+							<Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+						</Trigger>
+						<Trigger Property="Text" Value="{x:Null}">
+							<Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+						</Trigger>
+					</Style.Triggers>
+				</Style>
+			</TextBox.Style>
+		</TextBox>
 		<StackPanel Name="WrapPanel"
-		            Margin="0,20,0,0"
+		            Margin="5,20,5,5"
 		            Orientation="Vertical">
 
 		</StackPanel>
 	</Grid>
-	<!--<Window.Triggers>
+	<Window.Triggers>
 		<EventTrigger RoutedEvent="Window.Loaded">
 			<BeginStoryboard>
 				<Storyboard>
@@ -31,5 +54,5 @@
 				</Storyboard>
 			</BeginStoryboard>
 		</EventTrigger>
-	</Window.Triggers>-->
+	</Window.Triggers>
 </Window>
