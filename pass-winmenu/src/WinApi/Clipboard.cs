@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
+using PassWinmenu.Utilities;
 
 namespace PassWinmenu.WinApi
 {
@@ -14,13 +16,20 @@ namespace PassWinmenu.WinApi
 		/// <param name="timeout">The amount of time, in seconds, the text should remain on the clipboard.</param>
 		public void Place(string text, TimeSpan timeout)
 		{
-			//Clipboard.Flush();
-			var previousData = Clipboard.GetDataObject();
-			Log.Send("Saving previous clipboard contents before storing the password");
-			Log.Send($" - Formats: {string.Join(", ", previousData.GetFormats())}");
+			Helpers.AssertOnUiThread();
 
-			Clipboard.Clear();
-			Clipboard.SetDataObject(text);
+			var clipboardBackup = new Dictionary<string, object>();
+			var dataObject = Clipboard.GetDataObject();
+			if (dataObject != null)
+			{
+				Log.Send("Saving previous clipboard contents before storing the password");
+				Log.Send($" - Formats: {string.Join(", ", dataObject.GetFormats(false))}");
+				foreach (var format in dataObject.GetFormats(false))
+				{
+					clipboardBackup[format] = dataObject.GetData(format, false);
+				}
+			}
+			Clipboard.SetText(text, TextDataFormat.UnicodeText);
 
 			Task.Delay(timeout).ContinueWith(_ =>
 			{
@@ -29,11 +38,18 @@ namespace PassWinmenu.WinApi
 					try
 					{
 						// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
-						// If the clipboard did not previously contain any text, it is simply cleared.
 						if (Clipboard.ContainsText() && Clipboard.GetText() == text)
 						{
-							Log.Send("Restoring previous clipboard contents");
-							Clipboard.SetDataObject(previousData);
+							// First clear the clipboard, to ensure our text is gone,
+							// even if restoring the previous content fails.
+							Clipboard.Clear();
+							// Now try to restore the previous content.
+							Log.Send($"Restoring previous clipboard contents:");
+							foreach (var pair in clipboardBackup)
+							{
+								Log.Send($" - {pair.Key}");
+								Clipboard.SetData(pair.Key, pair.Value);
+							}
 						}
 					}
 					catch (Exception e)
