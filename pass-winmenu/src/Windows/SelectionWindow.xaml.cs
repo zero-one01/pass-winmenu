@@ -17,6 +17,9 @@ namespace PassWinmenu.Windows
 	/// </summary>
 	internal abstract partial class SelectionWindow
 	{
+		private const int scrollBoundary = 3;
+		private int scrollOffset = 0;
+		private List<string> optionStrings = new List<string>();
 		protected readonly List<Label> Options = new List<Label>();
 		/// <summary>
 		/// The label that is currently selected.
@@ -72,6 +75,7 @@ namespace PassWinmenu.Windows
 
 		protected override void OnContentRendered(EventArgs e)
 		{
+			// Position window
 			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-start");
 			var transfomedPos = PointFromScreen(configuration.Position);
 			var transformedDims = PointFromScreen(configuration.Dimensions);
@@ -85,6 +89,25 @@ namespace PassWinmenu.Windows
 			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-end");
 			base.OnContentRendered(e);
 			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-base-end");
+
+			// Create labels
+			var sizeTest = CreateLabel("size-test");
+			sizeTest.Measure(new Size(double.MaxValue, double.MaxValue));
+			var labelHeight = sizeTest.DesiredSize.Height;
+
+			var labelCount = WrapPanel.ActualHeight / labelHeight;
+
+			if (true)
+			{
+				var usedHeight = ((int)labelCount) * labelHeight;
+				WrapPanel.Height = usedHeight;
+			}
+
+			for (var i = 0; i < (int)labelCount; i++)
+			{
+				var label = CreateLabel($"label_{i}");
+				AddLabel(label);
+			}
 		}
 
 		/// <summary>
@@ -98,28 +121,24 @@ namespace PassWinmenu.Windows
 		/// <param name="options"></param>
 		protected void RedrawLabels(IEnumerable<string> options)
 		{
-			var sizeTest = CreateLabel("size-test");
-			sizeTest.Measure(new Size(double.MaxValue, double.MaxValue));
-			var labelHeight = sizeTest.DesiredSize.Height;
+			scrollOffset = 0;
+			optionStrings = options.ToList();
+			RedrawLabelsInternal(optionStrings);
+		}
 
-			var labelCount = WrapPanel.ActualHeight / labelHeight;
-
-			if (true)
+		private void RedrawLabelsInternal(List<string> values)
+		{
+			SelectFirst();
+			for (var i = 0; i < Options.Count; i++)
 			{
-				var usedHeight = ((int)labelCount) * labelHeight;
-				WrapPanel.Height = usedHeight;
-			}
-
-			ClearLabels();
-			var first = true;
-			foreach (var option in options.Take((int)labelCount))
-			{
-				var label = CreateLabel(option);
-				AddLabel(label);
-				if (first)
+				if (values.Count <= i)
 				{
-					first = false;
-					Select(label);
+					Options[i].Visibility = Visibility.Hidden;
+				}
+				else
+				{
+					Options[i].Visibility = Visibility.Visible;
+					Options[i].Content = values[i];
 				}
 			}
 		}
@@ -188,18 +207,6 @@ namespace PassWinmenu.Windows
 			Options.Add(label);
 			WrapPanel.Children.Add(label);
 		}
-
-		protected void ClearLabels()
-		{
-			Selected = null;
-			foreach (var label in Options)
-			{
-				WrapPanel.Children.Remove(label);
-			}
-			Options.Clear();
-		}
-
-
 
 		protected override void OnActivated(EventArgs e)
 		{
@@ -274,10 +281,7 @@ namespace PassWinmenu.Windows
 			SearchBox.CaretIndex = text.Length;
 		}
 
-		protected virtual void HandleSelectionChange(Label selection)
-		{
-
-		}
+		protected virtual void HandleSelectionChange(Label selection) { }
 
 
 		protected abstract void HandleSelect();
@@ -296,22 +300,50 @@ namespace PassWinmenu.Windows
 		private void SelectNext()
 		{
 			var selectionIndex = Options.IndexOf(Selected);
-			if (selectionIndex < Options.Count - 1)
+			if (selectionIndex < Options.Count)
 			{
-				var label = FindNext(selectionIndex);
-				Select(label);
-				HandleSelectionChange(label);
+				// Number of options that we're out of the scrolling bounds
+				var boundsOffset = selectionIndex + scrollBoundary + 1 - Options.Count;
+
+				if (boundsOffset <= 0 || scrollOffset + Options.Count >= optionStrings.Count)
+				{
+					var label = FindNext(selectionIndex);
+					Select(label);
+					HandleSelectionChange(label);
+				}
+				else
+				{
+					scrollOffset += 1;
+					var current = Selected;
+					RedrawLabelsInternal(optionStrings.Skip(scrollOffset).ToList());
+					Select(current);
+				}
+
 			}
 		}
 
 		private void SelectPrevious()
 		{
 			var selectionIndex = Options.IndexOf(Selected);
-			if (selectionIndex > 0)
+			if (selectionIndex >= 0)
 			{
-				var label = FindPrevious(selectionIndex);
-				Select(label);
-				HandleSelectionChange(label);
+				// Number of options that we're out of the scrolling bounds
+				var boundsOffset = scrollBoundary - selectionIndex;
+
+				if (boundsOffset <= 0 || scrollOffset - 1 < 0)
+				{
+					var label = FindPrevious(selectionIndex);
+					Select(label);
+					HandleSelectionChange(label);
+				}
+				else
+				{
+					scrollOffset -= 1;
+					var current = Selected;
+					RedrawLabelsInternal(optionStrings.Skip(scrollOffset).ToList());
+					Select(current);
+				}
+
 			}
 		}
 
@@ -381,7 +413,7 @@ namespace PassWinmenu.Windows
 			}
 		}
 
-		private void WrapPanel_OnMouseWheel(object sender, MouseWheelEventArgs e)
+		private void OnMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			if (e.Delta > 0)
 			{

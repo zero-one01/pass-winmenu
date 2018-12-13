@@ -7,7 +7,9 @@
         Title="pass-winmenu (menu)"
         Width="500" Height="30" Left="0" Top="0" ResizeMode="NoResize" 
         WindowStartupLocation="Manual"  AllowsTransparency="True" WindowStyle="None"
-        x:ClassModifier="internal">
+        x:ClassModifier="internal"
+        MouseWheel="OnMouseWheel"
+        >
 	<Grid Name="Grid">
 		<TextBox x:Name="SearchBox"
 		         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
@@ -17,7 +19,7 @@
 		         TextChanged="SearchBox_OnTextChanged"/>
 		<StackPanel Name="WrapPanel"
 		            Margin="0,20,0,0"
-		            Orientation="Vertical" MouseWheel="WrapPanel_OnMouseWheel">
+		            Orientation="Vertical">
 
 		</StackPanel>
 	</Grid>
