@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 
@@ -111,6 +112,38 @@ namespace PassWinmenu.Utilities
 				return SystemParameters.WindowGlassBrush;
 			}
 			return new SolidColorBrush(Helpers.ColourFromString(colour));
+		}
+
+		/// <summary>
+		/// Ensures that the thread calling this method is a UI thread.
+		/// </summary>
+		internal static void AssertOnUiThread()
+		{
+			var currentThread = Thread.CurrentThread;
+
+			if (currentThread.IsBackground)
+			{
+				throw new NotOnUiThreadException("Current thread is a background thread.");
+			}
+			if (currentThread.GetApartmentState() != ApartmentState.STA)
+			{
+				throw new NotOnUiThreadException("Current thread is not a single-threaded apartment thread.");
+			}
+			if (currentThread != Application.Current.Dispatcher.Thread)
+			{
+				throw new NotOnUiThreadException("Current thread is not the current application's dispatcher thread.");
+			}
+		}
+
+		class NotOnUiThreadException : Exception
+		{
+			public NotOnUiThreadException(string message) : base(message)
+			{
+			}
+
+			public NotOnUiThreadException(string message, Exception innerException) : base(message, innerException)
+			{
+			}
 		}
 	}
 }
