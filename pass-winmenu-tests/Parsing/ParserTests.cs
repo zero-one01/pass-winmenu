@@ -129,10 +129,10 @@ namespace PassWinmenu.Tests
 
 			Assert.IsTrue(parsed.Keys[0].Key == "Username");
 			Assert.IsTrue(parsed.Keys[0].Value == "user");
-			Assert.IsTrue(parsed.Keys[1].Key == "With-Dash:");
+			Assert.IsTrue(parsed.Keys[1].Key == "With-Dash");
 			Assert.IsTrue(parsed.Keys[1].Value == "value");
-			Assert.IsTrue(parsed.Keys[1].Key == "_WithUnderline:");
-			Assert.IsTrue(parsed.Keys[1].Value == "value2");
+			Assert.IsTrue(parsed.Keys[2].Key == "_WithUnderline");
+			Assert.IsTrue(parsed.Keys[2].Value == "value2");
 		}
 
 		[TestMethod, TestCategory(Category)]
