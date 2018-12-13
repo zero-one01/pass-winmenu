@@ -220,6 +220,12 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				throw new GpgError("Operation cancelled.");
 			}
+
+			if (result.HasStatusCodes(GpgStatusCode.DECRYPTION_FAILED))
+			{
+				throw new GpgError("GPG Couldn't decrypt this file. The following information may contain more details about the error that occurred:\n\n" +
+				                   $"{string.Join("\n", result.StderrMessages)}");
+			}
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE))
 			{
 				result.GenerateError();
