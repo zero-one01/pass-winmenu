@@ -265,12 +265,14 @@ interface:
     # All colour strings must be formatted as hexadecimal ARGB strings,
     # such as #AA00FF44. To 'unset' a colour, a fully transparent colour
     # can be used, which is any colour starting with #00.
+    # Alternatively, you can use '[accent]' to reference the user-defined
+    # accent colour (available on Windows 8 and 10).
     style:
         orientation: 'vertical'
         font-size: 14
         font-family: 'Consolas'
         background-colour: '#FF202020'
-        border-colour: '#FFD88900'
+        border-colour: '[accent]'
         caret-colour: '#FFDDDDDD'
         # Offset and dimensions of the menu.
         offset-left: 40%
@@ -293,7 +295,7 @@ interface:
         # This determines the styling of the current selection.
         selection:
             text-colour: '#FFFFFFFF'
-            background-colour: '#FFD88900'
+            background-colour: '[accent]'
             border-colour: '#FF000000'
             border-width: 0
 
