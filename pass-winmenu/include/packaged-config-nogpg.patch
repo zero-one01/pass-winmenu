@@ -8,7 +8,7 @@
  # work out of the box. Otherwise, you'll have to tweak it a bit.
  
  # All values in this file are set to pass-winmenu's default settings,
-@@ -91,7 +91,7 @@
+@@ -121,7 +121,7 @@
      # Path to your gpg.exe. If set to its default of null, pass-winmenu
      # will try to look for the file in its default location.
      # If you have added GPG to your PATH, you can also set this to 'gpg'.
