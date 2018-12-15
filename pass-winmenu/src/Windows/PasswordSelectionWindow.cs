@@ -2,57 +2,58 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
 
 namespace PassWinmenu.Windows
 {
-	internal class PasswordSelectionWindow : MainWindow
+	internal class PasswordSelectionWindow : SelectionWindow
 	{
-		public PasswordSelectionWindow(IEnumerable<string> options, MainWindowConfiguration configuration) : base(configuration)
-		{
-			foreach (var option in options)
-			{
-				var label = CreateLabel(option);
-				AddLabel(label);
-			}
+		private readonly List<string> options;
 
-			Select(Options.First());
+		public PasswordSelectionWindow(IEnumerable<string> options, SelectionWindowConfiguration configuration) : base(configuration)
+		{
+			this.options = options.ToList();
+		}
+
+		protected override void OnContentRendered(EventArgs e)
+		{
+			base.OnContentRendered(e);
+			RedrawLabels(options);
 		}
 
 		protected override void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
 		{
 			// We split on spaces to allow the user to quickly search for a certain term, as it allows them
 			// to search, for example, for reddit.com/username by entering "re us"
-			var terms = SearchBox.Text.ToLower(CultureInfo.CurrentCulture).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			var terms = SearchBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-			var firstSelectionFound = false;
-			foreach (var option in Options)
+			var matching = options.Where((option) =>
 			{
-				var content = ((string)option.Content).ToLower(CultureInfo.CurrentCulture);
-
-				// The option is only a match if it contains every term in the terms array.
-				if (terms.All(term => content.Contains(term)))
+				var lcOption = option.ToLower(CultureInfo.CurrentCulture);
+				return terms.All(term =>
 				{
-					// The first matched item should be pre-selected for convenience.
-					if (!firstSelectionFound)
+					// Perform case-sensitive matching if the user entered an uppercase character.
+					if (term.Any(char.IsUpper))
 					{
-						firstSelectionFound = true;
-						Select(option);
+						if (option.Contains(term)) return true;
 					}
-					option.Visibility = Visibility.Visible;
-				}
-				else
-				{
-					option.Visibility = Visibility.Collapsed;
-				}
-			}
+					else
+					{
+						if (lcOption.Contains(term)) return true;
+					}
+					return false;
+				});
+			});
+			RedrawLabels(matching);
 		}
 
 		protected override void HandleSelect()
 		{
-			Success = true;
-			Close();
+			if (Selected != null)
+			{
+				Success = true;
+				Close();
+			}
 		}
 	}
 }

@@ -1,23 +1,55 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using PassWinmenu.Configuration;
 using PassWinmenu.PasswordGeneration;
 
 namespace PassWinmenu.Windows
 {
-	public sealed partial class EditWindow : IDisposable
+	internal sealed partial class EditWindow : IDisposable
 	{
-		private readonly PasswordGenerator passwordGenerator = new PasswordGenerator();
+		private readonly PasswordGenerator passwordGenerator;
 
-		public EditWindow(string path, string content)
+		public EditWindow(string path, string content, PasswordGenerationConfig options)
 		{
 			WindowStartupLocation = WindowStartupLocation.CenterScreen;
 			InitializeComponent();
+
+			passwordGenerator = new PasswordGenerator(options);
+			CreateCheckboxes();
+
 			Title = $"Editing '{path}'";
 
 			PasswordContent.Text = content;
 			PasswordContent.Focus();
+		}
+
+		private void CreateCheckboxes()
+		{
+			int colCount = 3;
+			int index = 0;
+			foreach (var charGroup in passwordGenerator.Options.CharacterGroups)
+			{
+				int x = index % colCount;
+				int y = index / colCount;
+
+				var cbx = new CheckBox
+				{
+					Name = charGroup.Name,
+					Content = charGroup.Name,
+					Margin = new Thickness(x * 100, y * 20, 0, 0),
+					HorizontalAlignment = HorizontalAlignment.Left,
+					IsChecked = charGroup.Enabled,
+				};
+				cbx.Unchecked += HandleCheckedChanged;
+				cbx.Checked += HandleCheckedChanged;
+				CharacterGroups.Children.Add(cbx);
+
+				index++;
+			}
 		}
 
 		private void RegeneratePassword()
@@ -54,11 +86,8 @@ namespace PassWinmenu.Windows
 
 		private void HandleCheckedChanged(object sender, RoutedEventArgs e)
 		{
-			passwordGenerator.Options.AllowSymbols = Cbx_Symbols?.IsChecked ?? false;
-			passwordGenerator.Options.AllowNumbers = Cbx_Numbers?.IsChecked ?? false;
-			passwordGenerator.Options.AllowLower = Cbx_Lower?.IsChecked ?? false;
-			passwordGenerator.Options.AllowUpper = Cbx_Upper?.IsChecked ?? false;
-			passwordGenerator.Options.AllowWhitespace = Cbx_Whitespace?.IsChecked ?? false;
+			var checkbox = (CheckBox)sender;
+			passwordGenerator.Options.CharacterGroups.First(c => c.Name == checkbox.Name).Enabled = checkbox.IsChecked ?? false;
 
 			RegeneratePassword();
 		}

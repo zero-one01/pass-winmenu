@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PassWinmenu.PasswordManagement;
 
-namespace PassWinmenu.Parsing
+namespace PassWinmenu.Tests
 {
 	[TestClass]
 	public class ParserTests
@@ -13,10 +16,10 @@ namespace PassWinmenu.Parsing
 		{
 			var text = "";
 			var p = new PasswordFileParser();
-			var parsed = p.Parse(text, false);
+			var parsed = p.Parse(new PasswordFile(""), text, false);
 
 			Assert.AreEqual(parsed.Password, string.Empty);
-			Assert.AreEqual(parsed.ExtraContent, string.Empty);
+			Assert.AreEqual(parsed.Metadata, string.Empty);
 		}
 
 		[TestMethod, TestCategory(Category)]
@@ -28,17 +31,17 @@ namespace PassWinmenu.Parsing
 
 			var p = new PasswordFileParser();
 
-			var parsedCrlf = p.Parse(crlf, false);
+			var parsedCrlf = p.Parse(new PasswordFile(""), crlf, false);
 			Assert.AreEqual(parsedCrlf.Password, "password");
-			Assert.AreEqual(parsedCrlf.ExtraContent, "meta-data");
+			Assert.AreEqual(parsedCrlf.Metadata, "meta-data");
 
-			var parsedCr = p.Parse(crlf, false);
+			var parsedCr = p.Parse(new PasswordFile(""), cr, false);
 			Assert.AreEqual(parsedCr.Password, "password");
-			Assert.AreEqual(parsedCr.ExtraContent, "meta-data");
+			Assert.AreEqual(parsedCr.Metadata, "meta-data");
 
-			var parsedLf = p.Parse(crlf, false);
+			var parsedLf = p.Parse(new PasswordFile(""), lf, false);
 			Assert.AreEqual(parsedLf.Password, "password");
-			Assert.AreEqual(parsedLf.ExtraContent, "meta-data");
+			Assert.AreEqual(parsedLf.Metadata, "meta-data");
 		}
 
 		[TestMethod, TestCategory(Category)]
@@ -52,21 +55,106 @@ namespace PassWinmenu.Parsing
 
 			var p = new PasswordFileParser();
 
-			var parsedCrlf = p.Parse(crlf, false);
+			var parsedCrlf = p.Parse(new PasswordFile(""), crlf, false);
 			Assert.AreEqual(parsedCrlf.Password, "password");
-			Assert.AreEqual(parsedCrlf.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedCrlf.Metadata, string.Empty);
 
-			var parsedCr = p.Parse(cr, false);
+			var parsedCr = p.Parse(new PasswordFile(""), cr, false);
 			Assert.AreEqual(parsedCr.Password, "password");
-			Assert.AreEqual(parsedCr.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedCr.Metadata, string.Empty);
 
-			var parsedLf = p.Parse(lf, false);
+			var parsedLf = p.Parse(new PasswordFile(""), lf, false);
 			Assert.AreEqual(parsedLf.Password, "password");
-			Assert.AreEqual(parsedLf.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedLf.Metadata, string.Empty);
 
-			var parsedNone = p.Parse(none, false);
+			var parsedNone = p.Parse(new PasswordFile(""), none, false);
 			Assert.AreEqual(parsedNone.Password, "password");
-			Assert.AreEqual(parsedNone.ExtraContent, string.Empty);
+			Assert.AreEqual(parsedNone.Metadata, string.Empty);
+		}
+
+		[TestMethod, TestCategory(Category)]
+		public void Test_Metadata_LineEndings()
+		{
+			const string crlf = "password\r\n" +
+			                    "Username: user\r\n" +
+			                    "Key: value";
+			const string cr = "password\r" +
+			                  "Username: user\r" +
+			                  "Key: value";
+			const string lf = "password\n" +
+			                  "Username: user\n" +
+			                  "Key: value";
+			const string mixed = "password\r\n" +
+			                     "Username: user\n" +
+			                     "Key: value\r";
+
+			var p = new PasswordFileParser();
+
+			var parsedCrlf = p.Parse(new PasswordFile(""), crlf, false);
+			Assert.IsTrue(parsedCrlf.Keys[0].Key == "Username");
+			Assert.IsTrue(parsedCrlf.Keys[0].Value == "user");
+			Assert.IsTrue(parsedCrlf.Keys[1].Key == "Key");
+			Assert.IsTrue(parsedCrlf.Keys[1].Value == "value");
+
+			var parsedCr = p.Parse(new PasswordFile(""), cr, false);
+			Assert.IsTrue(parsedCr.Keys[0].Key == "Username");
+			Assert.IsTrue(parsedCr.Keys[0].Value == "user");
+			Assert.IsTrue(parsedCr.Keys[1].Key == "Key");
+			Assert.IsTrue(parsedCr.Keys[1].Value == "value");
+
+			var parsedLf = p.Parse(new PasswordFile(""), lf, false);
+			Assert.IsTrue(parsedLf.Keys[0].Key == "Username");
+			Assert.IsTrue(parsedLf.Keys[0].Value == "user");
+			Assert.IsTrue(parsedLf.Keys[1].Key == "Key");
+			Assert.IsTrue(parsedLf.Keys[1].Value == "value");
+
+			var parsedMixed = p.Parse(new PasswordFile(""), mixed, false);
+			Assert.IsTrue(parsedMixed.Keys[0].Key == "Username");
+			Assert.IsTrue(parsedMixed.Keys[0].Value == "user");
+			Assert.IsTrue(parsedMixed.Keys[1].Key == "Key");
+			Assert.IsTrue(parsedMixed.Keys[1].Value == "value");
+
+		}
+
+		[TestMethod, TestCategory(Category)]
+		public void Test_Metadata_KeyFormat()
+		{
+			var duplicate = "password\r\n" +
+			                "Username: user\r\n" +
+			                "With-Dash: value\r\n" +
+			                "_WithUnderline: value2\r\n";
+
+			var p = new PasswordFileParser();
+			var parsed = p.Parse(new PasswordFile(""), duplicate, false);
+
+			Assert.IsTrue(parsed.Keys[0].Key == "Username");
+			Assert.IsTrue(parsed.Keys[0].Value == "user");
+			Assert.IsTrue(parsed.Keys[1].Key == "With-Dash");
+			Assert.IsTrue(parsed.Keys[1].Value == "value");
+			Assert.IsTrue(parsed.Keys[2].Key == "_WithUnderline");
+			Assert.IsTrue(parsed.Keys[2].Value == "value2");
+		}
+
+		[TestMethod, TestCategory(Category)]
+		public void Test_Metadata_Multiple_Keys()
+		{
+			var duplicate = "password\r\n" +
+						  "Username: user\r\n" +
+			              "Duplicate: value1\r\n" +
+			              "Duplicate: value2\r\n" +
+			              "Duplicate: value3\r\n";
+
+			var p = new PasswordFileParser();
+			var parsed = p.Parse(new PasswordFile(""), duplicate, false);
+
+			Assert.IsTrue(parsed.Keys[0].Key == "Username");
+			Assert.IsTrue(parsed.Keys[0].Value == "user");
+			Assert.IsTrue(parsed.Keys[1].Key == "Duplicate");
+			Assert.IsTrue(parsed.Keys[1].Value == "value1");
+			Assert.IsTrue(parsed.Keys[2].Key == "Duplicate");
+			Assert.IsTrue(parsed.Keys[2].Value == "value2");
+			Assert.IsTrue(parsed.Keys[3].Key == "Duplicate");
+			Assert.IsTrue(parsed.Keys[3].Value == "value3");
 		}
 	}
 }

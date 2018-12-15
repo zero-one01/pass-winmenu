@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\LibGit2Sharp.NativeBinaries.1.0.185\build\LibGit2Sharp.NativeBinaries.props" Condition="Exists('..\packages\LibGit2Sharp.NativeBinaries.1.0.185\build\LibGit2Sharp.NativeBinaries.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -15,18 +15,13 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
@@ -39,7 +34,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CLOSEEXISTING</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -57,10 +52,6 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>embedded\pass-winmenu.ico</ApplicationIcon>
@@ -98,7 +89,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\Actions\ActionDispatcher.cs" />
+    <Compile Include="src\Actions\EditAction.cs" />
+    <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
+    <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
+    <Compile Include="src\ExternalPrograms\ISyncService.cs" />
+    <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
+    <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
+    <Compile Include="src\PasswordManagement\PasswordFile.cs" />
+    <Compile Include="src\WinApi\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfigFile.cs" />
@@ -123,8 +131,11 @@
     <Compile Include="src\Configuration\Classes\UsernameDetectionRegexOptions.cs" />
     <Compile Include="src\Configuration\ConfigurationException.cs" />
     <Compile Include="src\Configuration\ConfigurationParseException.cs" />
+    <Compile Include="src\WinApi\KeyboardEmulator.cs" />
+    <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\GpgAgent.cs" />
+    <Compile Include="src\ExternalPrograms\ICryptoService.cs" />
     <Compile Include="src\Hotkeys\Hotkey.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.KeyEventSource.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.UI.cs" />
@@ -132,11 +143,12 @@
     <Compile Include="src\Hotkeys\HotkeyRegistrars.Windows.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.Windows.MessageWindow.cs" />
     <Compile Include="src\Hotkeys\IHotkeyRegistrar.cs" />
+    <Compile Include="src\WinApi\INotificationService.cs" />
     <Compile Include="src\Logger.cs" />
+    <Compile Include="src\WinApi\Notifications.cs" />
     <Compile Include="src\PasswordFileParser.cs" />
-    <Compile Include="src\PasswordGeneration\PasswordGenerationOptions.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
-    <Compile Include="src\PasswordManager.cs" />
+    <Compile Include="src\PasswordManagement\PasswordManager.cs" />
     <Compile Include="src\PinentryWatcher.cs" />
     <Compile Include="src\UpdateChecking\Chocolatey\ChocolateyUpdateSource.cs" />
     <Compile Include="src\UpdateChecking\GitHub\GitHubUpdateSource.cs" />
@@ -146,6 +158,7 @@
     <Compile Include="src\UpdateChecking\UpdateChecker.cs" />
     <Compile Include="src\UpdateChecking\UpdateException.cs" />
     <Compile Include="src\Utilities\Disposable.cs" />
+    <Compile Include="src\Utilities\ExecutionTimer.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\DirectoryInfoExtensions.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\KeyEventArgsExtensions.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\StringExtensions.cs" />
@@ -157,36 +170,43 @@
     <Compile Include="src\Utilities\ExtensionMethods\ScreenExtensions.cs" />
     <Compile Include="src\ExternalPrograms\Git.cs" />
     <Compile Include="src\ExternalPrograms\GPG.cs" />
-    <Compile Include="src\Program.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="src\Program.cs" />
     <Compile Include="src\EmbeddedResources.cs" />
     <Compile Include="src\StartupLink.cs" />
     <Compile Include="src\Utilities\Helpers.cs" />
     <Compile Include="src\Utilities\NativeMethods.cs" />
     <Compile Include="src\Windows\EditWindow.xaml.cs">
       <DependentUpon>EditWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
-    <Compile Include="src\Windows\MainWindowConfiguration.cs" />
-    <Compile Include="src\Windows\PasswordSelectionWindow.cs" />
-    <Compile Include="src\Windows\PasswordWindow.xaml.cs">
-      <DependentUpon>PasswordWindow.xaml</DependentUpon>
-    </Compile>
-    <Page Include="src\Windows\EditWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="src\Windows\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="src\Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\Windows\SelectionWindowConfiguration.cs" />
+    <Compile Include="src\Windows\PasswordSelectionWindow.cs" />
+    <Compile Include="src\Windows\PasswordWindow.xaml.cs">
+      <DependentUpon>PasswordWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="src\Windows\SelectionWindow.xaml.cs">
+      <DependentUpon>SelectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="src\Windows\WindowManager.cs" />
+    <Page Include="src\Windows\EditWindow.xaml">
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="src\Windows\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
     <Page Include="src\Windows\PasswordWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="src\Windows\SelectionWindow.xaml">
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -202,8 +222,8 @@
   <ItemGroup>
     <None Include="build-package.ps1" />
     <None Include="include\GnuPG.zip" />
-    <None Include="include\packaged-config-nogpg.yaml" />
-    <None Include="include\packaged-config.yaml" />
+    <None Include="include\packaged-config-nogpg.patch" />
+    <None Include="include\packaged-config.patch" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -229,7 +249,9 @@
   <ItemGroup>
     <EmbeddedResource Include="embedded\version.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="embedded\pass-winmenu-new.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

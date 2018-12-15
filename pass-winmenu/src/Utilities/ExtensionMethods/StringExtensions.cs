@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace PassWinmenu.Utilities.ExtensionMethods
@@ -56,6 +57,31 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 			str = char.ToLower(str[0]).ToString() + str.Substring(1);
 			str = Regex.Replace(ToCamelCase(str), "(?<char>[A-Z])", match => separator + match.Groups["char"].Value.ToLowerInvariant());
 			return str;
+		}
+
+		/// <summary>
+		/// Extracts the Unicode code points from a string.
+		/// </summary>
+		/// <param name="str">The string from which the code points should be extracted.</param>
+		/// <returns>An integer array representing the discovered code points.</returns>
+		public static int[] ToCodePoints(this string str)
+		{
+			if (str == null) throw new ArgumentNullException(nameof(str));
+
+			if (!str.IsNormalized())
+			{
+				str = str.Normalize();
+			}
+
+			var codePoints = new List<int>();
+			for (var i = 0; i < str.Length; i++)
+			{
+				codePoints.Add(char.ConvertToUtf32(str, i));
+				if (char.IsHighSurrogate(str[i]))
+					i += 1;
+			}
+
+			return codePoints.ToArray();
 		}
 	}
 }

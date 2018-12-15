@@ -50,6 +50,7 @@ namespace PassWinmenu.UdateChecking
 			const int checkBeforeMs = 800;
 			const int raiseAfterMs = 1000;
 			const int checkAgainMs = 400;
+			const int checkAttempts = 10;
 
 			var source = new DummyUpdateSource
 			{
@@ -73,11 +74,16 @@ namespace PassWinmenu.UdateChecking
 
 			// Validate that the event is not raised before the time specified in raiseAfterMs has expired.
 			Thread.Sleep(checkBeforeMs);
-			Assert.IsFalse(raised);
+			Assert.IsFalse(raised, "Notification was raised before update interval expired");
 
 			// Validate that the event has been raised now.
 			Thread.Sleep(checkAgainMs);
-			Assert.IsTrue(raised);
+			for (int i = 0; i < checkAttempts && !raised; i++)
+			{
+				Thread.Sleep(checkAgainMs);
+			}
+
+			Assert.IsTrue(raised, "Notification was not raised");
 		}
 
 		/// <summary>

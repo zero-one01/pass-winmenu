@@ -12,7 +12,7 @@ namespace PassWinmenu.ExternalPrograms
 	/// <summary>
 	/// Simple wrapper over GPG.
 	/// </summary>
-	internal class GPG
+	internal class GPG : ICryptoService
 	{
 		private const string statusMarker = "[GNUPG:] ";
 		private const string gpgDefaultInstallDir = @"C:\Program Files (x86)\gnupg\bin";
@@ -219,6 +219,12 @@ namespace PassWinmenu.ExternalPrograms
 			if (result.HasStatusCodes(GpgStatusCode.DECRYPTION_FAILED) && result.StderrMessages.Any(m => m.Contains("Operation cancelled")))
 			{
 				throw new GpgError("Operation cancelled.");
+			}
+
+			if (result.HasStatusCodes(GpgStatusCode.DECRYPTION_FAILED))
+			{
+				throw new GpgError("GPG Couldn't decrypt this file. The following information may contain more details about the error that occurred:\n\n" +
+				                   $"{string.Join("\n", result.StderrMessages)}");
 			}
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE))
 			{
