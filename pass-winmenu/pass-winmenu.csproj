@@ -102,6 +102,7 @@
     <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
+    <Compile Include="src\Configuration\LoadResult.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\IPasswordManager.cs" />

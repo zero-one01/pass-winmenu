@@ -9,13 +9,23 @@ namespace PassWinmenu.Configuration
 	internal class ConfigManager
 	{
 		public static Config Config { get; private set; } = new Config();
+		private static FileSystemWatcher watcher;
 
-		public enum LoadResult
+		~ConfigManager()
 		{
-			Success,
-			NeedsUpgrade,
-			FileCreationFailure,
-			NewFileCreated
+			watcher?.Dispose();
+		}
+
+		public static void EnableAutoReloading(string fileName)
+		{
+			watcher = new FileSystemWatcher(Path.GetDirectoryName(fileName));
+			watcher.IncludeSubdirectories = false;
+			watcher.EnableRaisingEvents = true;
+			watcher.Changed += (sender, args) =>
+			{
+				Log.Send("Configuration file changed, attempting reload.");
+				Reload(fileName);
+			};
 		}
 
 		public static LoadResult Load(string fileName)
@@ -76,9 +86,13 @@ namespace PassWinmenu.Configuration
 					var newConfig = deserialiser.Deserialize<Config>(reader);
 					Config = newConfig;
 				}
+				Log.Send("Configuration file reloaded successfully.");
+
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
+				Log.Send($"Could not reload configuration file. An exception occurred.");
+				Log.ReportException(e);
 				// No need to do anything, we can simply continue using the old configuration.
 			}
 		}

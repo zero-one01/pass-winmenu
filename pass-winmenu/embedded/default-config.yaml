@@ -224,6 +224,8 @@ notifications:
         update-available: true
 
 application:
+    # Automatically reload the configuration file when it changes.
+    reload-config: true
     update-checking:
         # Should we check for updates?
         # This will, when an update is available, add a menu entry that, when

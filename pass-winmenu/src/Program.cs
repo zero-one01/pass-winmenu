@@ -212,8 +212,8 @@ namespace PassWinmenu
 
 		private void LoadConfigFile()
 		{
-			const string configFileName = "pass-winmenu.yaml";
-			ConfigManager.LoadResult result;
+			const string configFileName = @".\pass-winmenu.yaml";
+			LoadResult result;
 			try
 			{
 				result = ConfigManager.Load(configFileName);
@@ -245,16 +245,16 @@ namespace PassWinmenu
 
 			switch (result)
 			{
-				case ConfigManager.LoadResult.FileCreationFailure:
+				case LoadResult.FileCreationFailure:
 					notificationService.Raise("A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", Severity.Error);
 					break;
-				case ConfigManager.LoadResult.NewFileCreated:
+				case LoadResult.NewFileCreated:
 					var open = MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.\n\n" +
 					                           "Would you like to open it now?", "New configuration file created", MessageBoxButton.YesNo);
 					if (open == MessageBoxResult.Yes) Process.Start(configFileName);
 					Exit();
 					return;
-				case ConfigManager.LoadResult.NeedsUpgrade:
+				case LoadResult.NeedsUpgrade:
 					var backedUpFile = ConfigManager.Backup(configFileName);
 					var openBoth = MessageBox.Show("The current configuration file is out of date. A new configuration file has been created, and the old file has been backed up.\n" +
 					                               "Please edit the new configuration file according to your preferences and restart the application.\n\n" +
@@ -266,6 +266,11 @@ namespace PassWinmenu
 					}
 					Exit();
 					return;
+			}
+			if (ConfigManager.Config.Application.ReloadConfig)
+			{
+				ConfigManager.EnableAutoReloading(configFileName);
+				Log.Send("Config reloading enabled");
 			}
 		}
 

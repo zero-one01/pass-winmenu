@@ -5,6 +5,7 @@
 		public LabelStyleConfig Search { get; set; } = new LabelStyleConfig { TextColour = "#FFDDDDDD", BackgroundColour = "#00FFFFFF", BorderWidth = 0, BorderColour = "#FF000000" };
 		public LabelStyleConfig Options { get; set; } = new LabelStyleConfig { TextColour = "#FFDDDDDD", BackgroundColour = "#00FFFFFF", BorderWidth = 0, BorderColour = "#FF000000" };
 		public LabelStyleConfig Selection { get; set; } = new LabelStyleConfig { TextColour = "#FFFFFFFF", BackgroundColour = "[accent]", BorderWidth = 0, BorderColour = "#FF000000" };
+		public int ScrollBoundary { get; set; } = 0;
 		public string Orientation { get; set; } = "vertical";
 		public double FontSize { get; set; } = 14;
 		public string FontFamily { get; set; } = "Consolas";
