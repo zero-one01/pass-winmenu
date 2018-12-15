@@ -20,46 +20,46 @@ $ZIPNAME="pass-winmenu.zip"
 
 if($Clean){
 	if(Test-Path "$PKGDIR"){
-		rm -recurse "$PKGDIR"
+		Remove-Item -recurse "$PKGDIR"
 	}
 	mkdir "$PKGDIR"
 }else{
 	if(Test-Path "$PKGDIR/pass-winmenu.exe"){
-		rm "$PKGDIR/pass-winmenu.exe"
+		Remove-Item "$PKGDIR/pass-winmenu.exe"
 	}
 	if(Test-Path "$PKGDIR/pass-winmenu.yaml"){
-		rm "$PKGDIR/pass-winmenu.yaml"
+		Remove-Item "$PKGDIR/pass-winmenu.yaml"
 	}
 }
 
-cp -recurse "bin/Release/lib" "$PKGDIR/lib"
+Copy-Item -recurse "bin/Release/lib" "$PKGDIR/lib"
 # Linux and OSX are not supported, so their libraries do not have to be included.
-rm -recurse "$PKGDIR/lib/osx"
-rm -recurse "$PKGDIR/lib/linux"
+Remove-Item -recurse "$PKGDIR/lib/osx"
+Remove-Item -recurse "$PKGDIR/lib/linux"
 # The PDB files aren't used either, so they can be removed as well.
-rm -recurse "$PKGDIR/lib/win32/x64/*.pdb"
-rm -recurse "$PKGDIR/lib/win32/x86/*.pdb"
+Remove-Item -recurse "$PKGDIR/lib/win32/x64/*.pdb"
+Remove-Item -recurse "$PKGDIR/lib/win32/x86/*.pdb"
 
-cp "bin/Release/pass-winmenu.exe" "$PKGDIR/pass-winmenu.exe"
+Copy-Item "bin/Release/pass-winmenu.exe" "$PKGDIR/pass-winmenu.exe"
 
 if($WithGpg){
 	tools/7za.exe x -aos "include/GnuPG.zip" "-o$INCLUDEDIR"
-	cp "embedded/default-config.yaml" "$PKGDIR/pass-winmenu.yaml"
+	Copy-Item "embedded/default-config.yaml" "$PKGDIR/pass-winmenu.yaml"
 	tools/patch.exe "$PKGDIR/pass-winmenu.yaml" "include/packaged-config.patch"
 }else{
 	$ZIPNAME="pass-winmenu-nogpg.zip"
-	cp "embedded/default-config.yaml" "$PKGDIR/pass-winmenu.yaml"
+	Copy-Item "embedded/default-config.yaml" "$PKGDIR/pass-winmenu.yaml"
 	tools/patch.exe "$PKGDIR/pass-winmenu.yaml" "include/packaged-config-nogpg.patch"
 }
 
 if($Package){
 	$ZIPPATH = "$ZIPDIR$ZIPNAME"
 	if(Test-Path "$ZIPPATH"){
-		echo "Removing old package: $ZIPPATH"
-		rm "$ZIPPATH"
+		Write-Output "Removing old package: $ZIPPATH"
+		Remove-Item "$ZIPPATH"
 	}
 	$STARTDIR=$PWD
-	cd $ZIPDIR
+	Set-Location $ZIPDIR
 	if($Compress){
 		# These options seem to result in the smallest file size.
 		../tools/7za.exe a -mm=Deflate -mfb=258 -mpass=15 "$ZIPNAME" "Release-Packaged/*"
@@ -67,5 +67,5 @@ if($Package){
 		../tools/7za.exe a "$ZIPNAME" "Release-Packaged/*"
 	}
 	../tools/7za.exe rn "$ZIPNAME" "Release-Packaged" "pass-winmenu"
-	cd $STARTDIR
+	Set-Location $STARTDIR
 }
