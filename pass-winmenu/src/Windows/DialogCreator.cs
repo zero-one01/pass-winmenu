@@ -175,8 +175,16 @@ namespace PassWinmenu.Windows
 		public void EditWithEditWindow(string selectedFile)
 		{
 			EnsureStaThread();
-
-			var content = passwordManager.DecryptText(selectedFile);
+			string content;
+			try
+			{
+				content = passwordManager.DecryptText(selectedFile);
+			}
+			catch (Exception e)
+			{
+				notificationService.ShowErrorWindow($"Unable to edit your password (decryption failed): {e.Message}");
+				return;
+			}
 			using (var window = new EditWindow(selectedFile, content, ConfigManager.Config.PasswordStore.PasswordGeneration))
 			{
 				if (window.ShowDialog() ?? false)
