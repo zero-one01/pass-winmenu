@@ -18,8 +18,8 @@ namespace PassWinmenu.Windows
 	/// </summary>
 	internal abstract partial class SelectionWindow
 	{
-		private const int scrollBoundary = 0;
-		private int scrollOffset = 0;
+		private int scrollBoundary = 0;
+		private int scrollOffset;
 		private List<string> optionStrings = new List<string>();
 		protected readonly List<Label> Options = new List<Label>();
 		/// <summary>
@@ -45,6 +45,7 @@ namespace PassWinmenu.Windows
 		{
 			TimerHelper.Current.TakeSnapshot("mainwnd-creating");
 			styleConfig = ConfigManager.Config.Interface.Style;
+			scrollBoundary = ConfigManager.Config.Interface.Style.ScrollBoundary;
 
 			// Position and size the window according to user configuration.
 			Matrix fromDevice;

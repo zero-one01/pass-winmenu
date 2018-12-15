@@ -272,6 +272,9 @@ interface:
     # accent colour (available on Windows 8 and 10).
     style:
         orientation: 'vertical'
+        # Number of items between the curernt selection and the border
+        # before the window should start scrolling.
+        scroll-boundary: 0
         font-size: 14
         font-family: 'Consolas'
         background-colour: '#FF202020'
