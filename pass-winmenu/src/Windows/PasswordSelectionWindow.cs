@@ -13,12 +13,7 @@ namespace PassWinmenu.Windows
 		public PasswordSelectionWindow(IEnumerable<string> options, SelectionWindowConfiguration configuration) : base(configuration)
 		{
 			this.options = options.ToList();
-		}
-
-		protected override void OnContentRendered(EventArgs e)
-		{
-			base.OnContentRendered(e);
-			RedrawLabels(options);
+			RedrawLabels(this.options);
 		}
 
 		protected override void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)

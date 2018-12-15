@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using PassWinmenu.Configuration;
 using PassWinmenu.Hotkeys;
@@ -35,7 +36,6 @@ namespace PassWinmenu.Windows
 
 		private bool isClosing;
 		private bool firstActivation = true;
-		private readonly SelectionWindowConfiguration configuration;
 		private readonly StyleConfig styleConfig;
 
 		/// <summary>
@@ -44,17 +44,46 @@ namespace PassWinmenu.Windows
 		protected SelectionWindow(SelectionWindowConfiguration configuration)
 		{
 			TimerHelper.Current.TakeSnapshot("mainwnd-creating");
-			this.configuration = configuration;
-			InitializeComponent();
-			Visibility = Visibility.Collapsed;
+			styleConfig = ConfigManager.Config.Interface.Style;
 
-			if (configuration.Orientation == Orientation.Horizontal)
+			// Position and size the window according to user configuration.
+			Matrix fromDevice;
+			using (var source = new HwndSource(new HwndSourceParameters()))
 			{
-				WrapPanel.Orientation = Orientation.Horizontal;
+				fromDevice = source.CompositionTarget.TransformFromDevice;
 			}
 
+			var position = fromDevice.Transform(configuration.Position);
+			Left = position.X;
+			Top = position.Y;
 
-			styleConfig = ConfigManager.Config.Interface.Style;
+			var dimensions = fromDevice.Transform(configuration.Dimensions);
+			Width = dimensions.X;
+			Height = dimensions.Y;
+
+			InitializeComponent();
+			// Initialise the labels.
+			if (configuration.Orientation == Orientation.Horizontal)
+			{
+				OptionsPanel.Orientation = Orientation.Horizontal;
+			}
+
+			var panelHeight = Height - 30;
+			var labelHeight = CalculateLabelHeight();
+			
+			var labelCount = panelHeight / labelHeight;
+
+			if (true)
+			{
+				var usedHeight = ((int)labelCount) * labelHeight;
+				OptionsPanel.Height = usedHeight;
+			}
+
+			for (var i = 0; i < (int)labelCount; i++)
+			{
+				var label = CreateLabel($"label_{i}");
+				AddLabel(label);
+			}
 
 			SearchBox.BorderBrush = Helpers.BrushFromColourString("#FFFF00FF");
 			SearchBox.CaretBrush = Helpers.BrushFromColourString(styleConfig.CaretColour);
@@ -81,42 +110,12 @@ namespace PassWinmenu.Windows
 			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-base-end");
 		}
 
-		protected override void OnContentRendered(EventArgs e)
+		private double CalculateLabelHeight()
 		{
-			// Position window
-			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-start");
-			var transformedPos = PointFromScreen(configuration.Position);
-			var transformedDims = PointFromScreen(configuration.Dimensions);
-			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-transformed");
-
-			Left = transformedPos.X;
-			Top = transformedPos.Y;
-			Width = transformedDims.X;
-			Height = transformedDims.Y;
-			Visibility = Visibility.Visible;
-
-
-			// Create labels
 			var sizeTest = CreateLabel("size-test");
 			sizeTest.Measure(new Size(double.MaxValue, double.MaxValue));
 			var labelHeight = sizeTest.DesiredSize.Height;
-
-			var labelCount = WrapPanel.ActualHeight / labelHeight;
-
-			if (true)
-			{
-				var usedHeight = ((int)labelCount) * labelHeight;
-				WrapPanel.Height = usedHeight;
-			}
-
-			for (var i = 0; i < (int)labelCount; i++)
-			{
-				var label = CreateLabel($"label_{i}");
-				AddLabel(label);
-			}
-			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-end");
-			base.OnContentRendered(e);
-			TimerHelper.Current.TakeSnapshot("mainwnd-oncontentrendered-base-end");
+			return labelHeight;
 		}
 
 		/// <summary>
@@ -213,7 +212,7 @@ namespace PassWinmenu.Windows
 		protected void AddLabel(Label label)
 		{
 			Options.Add(label);
-			WrapPanel.Children.Add(label);
+			OptionsPanel.Children.Add(label);
 		}
 
 		protected override void OnActivated(EventArgs e)
@@ -357,6 +356,7 @@ namespace PassWinmenu.Windows
 
 		private void SelectFirst()
 		{
+			if (!Options.Any()) return;
 			var label = Options.First();
 			Select(label);
 			HandleSelectionChange(label);
@@ -364,6 +364,7 @@ namespace PassWinmenu.Windows
 
 		private void SelectLast()
 		{
+			if (!Options.Any()) return;
 			var label = Options.Last();
 			Select(label);
 			HandleSelectionChange(label);

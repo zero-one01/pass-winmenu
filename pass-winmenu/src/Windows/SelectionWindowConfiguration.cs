@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using System.Windows.Forms;
+using System.Windows.Controls;
 using PassWinmenu.Configuration;
 using PassWinmenu.Utilities.ExtensionMethods;
-using Orientation = System.Windows.Controls.Orientation;
+using Screen=System.Windows.Forms.Screen;
+using Cursor=System.Windows.Forms.Cursor;
 
 namespace PassWinmenu.Windows
 {
