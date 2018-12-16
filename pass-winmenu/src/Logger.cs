@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace PassWinmenu
 {
@@ -43,13 +45,28 @@ namespace PassWinmenu
 			{
 				MessageBox.Show($"The log file could not be created: an error occurred ({e.GetType().Name}: {e.Message})", "Failed to create log file");
 			}
+
 			AppDomain.CurrentDomain.UnhandledException += ReportException;
+			Application.Current.DispatcherUnhandledException += ReportDispatcherException;
+			TaskScheduler.UnobservedTaskException += ReportTaskSchedulerException;
 		}
 
-		private static void ReportException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+		private static void ReportTaskSchedulerException(object sender, UnobservedTaskExceptionEventArgs eventArgs)
+		{
+			SendRaw("An unhandled exception occurred in a background task. Stack trace:");
+			LogExceptionAsText(eventArgs.Exception, 0);
+		}
+
+		private static void ReportDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs eventArgs)
 		{
 			SendRaw("An unhandled exception occurred. Stack trace:");
-			LogExceptionAsText(unhandledExceptionEventArgs.ExceptionObject as Exception, 0);
+			LogExceptionAsText(eventArgs.Exception, 0);
+		}
+
+		private static void ReportException(object sender, UnhandledExceptionEventArgs eventArgs)
+		{
+			SendRaw("An unhandled exception occurred. Stack trace:");
+			LogExceptionAsText(eventArgs.ExceptionObject as Exception, 0);
 		}
 
 		public static void ReportException(Exception e)
