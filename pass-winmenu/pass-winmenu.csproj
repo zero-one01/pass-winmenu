@@ -181,6 +181,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
+    <Compile Include="src\Windows\LogViewer.xaml.cs">
+      <DependentUpon>LogViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -197,6 +200,10 @@
     <Page Include="src\Windows\EditWindow.xaml">
       <Generator>XamlIntelliSenseFileGenerator</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="src\Windows\LogViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="src\Windows\MainWindow.xaml">
       <SubType>Designer</SubType>

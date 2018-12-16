@@ -184,5 +184,10 @@ namespace PassWinmenu.Actions
 				}
 			}
 		}
+
+		public void ViewLogs()
+		{
+			dialogCreator.ViewLogs();
+		}
 	}
 }

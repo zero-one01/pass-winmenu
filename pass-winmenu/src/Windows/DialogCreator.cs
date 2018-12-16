@@ -8,6 +8,7 @@ using System.Windows;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.PasswordManagement;
+using PassWinmenu.src.Windows;
 using PassWinmenu.WinApi;
 
 namespace PassWinmenu.Windows
@@ -507,6 +508,12 @@ namespace PassWinmenu.Windows
 			{
 				KeyboardEmulator.EnterText(chosenValue, ConfigManager.Config.Output.DeadKeys);
 			}
+		}
+
+		public void ViewLogs()
+		{
+			var viewer = new LogViewer(string.Join("\n", Log.History.Select(l => l.ToString())));
+			viewer.ShowDialog();
 		}
 	}
 }

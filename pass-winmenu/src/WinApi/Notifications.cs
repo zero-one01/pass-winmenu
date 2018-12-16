@@ -57,6 +57,12 @@ namespace PassWinmenu.WinApi
 			menu.Items.Add("Open Shell", null, (sender, args) => Task.Run(() => actionDispatcher.OpenPasswordShell()));
 			menu.Items.Add(new ToolStripSeparator());
 
+			var dropDown = new ToolStripMenuItem("More Actions");
+			dropDown.DropDownItems.Add("View Logs", null, (sender, args) => actionDispatcher.ViewLogs());
+
+			menu.Items.Add(dropDown);
+			menu.Items.Add(new ToolStripSeparator());
+
 			var startupLink = new StartupLink("pass-winmenu");
 			var startWithWindows = new ToolStripMenuItem("Start with Windows")
 			{

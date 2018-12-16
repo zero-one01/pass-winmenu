@@ -19,6 +19,12 @@ namespace PassWinmenu
 	{
 		public DateTime DateTime { get; set; }
 		public string Message { get; set; }
+
+		public override string ToString()
+		{
+			var line = $"[{DateTime:HH:mm:ss.fff}] {Message}";
+			return line;
+		}
 	}
 
 	static class Log
@@ -93,14 +99,15 @@ namespace PassWinmenu
 		private static void SendRaw(string message)
 		{
 			var submissionTime = DateTime.Now;
-			var line = $"[{submissionTime:HH:mm:ss.fff}] {message}";
+			var line = new LogLine
+			{
+				DateTime = submissionTime,
+				Message = message
+			};
+
 			lock (History)
 			{
-				History.Add(new LogLine
-				{
-					DateTime = submissionTime,
-					Message = message
-				});
+				History.Add(line);
 			}
 #if DEBUG
 			Console.WriteLine(line);
