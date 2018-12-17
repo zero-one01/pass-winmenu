@@ -102,13 +102,14 @@
     <Compile Include="src\Actions\IAction.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
-    <Compile Include="src\Configuration\Classes\UpdateProvider.cs" />
+    <Compile Include="src\Configuration\Classes\UpdateSource.cs" />
     <Compile Include="src\Configuration\LoadResult.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
     <Compile Include="src\PasswordManagement\PasswordFile.cs" />
     <Compile Include="src\UpdateChecking\Dummy\DummyUpdateSource.cs" />
+    <Compile Include="src\UpdateChecking\UpdateSourceExtensions.cs" />
     <Compile Include="src\WinApi\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />

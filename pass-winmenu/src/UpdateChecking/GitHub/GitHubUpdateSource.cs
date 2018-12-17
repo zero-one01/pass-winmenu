@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -28,22 +29,19 @@ namespace PassWinmenu.UpdateChecking.GitHub
 			};
 		}
 
-		public ProgramVersion GetLatestVersion()
-		{
-			var response = FetchReleases();
-			var latest = response.OrderByDescending(r => r.Version).First();
-			return ToProgramVersion(latest);
-		}
-
 		private ProgramVersion ToProgramVersion(Release release)
 		{
+			var importantRegex = new Regex(@"\*\*\s*important\s+release:?\s*\*\*", RegexOptions.IgnoreCase);
+			var important = importantRegex.IsMatch(release.Body);
+
 			return new ProgramVersion
 			{
 				VersionNumber = release.Version,
 				DownloadLink = new Uri(release.HtmlUrl),
 				ReleaseDate = release.PublishedAt,
 				ReleaseNotes = new Uri(release.HtmlUrl),
-				IsPrerelease = release.Prerelease
+				IsPrerelease = release.Prerelease,
+				Important = important,
 			};
 		}
 

@@ -13,13 +13,7 @@ namespace PassWinmenu.UpdateChecking
 		/// Does the update source require an internet connection to check for updates?
 		/// </summary>
 		bool RequiresConnectivity { get; }
-
-		/// <summary>
-		/// Fetches version information for the latest release.
-		/// </summary>
-		/// <returns>A <see cref="ProgramVersion"/> describing the latest release.</returns>
-		ProgramVersion GetLatestVersion();
-
+		
 		/// <summary>
 		/// Fetches version information for all published releases.
 		/// </summary>

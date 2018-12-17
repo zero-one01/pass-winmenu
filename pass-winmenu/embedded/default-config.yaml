@@ -216,12 +216,15 @@ notifications:
         password-generated: true
         # ...a password has been edited:
         password-updated: true
-        # ...changes are pushed to Git
+        # ...changes are pushed to Git:
         git-push: true
-        # ...changes are pulled from Git
+        # ...changes are pulled from Git:
         git-pull: true
-        # ...a new update can be downloaded
+        # ...a new update can be downloaded:
         update-available: true
+        # ...a new update containing an important vulnerability fix
+        #    can be downloaded:
+        important-update-available: true
 
 application:
     # Automatically reload the configuration file when it changes.
@@ -230,10 +233,9 @@ application:
         # Should we check for updates?
         # This will, when an update is available, add a menu entry that, when
         # clicked, will send you to the GitHub release page for the update.
-        # It is recommended to keep this enabled, as it allows pass-winmenu to
-        # notify you in case any potential vulnerabilities have been fixed
-        # in an upcoming update.
         check-for-updates: true
+        # Set this to true if you also want to check for prereleases.
+        allow-prereleases: false
 
 interface:
     # If set to true, the menu will be opened on the same screen the mouse cursor

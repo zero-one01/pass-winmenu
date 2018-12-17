@@ -9,6 +9,8 @@ using McSherry.SemanticVersioning;
 using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
 using PassWinmenu.UpdateChecking;
+using PassWinmenu.Utilities;
+using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 
 namespace PassWinmenu.WinApi
@@ -18,6 +20,8 @@ namespace PassWinmenu.WinApi
 		public NotifyIcon Icon { get; set; }
 
 		private string downloadUpdateString = "https://github.com/Baggykiin/pass-winmenu/releases";
+		private ToolStripMenuItem downloadUpdate;
+		private ToolStripSeparator downloadSeparator;
 		private const int ToolTipTimeoutMs = 5000;
 
 		public Notifications(NotifyIcon icon)
@@ -40,12 +44,17 @@ namespace PassWinmenu.WinApi
 			menu.Items.Add(new ToolStripLabel("pass-winmenu " + Program.Version));
 			menu.Items.Add(new ToolStripSeparator());
 
-			var downloadUpdate = new ToolStripMenuItem("Download Update");
+			downloadUpdate = new ToolStripMenuItem("Download Update");
 			downloadUpdate.Click += HandleDownloadUpdateClick;
 			downloadUpdate.BackColor = Color.Beige;
+
 			downloadUpdate.Visible = false;
+			downloadSeparator = new ToolStripSeparator();
+			downloadSeparator.Visible = false;
 
 			menu.Items.Add(downloadUpdate);
+			menu.Items.Add(downloadSeparator);
+
 			menu.Items.Add("Decrypt Password", null, (sender, args) => actionDispatcher.DecryptPassword(true, false, false));
 			menu.Items.Add("Add new Password", null, (sender, args) => actionDispatcher.AddPassword());
 			menu.Items.Add("Edit Password File", null, (sender, args) => actionDispatcher.EditPassword());
@@ -135,11 +144,33 @@ namespace PassWinmenu.WinApi
 
 		public void HandleUpdateAvailable(UpdateAvailableEventArgs args)
 		{
-			// If the update contains important vulnerability fixes, always display a notification.
-			if (ConfigManager.Config.Notifications.Types.UpdateAvailable || args.Version.Important)
+			Application.Current.Dispatcher.Invoke(() => HandleUpdateAvailableInternal(args));
+		}
+
+		private void HandleUpdateAvailableInternal(UpdateAvailableEventArgs args)
+		{
+			Helpers.AssertOnUiThread();
+
+			downloadUpdate.Text += $" ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)})";
+			downloadUpdate.Visible = true;
+			downloadSeparator.Visible = true;
+
+			if (args.Version.Important &&
+			    (ConfigManager.Config.Notifications.Types.UpdateAvailable ||
+			     ConfigManager.Config.Notifications.Types.ImportantUpdateAvailable))
 			{
-				Icon.ContextMenuStrip.Items[2].Visible = true;
-				Raise($"A new update ({args.Version.VersionNumber.ToString(SemanticVersionFormat.Concise)}) is available.", Severity.Info);
+				Raise($"An important vulnerability fix ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)}) is available. Check the release for more information.", Severity.Info);
+			}
+			else if (ConfigManager.Config.Notifications.Types.UpdateAvailable)
+			{
+				if (args.Version.IsPrerelease)
+				{
+					Raise($"A new pre-release ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)}) is available.", Severity.Info);
+				}
+				else
+				{
+					Raise($"A new update ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)}) is available.", Severity.Info);
+				}
 			}
 		}
 

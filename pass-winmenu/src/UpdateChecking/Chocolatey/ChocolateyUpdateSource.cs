@@ -10,11 +10,6 @@ namespace PassWinmenu.UpdateChecking.Chocolatey
 	{
 		public bool RequiresConnectivity => true;
 
-		public ProgramVersion GetLatestVersion()
-		{
-			throw new NotImplementedException();
-		}
-
 		public IEnumerable<ProgramVersion> GetAllReleases()
 		{
 			throw new NotImplementedException();

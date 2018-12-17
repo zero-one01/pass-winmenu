@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -117,26 +118,47 @@ namespace PassWinmenu
 
 		private void InitialiseUpdateChecker()
 		{
-			if (!ConfigManager.Config.Application.UpdateChecking.CheckForUpdates) return;
+			var updateCfg = ConfigManager.Config.Application.UpdateChecking;
+			if (!updateCfg.CheckForUpdates) return;
 
 			IUpdateSource updateSource;
-			switch (ConfigManager.Config.Application.UpdateChecking.UpdateProvider)
+			switch (updateCfg.UpdateSource)
 			{
-				case UpdateProvider.GitHub:
+				case UpdateSource.GitHub:
 					updateSource = new GitHubUpdateSource();
 					break;
-				case UpdateProvider.Chocolatey:
+				case UpdateSource.Chocolatey:
 					updateSource = new ChocolateyUpdateSource();
 					break;
-				case UpdateProvider.Dummy:
-					updateSource = new DummyUpdateSource();
+				case UpdateSource.Dummy:
+					updateSource = new DummyUpdateSource
+					{
+						Versions = new List<ProgramVersion>
+						{
+							new ProgramVersion
+							{
+								VersionNumber = new SemanticVersion(10, 0, 0),
+								Important = true,
+							},
+							new ProgramVersion
+							{
+								VersionNumber = SemanticVersion.Parse("v11.0-pre1", ParseMode.Lenient),
+								IsPrerelease = true,
+							},
+						}
+					};
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(null, "Invalid update provider.");
 			}
 			var versionString = Version.Split('-').First();
 
-			updateChecker = new UpdateChecker(updateSource, SemanticVersion.Parse(versionString, ParseMode.Lenient));
+			updateChecker = new UpdateChecker(updateSource,
+			                                  SemanticVersion.Parse(versionString, ParseMode.Lenient),
+			                                  updateCfg.AllowPrereleases,
+			                                  updateCfg.CheckIntervalTimeSpan,
+			                                  updateCfg.InitialDelayTimeSpan);
+
 			updateChecker.UpdateAvailable += (sender, args) =>
 			{
 				notificationService.HandleUpdateAvailable(args);

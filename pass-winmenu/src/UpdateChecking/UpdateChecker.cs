@@ -15,18 +15,35 @@ namespace PassWinmenu.UpdateChecking
 		public IUpdateSource UpdateSource { get; }
 		public SemanticVersion CurrentVersion { get; }
 		public ProgramVersion? LatestVersion { get; private set; }
-		public TimeSpan CheckInterval { get; set; } = TimeSpan.FromHours(1);
-		public TimeSpan InitialDelay { get; set; } = TimeSpan.FromHours(1);
+		public TimeSpan CheckInterval { get; set; }
+		public TimeSpan InitialDelay { get; set; }
+		public bool AllowPrerelease { get; set; }
 
 		public event EventHandler<UpdateAvailableEventArgs> UpdateAvailable;
 
 		private Timer timer;
 
-		public UpdateChecker(IUpdateSource updateSource, SemanticVersion currentVersion)
+		public UpdateChecker(IUpdateSource   updateSource,
+		                     SemanticVersion currentVersion,
+		                     bool            allowPrerelease,
+		                     TimeSpan        checkInterval,
+		                     TimeSpan        initialDelay)
 		{
 			UpdateSource = updateSource;
 			CurrentVersion = currentVersion;
+			AllowPrerelease = allowPrerelease;
+			CheckInterval = checkInterval;
+			InitialDelay = initialDelay;
 		}
+
+		public UpdateChecker(IUpdateSource   updateSource,
+		                     SemanticVersion currentVersion,
+		                     bool            allowPrerelease,
+		                     TimeSpan        checkInterval)
+			: this(updateSource, currentVersion, allowPrerelease, checkInterval, checkInterval)
+		{
+		}
+
 
 		/// <summary>
 		/// Starts checking for updates.
@@ -66,7 +83,7 @@ namespace PassWinmenu.UpdateChecking
 			timer.Stop();
 			timer.Dispose();
 			LatestVersion = update;
-			Log.Send($"New update found: {update.Value.VersionNumber}", LogLevel.Debug);
+			Log.Send($"New update found: {update.Value.VersionNumber} - prerelease: {update.Value.IsPrerelease} - important: {update.Value.Important}", LogLevel.Debug);
 			NotifyUpdate(update.Value);
 		}
 
@@ -85,7 +102,7 @@ namespace PassWinmenu.UpdateChecking
 				return null;
 			}
 
-			var latestVersion = UpdateSource.GetLatestVersion();
+			var latestVersion = UpdateSource.GetLatestVersion(AllowPrerelease);
 
 			if (latestVersion.VersionNumber > CurrentVersion)
 			{

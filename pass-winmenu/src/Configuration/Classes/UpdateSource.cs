@@ -1,6 +1,6 @@
 ﻿namespace PassWinmenu.Configuration
 {
-	enum UpdateProvider
+	enum UpdateSource
 	{
 		GitHub,
 		Chocolatey,

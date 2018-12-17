@@ -1,12 +1,19 @@
 ﻿using System;
+using YamlDotNet.Serialization;
 
 namespace PassWinmenu.Configuration
 {
 	internal class UpdateCheckingConfig
 	{
 		public bool CheckForUpdates { get; set; } = true;
-		public UpdateProvider UpdateProvider { get; set; } = UpdateProvider.GitHub;
-		public int CheckInterval { get; set; } = (int)TimeSpan.FromHours(1).TotalSeconds;
-		public int InitialDelay { get; set; } = (int)TimeSpan.FromHours(1).TotalSeconds;
+		public bool AllowPrereleases { get; set; } = false;
+		public UpdateSource UpdateSource { get; set; } = UpdateSource.GitHub;
+		public int CheckInterval { get; set; } = 3600;
+		[YamlIgnore]
+		public TimeSpan CheckIntervalTimeSpan => TimeSpan.FromSeconds(CheckInterval);
+		public int InitialDelay { get; set; } = 3600;
+		[YamlIgnore]
+		public TimeSpan InitialDelayTimeSpan => TimeSpan.FromSeconds(InitialDelay);
+
 	}
 }

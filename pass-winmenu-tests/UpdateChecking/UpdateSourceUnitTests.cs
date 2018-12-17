@@ -7,11 +7,5 @@ namespace PassWinmenu.UpdateChecking
 	{
 		private const string Category = "Updates: update sources";
 
-		[TestMethod]
-		public void Test()
-		{
-		}
-
-
 	}
 }
