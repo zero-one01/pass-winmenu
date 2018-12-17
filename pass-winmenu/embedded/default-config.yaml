@@ -163,17 +163,42 @@ output:
 
 # Here you can map hotkeys to various actions. Supported actions are:
 # - decrypt-password
+#     available options:
+#      - copy-to-clipboard: (true/false)
+#        Copy the password to your clipboard. Note that in Windows 10 version
+#        1809 and up, clipboard history may be enabled, which may preserve
+#        copied passwords. Use with caution.
+#      - type-username: (true/false)
+#        Type the username into the topmost window.
+#      - type-password: (true/false)
+#        Type the password into the topmost window. If the username was also
+#        typed, it will be followed by a tab before the password is entered.
 # - add-password
 # - edit-password
+# - decrypt-metadata
+#     Decrypt the metadata of a password file (all lines after the first line).
+#     available options:
+#      - copy-to-clipboard: (true/false)
+#        Copy the metadata.
+#      - type: (true/false)
+#        Type all metadata into the topmost window.
+# - password-field
+#     Get the value of a field from the metadata of a password file.
+#     Fields should have a name followed by a colon and a value.
+#     For instance:
+#        Recovery-Key: 5c673074-d441-4579-bf40-2dacc3a43d8f
+#     available options:
+#      - copy-to-clipboard: (true/false)
+#        Copy the value of the field to the clipboard.
+#      - field-name: <fieldname>
+#        Name of the field to decrypt. If this is left empty, you will be
+#        prompted with a menu where you can choose the correct field.
+#      - type: (true/false)
+#        Type the value of the field into the topmost window.
 # - git-pull
 # - git-push
 # - open-shell
 # Actions can be further configured using the 'options' variable.
-# Valid options for 'decrypt-password' are:
-# - copy-to-clipboard: (true/false)
-# - type-username: (true/false)
-# - type-password: (true/false)
-# The other actions currently have no configurable options.
 #
 # The default configuration has one hotkey for copying the password to your
 # clipboard, and one hotkey for automatically entering your username and
