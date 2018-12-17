@@ -102,15 +102,15 @@ namespace PassWinmenu
 
 			clipboard = new ClipboardHelper();
 			dialogCreator = new DialogCreator(notificationService, passwordManager, git);
-			actionDispatcher = new ActionDispatcher(notificationService, passwordManager, dialogCreator, clipboard, git);
+			InitialiseUpdateChecker();
+
+			actionDispatcher = new ActionDispatcher(notificationService, passwordManager, dialogCreator, clipboard, git, updateChecker);
 
 			notificationService.AddMenuActions(actionDispatcher);
 
 			// Assign our hotkeys.
 			hotkeys = new HotkeyManager();
 			AssignHotkeys(hotkeys);
-
-			InitialiseUpdateChecker();
 		}
 
 		private void InitialiseUpdateChecker()

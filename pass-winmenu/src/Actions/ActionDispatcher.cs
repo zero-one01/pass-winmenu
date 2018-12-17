@@ -5,6 +5,7 @@ using LibGit2Sharp;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.PasswordManagement;
+using PassWinmenu.UpdateChecking;
 using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
 
@@ -17,18 +18,21 @@ namespace PassWinmenu.Actions
 		private readonly DialogCreator dialogCreator;
 		private readonly ClipboardHelper clipboard;
 		private readonly ISyncService syncService;
+		private readonly UpdateChecker updateChecker;
 
 		public ActionDispatcher(INotificationService notificationService,
 		                        IPasswordManager     passwordManager,
 		                        DialogCreator        dialogCreator,
 		                        ClipboardHelper      clipboard,
-		                        ISyncService         syncService)
+		                        ISyncService         syncService,
+		                        UpdateChecker        updateChecker)
 		{
 			this.notificationService = notificationService;
 			this.passwordManager = passwordManager;
 			this.dialogCreator = dialogCreator;
 			this.clipboard = clipboard;
 			this.syncService = syncService;
+			this.updateChecker = updateChecker;
 		}
 
 		public void OpenExplorer()
@@ -135,7 +139,7 @@ namespace PassWinmenu.Actions
 
 		internal void CheckForUpdates()
 		{
-			throw new NotImplementedException();
+			updateChecker.CheckForUpdates();
 		}
 
 		internal void ShowDebugInfo()
