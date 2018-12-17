@@ -43,6 +43,7 @@ namespace PassWinmenu.UpdateChecking.GitHub
 				DownloadLink = new Uri(release.HtmlUrl),
 				ReleaseDate = release.PublishedAt,
 				ReleaseNotes = new Uri(release.HtmlUrl),
+				IsPrerelease = release.Prerelease
 			};
 		}
 

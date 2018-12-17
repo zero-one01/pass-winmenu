@@ -16,6 +16,7 @@ namespace PassWinmenu.UpdateChecking
 		public SemanticVersion CurrentVersion { get; }
 		public ProgramVersion? LatestVersion { get; private set; }
 		public TimeSpan CheckInterval { get; set; } = TimeSpan.FromHours(1);
+		public TimeSpan InitialDelay { get; set; } = TimeSpan.FromHours(1);
 
 		public event EventHandler<UpdateAvailableEventArgs> UpdateAvailable;
 
@@ -32,13 +33,17 @@ namespace PassWinmenu.UpdateChecking
 		/// </summary>
 		public void Start()
 		{
-			timer = new Timer(CheckInterval.TotalMilliseconds)
+			timer = new Timer(InitialDelay.TotalMilliseconds)
 			{
 				AutoReset = true,
 			};
 
 			timer.Elapsed += (sender, args) =>
 			{
+				// Update the timer interval so it takes the value from
+				// CheckInterval instead of InitialDelay after it has 
+				// elapsed at least once.
+				timer.Interval = CheckInterval.TotalMilliseconds;
 				CheckForUpdates();
 			};
 			timer.Start();

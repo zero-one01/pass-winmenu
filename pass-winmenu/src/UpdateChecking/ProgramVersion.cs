@@ -13,6 +13,7 @@ namespace PassWinmenu.UpdateChecking
 		public Uri ReleaseNotes { get; set; }
 		public Uri DownloadLink { get; set; }
 		public DateTime ReleaseDate { get; set; }
+		public bool IsPrerelease { get; set; }
 
 		/// <summary>
 		/// True if the update to this version includes one or more important vulnerability fixes.

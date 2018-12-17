@@ -18,6 +18,8 @@ using PassWinmenu.Windows;
 using YamlDotNet.Core;
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.Actions;
+using PassWinmenu.UpdateChecking.Chocolatey;
+using PassWinmenu.UpdateChecking.Dummy;
 
 namespace PassWinmenu
 {
@@ -117,11 +119,21 @@ namespace PassWinmenu
 		{
 			if (!ConfigManager.Config.Application.UpdateChecking.CheckForUpdates) return;
 
-#if CHOCOLATEY
-			var updateSource = new ChocolateyUpdateSource();
-#else
-			var updateSource = new GitHubUpdateSource();
-#endif
+			IUpdateSource updateSource;
+			switch (ConfigManager.Config.Application.UpdateChecking.UpdateProvider)
+			{
+				case UpdateProvider.GitHub:
+					updateSource = new GitHubUpdateSource();
+					break;
+				case UpdateProvider.Chocolatey:
+					updateSource = new ChocolateyUpdateSource();
+					break;
+				case UpdateProvider.Dummy:
+					updateSource = new DummyUpdateSource();
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(null, "Invalid update provider.");
+			}
 			var versionString = Version.Split('-').First();
 
 			updateChecker = new UpdateChecker(updateSource, SemanticVersion.Parse(versionString, ParseMode.Lenient));

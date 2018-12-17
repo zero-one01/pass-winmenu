@@ -1,7 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PassWinmenu.UdateChecking
+namespace PassWinmenu.UpdateChecking
 {
 	[TestClass]
 	public class UpdateSourceUnitTests

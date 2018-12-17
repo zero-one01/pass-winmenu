@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using McSherry.SemanticVersioning;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PassWinmenu.UpdateChecking;
+using PassWinmenu.UpdateChecking.Dummy;
 
-namespace PassWinmenu.UdateChecking
+namespace PassWinmenu.UpdateChecking
 {
 	[TestClass]
 	public class UpdateCheckerUnitTests

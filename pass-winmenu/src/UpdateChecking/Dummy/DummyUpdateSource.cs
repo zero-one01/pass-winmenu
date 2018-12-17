@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PassWinmenu.UpdateChecking;
 
-namespace PassWinmenu.UdateChecking
+namespace PassWinmenu.UpdateChecking.Dummy
 {
 	internal sealed class DummyUpdateSource : IUpdateSource
 	{
@@ -21,7 +21,7 @@ namespace PassWinmenu.UdateChecking
 
 		public IEnumerable<ProgramVersion> GetAllReleases()
 		{
-			throw new NotImplementedException();
+			return Versions;
 		}
 	}
 }
