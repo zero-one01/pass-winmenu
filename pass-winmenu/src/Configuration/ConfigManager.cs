@@ -24,10 +24,9 @@ namespace PassWinmenu.Configuration
 			watcher.EnableRaisingEvents = true;
 			watcher.Changed += (sender, args) =>
 			{
-				Log.Send("Configuration file changed, attempting reload.");
 				// Wait a moment to allow the writing process to close the file.
 				Thread.Sleep(500);
-				Log.Send($"Configuration file changed ({args.ChangeType}), attempting reload.");
+				Log.Send($"Configuration file changed (change type: {args.ChangeType}), attempting reload.");
 				Reload(fileName);
 			};
 		}
