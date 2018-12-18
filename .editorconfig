@@ -5,11 +5,11 @@
 # All files 
 [*] 
 indent_style = tab
+charset = utf-8
 # Code files 
 [*.{cs,csx,vb,vbx}] 
 indent_size = 4 
 insert_final_newline = true 
-charset = utf-8-bom 
 [*.yaml]
 indent_style = space
 ############################### 
