@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using McSherry.SemanticVersioning;
@@ -78,6 +78,84 @@ namespace PassWinmenu.UpdateChecking
 			}
 
 			Assert.IsTrue(raised, "Notification was not raised");
+		}
+
+
+		[TestMethod, TestCategory(Category)]
+		public void UpdateChecker_UpdatesPreReleases()
+		{
+			var current = SemanticVersion.Parse("2.0.0-pre2", ParseMode.Lenient);
+			var sourceWithNewPrerelease = new DummyUpdateSource
+			{
+				Versions = new List<ProgramVersion>
+				{
+					new ProgramVersion
+					{
+						VersionNumber = SemanticVersion.Parse("2.0.0-pre2"),
+						IsPrerelease = true
+					},
+					new ProgramVersion
+					{
+						VersionNumber = SemanticVersion.Parse("2.0.0-pre3"),
+						IsPrerelease = true
+					},
+					// Versions may be specified in any order
+					new ProgramVersion
+					{
+					VersionNumber = SemanticVersion.Parse("2.0.0-pre1"),
+					IsPrerelease = true
+					}
+				}
+			};
+
+			using (var checker = new UpdateChecker(sourceWithNewPrerelease, current, true, TimeSpan.FromMilliseconds(1)))
+			{
+				AssertUpdateCheck(checker, (sender, args) =>
+				{
+					Assert.AreEqual(args.Version.VersionNumber, SemanticVersion.Parse("2.0.0-pre3", ParseMode.Lenient));
+				});
+			}
+
+			// Ensure we get back the final release, even if it's specified as a pre-release.
+			var sourceWithFinalRelease = new DummyUpdateSource
+			{
+				Versions = new List<ProgramVersion>
+				{
+					new ProgramVersion
+					{
+						VersionNumber = SemanticVersion.Parse("2.0.0-pre3"),
+						IsPrerelease = true
+					},
+					new ProgramVersion
+					{
+						VersionNumber = SemanticVersion.Parse("2.0.0-pre2"),
+						IsPrerelease = true
+					},
+					new ProgramVersion
+					{
+						VersionNumber = SemanticVersion.Parse("2.0.0-pre1"),
+						IsPrerelease = true
+					},
+					new ProgramVersion
+					{
+						VersionNumber = SemanticVersion.Parse("2.0.0-pre4"),
+						IsPrerelease = true
+					},
+					new ProgramVersion
+					{
+						VersionNumber = SemanticVersion.Parse("2.0.0"),
+						IsPrerelease = true
+					}
+				}
+			};
+
+			using (var checker = new UpdateChecker(sourceWithFinalRelease, current, true, TimeSpan.FromMilliseconds(1)))
+			{
+				AssertUpdateCheck(checker, (sender, args) =>
+				{
+					Assert.AreEqual(args.Version.VersionNumber, SemanticVersion.Parse("2.0.0", ParseMode.Lenient));
+				});
+			}
 		}
 
 		[TestMethod, TestCategory(Category)]
