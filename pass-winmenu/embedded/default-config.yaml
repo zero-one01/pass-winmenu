@@ -279,6 +279,8 @@ interface:
         
     # Amount of time (in seconds) your passwords should remain on the clipboard.
     clipboard-timeout: 30
+    # Restore previous clipboard contents after the password has been cleared.
+    restore-clipboard: true
 
     hotkeys:
     # Configure hotkeys for the password selection menu.

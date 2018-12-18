@@ -1,7 +1,10 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using PassWinmenu.Configuration;
 using PassWinmenu.Utilities;
 
 namespace PassWinmenu.WinApi
@@ -18,17 +21,7 @@ namespace PassWinmenu.WinApi
 		{
 			Helpers.AssertOnUiThread();
 
-			var clipboardBackup = new Dictionary<string, object>();
-			var dataObject = Clipboard.GetDataObject();
-			if (dataObject != null)
-			{
-				Log.Send("Saving previous clipboard contents before storing the password");
-				Log.Send($" - Formats: {string.Join(", ", dataObject.GetFormats(false))}");
-				foreach (var format in dataObject.GetFormats(false))
-				{
-					clipboardBackup[format] = dataObject.GetData(format, false);
-				}
-			}
+			var clipboardBackup = MakeClipboardBackup();
 			Clipboard.SetText(text, TextDataFormat.UnicodeText);
 
 			Task.Delay(timeout).ContinueWith(_ =>
@@ -38,19 +31,23 @@ namespace PassWinmenu.WinApi
 					try
 					{
 						// Only reset the clipboard to its previous contents if it still contains the text we copied to it.
-						if (Clipboard.ContainsText() && Clipboard.GetText() == text)
+						if (!Clipboard.ContainsText() || Clipboard.GetText() != text) return;
+
+						Clipboard.Clear();
+
+						if (!ConfigManager.Config.Interface.RestoreClipboard) return;
+
+						// Create a new DataObject into which we can restore our data.
+						var dataObject = new DataObject();
+						Log.Send($"Restoring previous clipboard contents:");
+						foreach (var pair in clipboardBackup)
 						{
-							// First clear the clipboard, to ensure our text is gone,
-							// even if restoring the previous content fails.
-							Clipboard.Clear();
-							// Now try to restore the previous content.
-							Log.Send($"Restoring previous clipboard contents:");
-							foreach (var pair in clipboardBackup)
-							{
-								Log.Send($" - {pair.Key}");
-								Clipboard.SetData(pair.Key, pair.Value);
-							}
+							Log.Send($" - {pair.Key}");
+							dataObject.SetData(pair.Key, pair.Value);
 						}
+
+						// Now place it on the clipboard.
+						Clipboard.SetDataObject(dataObject, true);
 					}
 					catch (Exception e)
 					{
@@ -59,6 +56,35 @@ namespace PassWinmenu.WinApi
 				});
 			});
 		}
+
+		/// <summary>
+		/// Backs up the current clipboard data to a dictionary mapping data formats to contents.
+		/// </summary>
+		private Dictionary<string, object> MakeClipboardBackup()
+		{
+			var clipboardBackup = new Dictionary<string, object>();
+			var dataObject = Clipboard.GetDataObject();
+			if (dataObject == null)
+			{
+				return clipboardBackup;
+			}
+			Log.Send("Creating clipboard backup.");
+			var formats = dataObject.GetFormats(false);
+			Log.Send($" - Formats: {string.Join(", ", formats)}");
+			foreach (var format in formats)
+			{
+				try
+				{
+					clipboardBackup[format] = dataObject.GetData(format, false);
+				}
+				catch (Exception e)
+				{
+					Log.Send($"Couldn't store format \"{format}\": {e.GetType().Name} ({e.Message})", LogLevel.Warning);
+				}
+			}
+			return clipboardBackup;
+		}
+
 
 		public string GetText()
 		{
