@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -24,6 +25,9 @@ namespace PassWinmenu.Configuration
 			watcher.Changed += (sender, args) =>
 			{
 				Log.Send("Configuration file changed, attempting reload.");
+				// Wait a moment to allow the writing process to close the file.
+				Thread.Sleep(500);
+				Log.Send($"Configuration file changed ({args.ChangeType}), attempting reload.");
 				Reload(fileName);
 			};
 		}
