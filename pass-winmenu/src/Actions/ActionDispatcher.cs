@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using LibGit2Sharp;
@@ -76,9 +76,11 @@ namespace PassWinmenu.Actions
 		{
 			if (syncService == null)
 			{
-				notificationService.Raise("Unable to commit your changes: pass-winmenu is not configured to use Git.", Severity.Warning);
+				notificationService.Raise("Unable to commit your changes: pass-winmenu is not configured to use Git.",
+				                          Severity.Warning);
 				return;
 			}
+
 			// First, commit any uncommitted files
 			syncService.Commit();
 			// Now fetch the latest changes
@@ -89,21 +91,24 @@ namespace PassWinmenu.Actions
 			// FIXME: dependency on derived type
 			catch (LibGit2SharpException e) when (e.Message == "unsupported URL protocol")
 			{
-				notificationService.ShowErrorWindow("Unable to push your changes: Remote uses an unknown protocol.\n\n" +
-								"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
+				notificationService.ShowErrorWindow(
+					"Unable to push your changes: Remote uses an unknown protocol.\n\n" +
+					"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 				return;
 			}
 			catch (GitException e)
 			{
 				if (e.GitError != null)
 				{
-					notificationService.ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
+					notificationService.ShowErrorWindow(
+						$"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
 				}
 				else
 				{
 					notificationService.ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
 				}
 			}
+
 			var details = syncService.GetTrackingDetails();
 			var local = details.AheadBy;
 			var remote = details.BehindBy;
@@ -113,15 +118,18 @@ namespace PassWinmenu.Actions
 			}
 			catch (LibGit2SharpException e)
 			{
-				notificationService.ShowErrorWindow($"Unable to rebase your changes onto the tracking branch:\n{e.Message}");
+				notificationService.ShowErrorWindow(
+					$"Unable to rebase your changes onto the tracking branch:\n{e.Message}");
 				return;
 			}
+
 			syncService.Push();
 
 			if (!ConfigManager.Config.Notifications.Types.GitPush) return;
 			if (local > 0 && remote > 0)
 			{
-				notificationService.Raise($"All changes pushed to remote ({local} pushed, {remote} pulled)", Severity.Info);
+				notificationService.Raise($"All changes pushed to remote ({local} pushed, {remote} pulled)",
+				                          Severity.Info);
 			}
 			else if (local.GetValueOrDefault() == 0 && remote.GetValueOrDefault() == 0)
 			{
@@ -133,7 +141,8 @@ namespace PassWinmenu.Actions
 			}
 			else if (remote > 0)
 			{
-				notificationService.Raise($"Nothing to commit. {remote} changes were pulled from remote.", Severity.Info);
+				notificationService.Raise($"Nothing to commit. {remote} changes were pulled from remote.",
+				                          Severity.Info);
 			}
 		}
 
@@ -159,9 +168,12 @@ namespace PassWinmenu.Actions
 		{
 			if (syncService == null)
 			{
-				notificationService.Raise("Unable to update the password store: pass-winmenu is not configured to use Git.", Severity.Warning);
+				notificationService.Raise(
+					"Unable to update the password store: pass-winmenu is not configured to use Git.",
+					Severity.Warning);
 				return;
 			}
+
 			try
 			{
 				syncService.Fetch();
@@ -169,8 +181,9 @@ namespace PassWinmenu.Actions
 			}
 			catch (LibGit2SharpException e) when (e.Message == "unsupported URL protocol")
 			{
-				notificationService.ShowErrorWindow("Unable to update the password store: Remote uses an unknown protocol.\n\n" +
-											  "If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
+				notificationService.ShowErrorWindow(
+					"Unable to update the password store: Remote uses an unknown protocol.\n\n" +
+					"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
 			}
 			catch (LibGit2SharpException e)
 			{
@@ -180,7 +193,8 @@ namespace PassWinmenu.Actions
 			{
 				if (e.GitError != null)
 				{
-					notificationService.ShowErrorWindow($"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
+					notificationService.ShowErrorWindow(
+						$"Unable to fetch the latest changes: Git returned an error.\n\n{e.GitError}");
 				}
 				else
 				{
