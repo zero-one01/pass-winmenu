@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,6 +42,7 @@ namespace PassWinmenu.Windows
 					Content = charGroup.Name,
 					Margin = new Thickness(x * 100, y * 20, 0, 0),
 					HorizontalAlignment = HorizontalAlignment.Left,
+					VerticalAlignment = VerticalAlignment.Top,
 					IsChecked = charGroup.Enabled,
 				};
 				cbx.Unchecked += HandleCheckedChanged;
