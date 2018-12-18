@@ -1,4 +1,4 @@
-﻿using PassWinmenu.Configuration;
+using PassWinmenu.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -131,9 +131,13 @@ namespace PassWinmenu.ExternalPrograms
 			var gpgProc = Process.Start(psi);
 			if (input != null)
 			{
-				gpgProc.StandardInput.WriteLine(input);
-				gpgProc.StandardInput.Flush();
-				gpgProc.StandardInput.Close();
+				// Explicitly define the encoding to not send a BOM, to ensure other platforms can handle our output.
+				using (var writer = new StreamWriter(gpgProc.StandardInput.BaseStream, new UTF8Encoding(false)))
+				{
+					writer.WriteLine(input);
+					writer.Flush();
+					writer.Close();
+				}
 			}
 			return gpgProc;
 		}
@@ -171,7 +175,13 @@ namespace PassWinmenu.ExternalPrograms
 					stderrMessages.Add(stderrLine);
 				}
 			}
-			var output = gpgProc.StandardOutput.ReadToEnd();
+
+			string output;
+			// We can use the standard UTF-8 encoding here, as it should be able to handle input without BOM.
+			using (var reader = new StreamReader(gpgProc.StandardOutput.BaseStream, Encoding.UTF8))
+			{
+				output = reader.ReadToEnd();
+			}
 
 			return new GpgResult(gpgProc.ExitCode, output, statusMessages, stderrMessages);
 		}
