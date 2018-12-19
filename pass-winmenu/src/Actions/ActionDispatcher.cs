@@ -207,5 +207,10 @@ namespace PassWinmenu.Actions
 		{
 			dialogCreator.ViewLogs();
 		}
+
+		public void EditConfiguration()
+		{
+			Process.Start(Program.ConfigFileName);
+		}
 	}
 }

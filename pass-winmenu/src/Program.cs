@@ -31,6 +31,7 @@ namespace PassWinmenu
 		public const string LastConfigVersion = "1.7";
 		public const string EncryptedFileExtension = ".gpg";
 		public const string PlaintextFileExtension = ".txt";
+		public const string ConfigFileName = @".\pass-winmenu.yaml";
 
 		private ClipboardHelper clipboard;
 		private ActionDispatcher actionDispatcher;
@@ -246,11 +247,10 @@ namespace PassWinmenu
 
 		private void LoadConfigFile()
 		{
-			const string configFileName = @".\pass-winmenu.yaml";
 			LoadResult result;
 			try
 			{
-				result = ConfigManager.Load(configFileName);
+				result = ConfigManager.Load(ConfigFileName);
 			}
 			catch (Exception e) when (e.InnerException != null)
 			{
@@ -285,17 +285,17 @@ namespace PassWinmenu
 				case LoadResult.NewFileCreated:
 					var open = MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.\n\n" +
 					                           "Would you like to open it now?", "New configuration file created", MessageBoxButton.YesNo);
-					if (open == MessageBoxResult.Yes) Process.Start(configFileName);
+					if (open == MessageBoxResult.Yes) Process.Start(ConfigFileName);
 					Exit();
 					return;
 				case LoadResult.NeedsUpgrade:
-					var backedUpFile = ConfigManager.Backup(configFileName);
+					var backedUpFile = ConfigManager.Backup(ConfigFileName);
 					var openBoth = MessageBox.Show("The current configuration file is out of date. A new configuration file has been created, and the old file has been backed up.\n" +
 					                               "Please edit the new configuration file according to your preferences and restart the application.\n\n" +
 					                               "Would you like to open both files now?", "Configuration file out of date", MessageBoxButton.YesNo);
 					if (openBoth == MessageBoxResult.Yes)
 					{
-						Process.Start(configFileName);
+						Process.Start(ConfigFileName);
 						Process.Start(backedUpFile);
 					}
 					Exit();
@@ -303,7 +303,7 @@ namespace PassWinmenu
 			}
 			if (ConfigManager.Config.Application.ReloadConfig)
 			{
-				ConfigManager.EnableAutoReloading(configFileName);
+				ConfigManager.EnableAutoReloading(ConfigFileName);
 				Log.Send("Config reloading enabled");
 			}
 		}

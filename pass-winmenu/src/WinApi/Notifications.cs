@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
@@ -68,6 +68,7 @@ namespace PassWinmenu.WinApi
 
 			var dropDown = new ToolStripMenuItem("More Actions");
 			dropDown.DropDownItems.Add("Check for Updates", null, (sender, args) => actionDispatcher.CheckForUpdates());
+			dropDown.DropDownItems.Add("Edit Configuration", null, (sender, args) => actionDispatcher.EditConfiguration());
 			dropDown.DropDownItems.Add("View Log", null, (sender, args) => actionDispatcher.ViewLogs());
 
 			menu.Items.Add(dropDown);
