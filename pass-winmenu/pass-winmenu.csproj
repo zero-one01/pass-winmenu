@@ -103,7 +103,7 @@
     <Compile Include="src\Configuration\Classes\UpdateSource.cs" />
     <Compile Include="src\Configuration\LoadResult.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
-    <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
+    <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
     <Compile Include="src\PasswordManagement\PasswordFile.cs" />
     <Compile Include="src\UpdateChecking\Dummy\DummyUpdateSource.cs" />

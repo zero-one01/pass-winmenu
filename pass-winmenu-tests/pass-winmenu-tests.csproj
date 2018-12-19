@@ -80,6 +80,7 @@
     <Compile Include="Parsing\ParserTests.cs" />
     <Compile Include="PasswordManager\PasswordManagerUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\HelpersTests.cs" />
     <Compile Include="WinApi\ClipboardHelperTests.cs" />
     <Compile Include="UpdateChecking\UpdateCheckerUnitTests.cs" />
     <Compile Include="UpdateChecking\UpdateSourceUnitTests.cs" />

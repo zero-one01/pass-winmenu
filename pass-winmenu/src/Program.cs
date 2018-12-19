@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -104,7 +104,7 @@ namespace PassWinmenu
 			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
 
 			clipboard = new ClipboardHelper();
-			dialogCreator = new DialogCreator(notificationService, passwordManager, git);
+			dialogCreator = new DialogCreator(notificationService, passwordManager, git, gpg);
 			InitialiseUpdateChecker();
 
 			actionDispatcher = new ActionDispatcher(notificationService, passwordManager, dialogCreator, clipboard, git, updateChecker);

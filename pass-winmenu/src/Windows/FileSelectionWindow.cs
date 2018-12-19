@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,7 +44,7 @@ namespace PassWinmenu.Windows
 			if (Options.IndexOf(Selected) > 0 || string.IsNullOrEmpty(SearchBox.Text))
 			{
 				var selection = GetSelection();
-				if (selection.EndsWith(".gpg"))
+				if (selection.EndsWith(Program.EncryptedFileExtension))
 				{
 					selection = selection.Substring(0, selection.Length - 4);
 				}
@@ -57,16 +57,16 @@ namespace PassWinmenu.Windows
 					return;
 				}
 				var selection = GetSelection();
-				if (selection.EndsWith(".gpg"))
+				if (selection.EndsWith(Program.EncryptedFileExtension))
 				{
 					MessageBox.Show("A .gpg extension will be added automatically and does not need to be entered here.");
 					selection = selection.Substring(0, selection.Length - 4);
 					SetSearchBoxText(selection);
 					return;
 				}
-				if (File.Exists(Path.Combine(baseDirectory, selection + ".gpg")))
+				if (File.Exists(Path.Combine(baseDirectory, selection + Program.EncryptedFileExtension)))
 				{
-					MessageBox.Show($"The password file \"{selection + ".gpg"}\" already exists.");
+					MessageBox.Show($"The password file \"{selection + Program.EncryptedFileExtension}\" already exists.");
 					return;
 				}
 				Success = true;

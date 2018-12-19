@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,8 +14,8 @@ namespace PassWinmenu.PasswordManagement
 		internal const string GpgIdFileName = ".gpg-id";
 
 		private readonly PinentryWatcher pinentryWatcher = new PinentryWatcher();
-		private readonly DirectoryInfo passwordStoreDirectory;
 
+		public DirectoryInfo PasswordStore { get; }
 		public ICryptoService Crypto { get; }
 		public bool PinentryFixEnabled { get; set; }
 		public readonly string EncryptedFileExtension;
@@ -23,126 +23,50 @@ namespace PassWinmenu.PasswordManagement
 		public PasswordManager(string passwordStore, string encryptedFileExtension, GPG crypto)
 		{
 			var normalised = Helpers.NormaliseDirectory(passwordStore);
-			passwordStoreDirectory = new DirectoryInfo(normalised);
+			PasswordStore = new DirectoryInfo(normalised);
 
 			EncryptedFileExtension = encryptedFileExtension;
 			Crypto = crypto;
 		}
 
 		/// <summary>
-		/// Generates an encrypted password file at the specified path.
+		/// Encrypts a password file at the specified path.
 		/// If the path contains directories that do not exist, they will be created automatically.
 		/// </summary>
 		/// <param name="file">
-		/// A <see cref="DecryptedPasswordFile"/> instance specifying the contents
-		/// of the password file to be generated.
+		/// A <see cref="KeyedPasswordFile"/> instance specifying the contents
+		/// of the password file to be encrypted.
 		/// </param>
-		public void EncryptPassword(DecryptedPasswordFile file)
+		/// <param name="overwrite">
+		/// If this file already exists, should it be overwritten?
+		/// </param>
+		public PasswordFile EncryptPassword(DecryptedPasswordFile file, bool overwrite)
 		{
-			EncryptText(file.Content, file.RelativePath);
+			file.Directory.Create();
+			Crypto.Encrypt(file.Content, file.FullPath, GetGpgIds(file.FullPath));
+			return new PasswordFile(file.PasswordStore, file.RelativePath);
 		}
 
-		/// <summary>
-		/// Generates an encrypted password file at the specified path.
-		/// If the path contains directories that do not exist, they will be created automatically.
-		/// </summary>
-		/// <param name="text">The text to be encrypted.</param>
-		/// <param name="path">A relative path specifying where in the password store the password file should be generated.</param>
-		public void EncryptText(string text, string path)
+		public string DecryptText(PasswordFile file)
 		{
-			var fullPath = GetPasswordFilePath(path);
-			Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-			Crypto.Encrypt(text, fullPath, GetGpgIds(fullPath));
-		}
-
-		public string DecryptText(string path)
-		{
-			var fullPath = GetPasswordFilePath(path);
-			if (!File.Exists(fullPath)) throw new ArgumentException($"The password file \"{fullPath}\" does not exist.");
+			if (!File.Exists(file.FullPath)) throw new ArgumentException($"The password file \"{file.FullPath}\" does not exist.");
 
 			if(PinentryFixEnabled) pinentryWatcher.BumpPinentryWindow();
-			return Crypto.Decrypt(fullPath);
+			return Crypto.Decrypt(file.FullPath);
 		}
 
 		/// <summary>
 		/// Get the content from an encrypted password file.
 		/// </summary>
-		/// <param name="path">A relative path specifying the location of the password file in the password store.</param>
+		/// <param name="file">A <see cref="PasswordFile"/> specifying the password file to be decrypted.</param>
 		/// <param name="passwordOnFirstLine">Should be true if the first line of the file contains the password.
 		/// Any content in the remaining lines will be considered metadata.
 		/// If set to false, the contents of the entire file are considered to be the password.</param>
 		/// <returns></returns>
-		public DecryptedPasswordFile DecryptPassword(string path, bool passwordOnFirstLine)
+		public KeyedPasswordFile DecryptPassword(PasswordFile file, bool passwordOnFirstLine)
 		{
-			var content = DecryptText(path);
-			var file = new PasswordFile(path);
+			var content = DecryptText(file);
 			return new PasswordFileParser().Parse(file, content, !passwordOnFirstLine);
-		}
-
-		/// <summary>
-		/// Encrypt a file. The path to the unencrypted file (plus a .gpg extension)
-		/// is used to produce the path to the encrypted file.
-		/// </summary>
-		/// <param name="file">A relative path pointing to the encrypted file in the password store.</param>
-		public PasswordFile EncryptFile(string file)
-		{
-			var fullFilePath = GetPasswordFilePath(file);
-			if (!File.Exists(fullFilePath)) throw new ArgumentException($"The unencrypted file \"{fullFilePath}\" does not exist.");
-			Crypto.EncryptFile(fullFilePath, fullFilePath + EncryptedFileExtension, GetGpgIds(file));
-
-			return new PasswordFile(file + EncryptedFileExtension);
-		}
-
-		/// <summary>
-		/// Decrypt a file. The encrypted file should have a .gpg extension, which
-		/// is removed to produce the path to the decrypted file.
-		/// </summary>
-		/// <param name="path">The path, relative to the password store, to the encrypted file.</param>
-		/// <returns>An absolute path pointing to the decrypted file.</returns>
-		public string DecryptFile(string path)
-		{
-			if (!path.EndsWith(EncryptedFileExtension))
-			{
-				throw new ArgumentException($"The encrypted file \"{path}\" should have a filename ending with {EncryptedFileExtension}");
-			}
-
-			var encryptedFileName = GetPasswordFilePath(path);
-			var decryptedFileName = encryptedFileName.Substring(0, encryptedFileName.Length - EncryptedFileExtension.Length);
-
-			if (File.Exists(decryptedFileName)) throw new InvalidOperationException($"A plaintext file already exists at \"{decryptedFileName}\".");
-			if (!File.Exists(encryptedFileName)) throw new ArgumentException($"The encrypted file \"{encryptedFileName}\" does not exist.");
-
-			if(PinentryFixEnabled) pinentryWatcher.BumpPinentryWindow();
-			Crypto.DecryptToFile(encryptedFileName, decryptedFileName);
-			return decryptedFileName;
-		}
-
-		/// <summary>
-		/// Turns a relative (password store) path into an absolute path pointing to a password store file.
-		/// Throws an exception if the given path is not in the password store.
-		/// </summary>
-		/// <param name="relativePath">A relative path pointing to a file or directory in the password store.</param>
-		/// <returns>The absolute path of that file or directory.</returns>
-		public string GetPasswordFilePath(string relativePath)
-		{
-			// Ensure the directory separators are correct
-			var normalised = Helpers.NormaliseDirectory(relativePath);
-			// Only allow saving encrypted files to the password store
-			if (Path.IsPathRooted(relativePath))
-			{
-				// The given path is absolute. If it's a child of the password directory, that's fine.
-				// If it isn't, throw an error.
-				if (passwordStoreDirectory.IsParentOf(relativePath))
-				{
-					return relativePath;
-				}
-				else
-				{
-					throw new ArgumentException("Password file path must be relative to the password store directory.");
-				}
-			}
-			var fullPath = Path.Combine(passwordStoreDirectory.FullName, normalised);
-			return fullPath;
 		}
 
 		/// <summary>
@@ -150,13 +74,15 @@ namespace PassWinmenu.PasswordManagement
 		/// </summary>
 		/// <param name="pattern">The pattern against which the files should be matched.</param>
 		/// <returns></returns>
-		public IEnumerable<string> GetPasswordFiles(string pattern)
+		public IEnumerable<PasswordFile> GetPasswordFiles(string pattern)
 		{
-			var files = Directory.EnumerateFiles(passwordStoreDirectory.FullName, "*", SearchOption.AllDirectories);
-			var matchingFiles = files.Where(f => Regex.IsMatch(Path.GetFileName(f), pattern));
-			var relativeNames = matchingFiles.Select(p => Helpers.GetRelativePath(p, passwordStoreDirectory.FullName));
+			var patternRegex = new Regex(pattern);
 
-			return relativeNames;
+			var files = Directory.EnumerateFiles(PasswordStore.FullName, "*", SearchOption.AllDirectories);
+			var matchingFiles = files.Where(f => patternRegex.IsMatch(Path.GetFileName(f)));
+			var passwordFiles = matchingFiles.Select(n => new PasswordFile(PasswordStore, n));
+
+			return passwordFiles;
 		}
 
 		/// <summary>
@@ -172,7 +98,7 @@ namespace PassWinmenu.PasswordManagement
 			path = Helpers.NormaliseDirectory(path);
 
 			// Ensure the password file directory is actually located within the password store.
-			if (!passwordStoreDirectory.IsParentOf(path))
+			if (!PasswordStore.IsParentOf(path))
 			{
 				throw new ArgumentException("The given directory is not a subdirectory of the password store.");
 			}
@@ -182,7 +108,7 @@ namespace PassWinmenu.PasswordManagement
 			var current = new DirectoryInfo(path);
 			while (!current.Exists || !current.ContainsFile(GpgIdFileName))
 			{
-				if (current.Parent == null || current.PathEquals(passwordStoreDirectory))
+				if (current.Parent == null || current.PathEquals(PasswordStore))
 				{
 					return null;
 				}

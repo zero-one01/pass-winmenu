@@ -275,8 +275,20 @@ interface:
         # Use the built-in password editor. You can set this to false if you want
         # to use a different text editor instead. In that case, pass-winmenu will
         # launch your default text editor for .txt files.
+        # Using a custom text editor is not recommended, as this will temporarily
+        # create a plaintext file containing your password, which may physically
+        # remain on your disk even after the file has been deleted.
         use-builtin: true
-        
+        # If you do want to use your own text editor, and you have access to a
+        # volatile storage medium (for instance, a RAM disk), you can specify
+        # a path within that storage location here, in which case it will be used
+        # to temporarily store plaintext password files while they are being edited.
+        # Example:
+        #temporary-file-directory: 'Z:\pass-winmenu-temp\'
+        # By default, we use AppData\Local\Temp:
+        temporary-file-directory: '%temp%'
+
+
     # Amount of time (in seconds) your passwords should remain on the clipboard.
     clipboard-timeout: 30
     # Restore previous clipboard contents after the password has been cleared.

@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.IO;
 
 namespace PassWinmenu.PasswordManagement
 {
 	internal interface IPasswordManager
 	{
-		string DecryptFile(string path);
-		DecryptedPasswordFile DecryptPassword(string path, bool passwordOnFirstLine);
-		string DecryptText(string path);
-		PasswordFile EncryptFile(string file);
-		void EncryptPassword(DecryptedPasswordFile file);
-		void EncryptText(string text, string path);
-		string GetPasswordFilePath(string relativePath);
-		IEnumerable<string> GetPasswordFiles(string pattern);
+		DirectoryInfo PasswordStore { get; }
+		IEnumerable<PasswordFile> GetPasswordFiles(string pattern);
+
+		KeyedPasswordFile DecryptPassword(PasswordFile file, bool passwordOnFirstLine);
+
+		PasswordFile EncryptPassword(DecryptedPasswordFile file, bool overwrite);
 	}
 }
