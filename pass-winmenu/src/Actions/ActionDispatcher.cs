@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using LibGit2Sharp;
+using McSherry.SemanticVersioning;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.PasswordManagement;
@@ -148,7 +149,22 @@ namespace PassWinmenu.Actions
 
 		internal void CheckForUpdates()
 		{
-			updateChecker.CheckForUpdates();
+			if (!updateChecker.CheckForUpdates())
+			{
+				var latest = updateChecker.LatestVersion;
+				if (latest == null)
+				{
+					notificationService.Raise($"Unable to find update information.",
+					                          Severity.Info);
+				}
+				else
+				{
+					notificationService.Raise($"No new updates available (latest available version is " +
+					                          $"{latest.Value.VersionNumber.ToString(SemanticVersionFormat.PrefixedDefault)}).",
+					                          Severity.Info);
+				}
+
+			}
 		}
 
 		internal void ShowDebugInfo()

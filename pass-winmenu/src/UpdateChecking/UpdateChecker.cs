@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -69,22 +69,22 @@ namespace PassWinmenu.UpdateChecking
 		/// <summary>
 		/// Checks for any available updates, raising <see cref="UpdateAvailable"/> if an update is found.
 		/// </summary>
-		public void CheckForUpdates()
+		public bool CheckForUpdates()
 		{
 			Log.Send("Checking for available updates...", LogLevel.Debug);
 			var update = GetUpdate();
 			if (update == null)
 			{
 				Log.Send("No update found.", LogLevel.Debug);
-				return;
+				return false;
 			}
 
 			// Stop automatic update checking if we've found an update.
 			timer.Stop();
 			timer.Dispose();
-			LatestVersion = update;
 			Log.Send($"New update found: {update.Value.VersionNumber} - prerelease: {update.Value.IsPrerelease} - important: {update.Value.Important}", LogLevel.Debug);
 			NotifyUpdate(update.Value);
+			return true;
 		}
 
 
@@ -102,11 +102,12 @@ namespace PassWinmenu.UpdateChecking
 				return null;
 			}
 
-			var latestVersion = UpdateSource.GetLatestVersion(AllowPrerelease);
+			LatestVersion = UpdateSource.GetLatestVersion(AllowPrerelease);
+			if (LatestVersion == null) return null;
 
-			if (latestVersion.VersionNumber > CurrentVersion)
+			if (LatestVersion.Value.VersionNumber > CurrentVersion)
 			{
-				return latestVersion;
+				return LatestVersion;
 			}
 			return null;
 		}
