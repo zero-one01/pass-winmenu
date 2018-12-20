@@ -4,48 +4,30 @@
         Title="pass-winmenu (menu)"
         WindowStyle="None"
         ResizeMode="NoResize"
+        SizeToContent="Height"
         AllowsTransparency="True"
         x:ClassModifier="internal"
-        MouseWheel="OnMouseWheel"
-        >
+        MouseWheel="OnMouseWheel">
 	<Grid Name="Grid">
-		<TextBox x:Name="SearchBox"
-		         Margin="5,5,5,0"
-		         TextWrapping="NoWrap"
-		         Height="20"
-		         VerticalAlignment="Top"
-		         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
-		         TextChanged="SearchBox_OnTextChanged">
-			<TextBox.Style>
-				<Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-					<Style.Resources>
-						<VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-							<VisualBrush.Visual>
-								<Label Content="Search..." Foreground="LightGray" />
-							</VisualBrush.Visual>
-						</VisualBrush>
-					</Style.Resources>
-					<Style.Triggers>
-						<Trigger Property="Text" Value="{x:Static sys:String.Empty}">
-							<Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-						</Trigger>
-						<Trigger Property="Text" Value="{x:Null}">
-							<Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-						</Trigger>
-					</Style.Triggers>
-				</Style>
-			</TextBox.Style>
-		</TextBox>
-		<StackPanel Name="OptionsPanel"
-		            Margin="5,25,5,5"
-		            Orientation="Vertical">
-		</StackPanel>
+		<DockPanel Name="WindowDock" Margin="5,5,5,6">
+			<TextBox DockPanel.Dock="Top" x:Name="SearchBox"
+			         TextWrapping="NoWrap"
+			         Height="20"
+			         VerticalAlignment="Top"
+			         Padding="-1,0,0,0"
+			         PreviewKeyDown="SearchBox_OnPreviewKeyDown"
+			         TextChanged="SearchBox_OnTextChanged"
+			         >
+			</TextBox>
+			<StackPanel Name="OptionsPanel"
+			            Orientation="Vertical" />
+		</DockPanel>
 	</Grid>
 	<Window.Triggers>
 		<EventTrigger RoutedEvent="Window.Loaded">
 			<BeginStoryboard>
 				<Storyboard>
-					<DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" FillBehavior="HoldEnd"></DoubleAnimation>
+					<DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" FillBehavior="HoldEnd" />
 				</Storyboard>
 			</BeginStoryboard>
 		</EventTrigger>

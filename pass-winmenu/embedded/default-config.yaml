@@ -322,6 +322,7 @@ interface:
         font-family: 'Consolas'
         background-colour: '#FF202020'
         border-colour: '[accent]'
+        border-width: [1]
         caret-colour: '#FFDDDDDD'
         # Offset and dimensions of the menu.
         offset-left: 40%
@@ -334,19 +335,19 @@ interface:
             text-colour: '#FFDDDDDD'
             background-colour: '#00FFFFFF'
             border-colour: '#FF000000'
-            border-width: 0
+            border-width: [0, 0, 1, 0]
         # This determines the styling of all unselected options.
         options:
             text-colour: '#FFDDDDDD'
             background-colour: '#00FFFFFF'
             border-colour: '#FF000000'
-            border-width: 0
+            border-width: [0]
         # This determines the styling of the current selection.
         selection:
             text-colour: '#FFFFFFFF'
             background-colour: '[accent]'
             border-colour: '#FF000000'
-            border-width: 0
+            border-width: [0]
 
 # Used to determine whether a config upgrade is needed.
 # Do not change this value manually.

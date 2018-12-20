@@ -74,6 +74,7 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="Microsoft.CSharp" />
@@ -81,6 +82,7 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -101,6 +103,7 @@
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
     <Compile Include="src\Configuration\Classes\UpdateSource.cs" />
+    <Compile Include="src\Configuration\WidthConverter.cs" />
     <Compile Include="src\Configuration\LoadResult.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
@@ -189,6 +192,9 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\Windows\SelectionLabel.xaml.cs">
+      <DependentUpon>SelectionLabel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\Windows\SelectionWindowConfiguration.cs" />
     <Compile Include="src\Windows\PasswordSelectionWindow.cs" />
     <Compile Include="src\Windows\PasswordWindow.xaml.cs">
@@ -213,6 +219,10 @@
     <Page Include="src\Windows\PasswordWindow.xaml">
       <Generator>XamlIntelliSenseFileGenerator</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="src\Windows\SelectionLabel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="src\Windows\SelectionWindow.xaml">
       <Generator>XamlIntelliSenseFileGenerator</Generator>

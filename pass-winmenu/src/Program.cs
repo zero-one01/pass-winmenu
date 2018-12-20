@@ -254,9 +254,19 @@ namespace PassWinmenu
 			}
 			catch (Exception e) when (e.InnerException != null)
 			{
-				notificationService.ShowErrorWindow(
-					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
-					"Unable to load configuration file.");
+				if (e is YamlException)
+				{
+					notificationService.ShowErrorWindow(
+						$"The configuration file could not be loaded: {e.Message}\n\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
+						"Unable to load configuration file.");
+				}
+				else
+				{
+					notificationService.ShowErrorWindow(
+						$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
+						"Unable to load configuration file.");
+				}
+
 				Exit();
 				return;
 			}

@@ -23,7 +23,7 @@ namespace PassWinmenu.Windows
 			base.OnContentRendered(e);
 
 			var completions = autocomplete.GetCompletionList("");
-			RedrawLabels(completions);
+			ResetLabels(completions);
 		}
 
 		protected override void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -35,7 +35,7 @@ namespace PassWinmenu.Windows
 			{
 				completions.Insert(0, SearchBox.Text);
 			}
-			RedrawLabels(completions);
+			ResetLabels(completions);
 		}
 
 		protected override void HandleSelect()
