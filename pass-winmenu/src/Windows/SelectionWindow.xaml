@@ -1,4 +1,4 @@
-﻿<Window x:Class="PassWinmenu.Windows.SelectionWindow"
+<Window x:Class="PassWinmenu.Windows.SelectionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="pass-winmenu (menu)"
@@ -39,7 +39,6 @@
 		<StackPanel Name="OptionsPanel"
 		            Margin="5,25,5,5"
 		            Orientation="Vertical">
-
 		</StackPanel>
 	</Grid>
 	<Window.Triggers>

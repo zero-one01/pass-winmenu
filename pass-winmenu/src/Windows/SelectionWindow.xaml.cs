@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -18,14 +18,14 @@ namespace PassWinmenu.Windows
 	/// </summary>
 	internal abstract partial class SelectionWindow
 	{
-		private int scrollBoundary = 0;
+		private int scrollBoundary;
 		private int scrollOffset;
 		private List<string> optionStrings = new List<string>();
-		protected readonly List<Label> Options = new List<Label>();
+		protected readonly List<SelectionLabel> Options = new List<SelectionLabel>();
 		/// <summary>
 		/// The label that is currently selected.
 		/// </summary>
-		public Label Selected { get; protected set; }
+		public SelectionLabel Selected { get; protected set; }
 		/// <summary>
 		/// True if the user has chosen one of the options, false otherwise.
 		/// </summary>
@@ -33,6 +33,7 @@ namespace PassWinmenu.Windows
 
 		public string SearchHint { get; set; } = "Search...";
 
+		private bool tryRemainOnTop = false;
 
 		private bool isClosing;
 		private bool firstActivation = true;
@@ -51,7 +52,18 @@ namespace PassWinmenu.Windows
 			Matrix fromDevice;
 			using (var source = new HwndSource(new HwndSourceParameters()))
 			{
-				fromDevice = source.CompositionTarget.TransformFromDevice;
+				if (source.CompositionTarget == null)
+				{
+					// I doubt this path is ever triggered, but we'll handle it just in case.
+					Log.Send("Could not determine the composition target. Window may not be positioned and sized correctly.", LogLevel.Warning);
+					// We'll just use the identity matrix here.
+					// This works fine as long as the screen's DPI scaling is set to 100%.
+					fromDevice = Matrix.Identity;
+				}
+				else
+				{
+					fromDevice = source.CompositionTarget.TransformFromDevice;
+				}
 			}
 
 			var position = fromDevice.Transform(configuration.Position);
@@ -60,57 +72,72 @@ namespace PassWinmenu.Windows
 
 			var dimensions = fromDevice.Transform(configuration.Dimensions);
 			Width = dimensions.X;
-			Height = dimensions.Y;
+			MaxHeight = dimensions.Y;
 
 			InitializeComponent();
-			// Initialise the labels.
-			if (configuration.Orientation == Orientation.Horizontal)
-			{
-				OptionsPanel.Orientation = Orientation.Horizontal;
-			}
 
-			var panelHeight = Height - 30;
-			var labelHeight = CalculateLabelHeight();
-			
-			var labelCount = panelHeight / labelHeight;
-
-			if (true)
-			{
-				var usedHeight = ((int)labelCount) * labelHeight;
-				OptionsPanel.Height = usedHeight;
-			}
-
-			for (var i = 0; i < (int)labelCount; i++)
-			{
-				var label = CreateLabel($"label_{i}");
-				AddLabel(label);
-			}
+			InitialiseLabels(configuration.Orientation);
 
 			SearchBox.BorderBrush = Helpers.BrushFromColourString("#FFFF00FF");
 			SearchBox.CaretBrush = Helpers.BrushFromColourString(styleConfig.CaretColour);
 			SearchBox.Background = Helpers.BrushFromColourString(styleConfig.Search.BackgroundColour);
 			SearchBox.Foreground = Helpers.BrushFromColourString(styleConfig.Search.TextColour);
-			SearchBox.BorderThickness = new Thickness(styleConfig.Search.BorderWidth);
+			SearchBox.BorderThickness = styleConfig.Search.BorderWidth;
 			SearchBox.BorderBrush = Helpers.BrushFromColourString(styleConfig.Search.BorderColour);
 			SearchBox.FontSize = styleConfig.FontSize;
 			SearchBox.FontFamily = new FontFamily(styleConfig.FontFamily);
+			;
 
 			Background = Helpers.BrushFromColourString(styleConfig.BackgroundColour);
-
 			BorderBrush = Helpers.BrushFromColourString(styleConfig.BorderColour);
+			BorderThickness = styleConfig.BorderWidth;
 
-			BorderThickness = new Thickness(1);
 			TimerHelper.Current.TakeSnapshot("mainwnd-created");
 		}
 
-		protected override void OnInitialized(EventArgs e)
-		{
-			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-start");
 
-			base.OnInitialized(e);
-			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-base-end");
+		private void InitialiseLabels(Orientation orientation)
+		{
+			var labelCount = 10;
+			if (orientation == Orientation.Horizontal)
+			{
+				DockPanel.SetDock(SearchBox, Dock.Left);
+				OptionsPanel.Orientation = Orientation.Horizontal;
+			}
+			else
+			{
+				// First measure how high the search box wants to be.
+				SearchBox.Measure(new Size(double.MaxValue, double.MaxValue));
+				// Now find out how much space we have to lay out our labels.
+				var availableSpace = MaxHeight // Start with the maximum window height
+				                   - Padding.Top - Padding.Bottom // Subtract window padding
+				                   - WindowDock.Margin.Top - WindowDock.Margin.Bottom // Subtract window dock margin
+				                   - SearchBox.DesiredSize.Height // Subtract size of the search box
+				                   - OptionsPanel.Margin.Top - OptionsPanel.Margin.Bottom; // Subtract the margins of the options panel
+
+				var labelHeight = CalculateLabelHeight();
+
+				var labelFit = availableSpace / labelHeight;
+				labelCount = (int)labelFit;
+
+				if (!styleConfig.ScaleToFit)
+				{
+					var remainder = (labelFit - labelCount) * labelHeight;
+					Log.Send($"Max height: {MaxHeight:F}, Available for labels: {availableSpace:F}, Total used by labels: {labelCount * labelHeight:F}, Remainder: {remainder:F}");
+					//MinHeight = MaxHeight;
+				}
+			}
+
+			for (var i = 0; i < labelCount; i++)
+			{
+				var label = CreateLabel($"label_{i}");
+				AddLabel(label);
+			}
 		}
 
+		/// <summary>
+		/// Generates a dummy label to measure how high it wants to be.
+		/// </summary>
 		private double CalculateLabelHeight()
 		{
 			var sizeTest = CreateLabel("size-test");
@@ -119,35 +146,45 @@ namespace PassWinmenu.Windows
 			return labelHeight;
 		}
 
+		protected override void OnInitialized(EventArgs e)
+		{
+			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-start");
+			base.OnInitialized(e);
+			TimerHelper.Current.TakeSnapshot("mainwnd-oninitialized-base-end");
+		}
+
 		/// <summary>
 		/// Handles text input in the textbox.
 		/// </summary>
 		protected abstract void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e);
 
 		/// <summary>
-		/// Redraws the labels, using the given strings.
+		/// Resets the labels to the given option strings, and scrolls back to the top.
 		/// </summary>
-		/// <param name="options"></param>
-		protected void RedrawLabels(IEnumerable<string> options)
+		protected void ResetLabels(IEnumerable<string> options)
 		{
 			scrollOffset = 0;
 			optionStrings = options.ToList();
-			RedrawLabelsInternal(optionStrings);
+			SetLabelContents(optionStrings);
 		}
 
-		private void RedrawLabelsInternal(List<string> values)
+		/// <summary>
+		/// Sets the contents of the labels to the given values,
+		/// hiding any labels that did not receive a value.
+		/// </summary>
+		private void SetLabelContents(List<string> values)
 		{
 			SelectFirst();
 			for (var i = 0; i < Options.Count; i++)
 			{
-				if (values.Count <= i)
+				if (values.Count > i)
 				{
-					Options[i].Visibility = Visibility.Hidden;
+					Options[i].Visibility = Visibility.Visible;
+					Options[i].Text = values[i];
 				}
 				else
 				{
-					Options[i].Visibility = Visibility.Visible;
-					Options[i].Content = values[i];
+					Options[i].Visibility = Visibility.Hidden;
 				}
 			}
 		}
@@ -156,7 +193,7 @@ namespace PassWinmenu.Windows
 		/// Selects a label; deselecting the previously selected label.
 		/// </summary>
 		/// <param name="label">The label to be selected. If this value is null, the selected label will not be changed.</param>
-		protected void Select(Label label)
+		protected void Select(SelectionLabel label)
 		{
 			if (label == null) return;
 
@@ -164,12 +201,11 @@ namespace PassWinmenu.Windows
 			{
 				Selected.Background = Helpers.BrushFromColourString(styleConfig.Options.BackgroundColour);
 				Selected.Foreground = Helpers.BrushFromColourString(styleConfig.Options.TextColour);
-				Selected.BorderThickness = new Thickness(styleConfig.Options.BorderWidth);
+				// TODO: Handle border width / colour
 			}
 			Selected = label;
 			Selected.Background = Helpers.BrushFromColourString(styleConfig.Selection.BackgroundColour);
 			Selected.Foreground = Helpers.BrushFromColourString(styleConfig.Selection.TextColour);
-			Selected.BorderThickness = new Thickness(styleConfig.Selection.BorderWidth);
 		}
 
 		/// <summary>
@@ -178,21 +214,16 @@ namespace PassWinmenu.Windows
 		/// <returns></returns>
 		public string GetSelection()
 		{
-			return (string)Selected.Content;
+			return Selected.Text;
 		}
 
-		protected Label CreateLabel(string content)
+		protected SelectionLabel CreateLabel(string content)
 		{
-			var label = new Label
-			{
-				Content = content,
-				FontSize = styleConfig.FontSize,
-				FontFamily = new FontFamily(styleConfig.FontFamily),
-				Background = Helpers.BrushFromColourString(styleConfig.Options.BackgroundColour),
-				Foreground = Helpers.BrushFromColourString(styleConfig.Options.TextColour),
-				Padding = new Thickness(0, 0, 0, 2),
-				Cursor = Cursors.Hand
-			};
+			var label = new SelectionLabel(content,
+			                               styleConfig.Options,
+			                               styleConfig.FontSize,
+			                               new FontFamily(styleConfig.FontFamily));
+
 			label.MouseLeftButtonUp += (sender, args) =>
 			{
 				if (label == Selected)
@@ -210,7 +241,7 @@ namespace PassWinmenu.Windows
 			return label;
 		}
 
-		protected void AddLabel(Label label)
+		protected void AddLabel(SelectionLabel label)
 		{
 			Options.Add(label);
 			OptionsPanel.Children.Add(label);
@@ -236,7 +267,7 @@ namespace PassWinmenu.Windows
 		protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
 		{
 			base.OnLostKeyboardFocus(e);
-			if (!isClosing) Activate();
+			if (!isClosing && tryRemainOnTop) Activate();
 		}
 
 		protected override void OnClosing(CancelEventArgs e)
@@ -250,7 +281,7 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		/// <param name="index">The position in the label list where searching should begin.</param>
 		/// <returns>The first label matching this condition, or null if no matching labels were found.</returns>
-		private Label FindPrevious(int index)
+		private SelectionLabel FindPrevious(int index)
 		{
 			var previous = index - 1;
 			if (previous >= 0)
@@ -269,7 +300,7 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		/// <param name="index">The position in the label list where searching should begin.</param>
 		/// <returns>The first label matching this condition, or null if no matching labels were found.</returns>
-		private Label FindNext(int index)
+		private SelectionLabel FindNext(int index)
 		{
 			var next = index + 1;
 			if (next < Options.Count)
@@ -289,7 +320,7 @@ namespace PassWinmenu.Windows
 			SearchBox.CaretIndex = text.Length;
 		}
 
-		protected virtual void HandleSelectionChange(Label selection) { }
+		protected virtual void HandleSelectionChange(SelectionLabel selection) { }
 
 
 		protected abstract void HandleSelect();
@@ -323,7 +354,7 @@ namespace PassWinmenu.Windows
 				{
 					scrollOffset += 1;
 					var current = Selected;
-					RedrawLabelsInternal(optionStrings.Skip(scrollOffset).ToList());
+					SetLabelContents(optionStrings.Skip(scrollOffset).ToList());
 					Select(current);
 				}
 
@@ -348,7 +379,7 @@ namespace PassWinmenu.Windows
 				{
 					scrollOffset -= 1;
 					var current = Selected;
-					RedrawLabelsInternal(optionStrings.Skip(scrollOffset).ToList());
+					SetLabelContents(optionStrings.Skip(scrollOffset).ToList());
 					Select(current);
 				}
 

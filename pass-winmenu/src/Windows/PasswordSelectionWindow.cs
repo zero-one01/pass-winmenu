@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace PassWinmenu.Windows
 		public PasswordSelectionWindow(IEnumerable<string> options, SelectionWindowConfiguration configuration) : base(configuration)
 		{
 			this.options = options.ToList();
-			RedrawLabels(this.options);
+			ResetLabels(this.options);
 		}
 
 		protected override void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -39,7 +39,7 @@ namespace PassWinmenu.Windows
 					return false;
 				});
 			});
-			RedrawLabels(matching);
+			ResetLabels(matching);
 		}
 
 		protected override void HandleSelect()
