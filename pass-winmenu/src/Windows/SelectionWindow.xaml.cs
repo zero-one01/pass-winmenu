@@ -86,7 +86,6 @@ namespace PassWinmenu.Windows
 			SearchBox.BorderBrush = Helpers.BrushFromColourString(styleConfig.Search.BorderColour);
 			SearchBox.FontSize = styleConfig.FontSize;
 			SearchBox.FontFamily = new FontFamily(styleConfig.FontFamily);
-			;
 
 			Background = Helpers.BrushFromColourString(styleConfig.BackgroundColour);
 			BorderBrush = Helpers.BrushFromColourString(styleConfig.BorderColour);
@@ -112,7 +111,7 @@ namespace PassWinmenu.Windows
 				var availableSpace = MaxHeight // Start with the maximum window height
 				                   - Padding.Top - Padding.Bottom // Subtract window padding
 				                   - WindowDock.Margin.Top - WindowDock.Margin.Bottom // Subtract window dock margin
-				                   - SearchBox.DesiredSize.Height // Subtract size of the search box
+				                   - SearchBox.DesiredSize.Height // Subtract size of the search box (includes margins)
 				                   - OptionsPanel.Margin.Top - OptionsPanel.Margin.Bottom; // Subtract the margins of the options panel
 
 				var labelHeight = CalculateLabelHeight();
