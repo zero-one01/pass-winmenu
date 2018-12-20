@@ -78,17 +78,17 @@ namespace PassWinmenu.Windows
 
 			InitialiseLabels(configuration.Orientation);
 
-			SearchBox.BorderBrush = Helpers.BrushFromColourString("#FFFF00FF");
-			SearchBox.CaretBrush = Helpers.BrushFromColourString(styleConfig.CaretColour);
-			SearchBox.Background = Helpers.BrushFromColourString(styleConfig.Search.BackgroundColour);
-			SearchBox.Foreground = Helpers.BrushFromColourString(styleConfig.Search.TextColour);
+			SearchBox.BorderBrush = styleConfig.Search.BorderColour;
+			SearchBox.CaretBrush = styleConfig.CaretColour;
+			SearchBox.Background = styleConfig.Search.BackgroundColour;
+			SearchBox.Foreground = styleConfig.Search.TextColour;
+			SearchBox.Margin = styleConfig.Search.Margin;
 			SearchBox.BorderThickness = styleConfig.Search.BorderWidth;
-			SearchBox.BorderBrush = Helpers.BrushFromColourString(styleConfig.Search.BorderColour);
 			SearchBox.FontSize = styleConfig.FontSize;
 			SearchBox.FontFamily = new FontFamily(styleConfig.FontFamily);
 
-			Background = Helpers.BrushFromColourString(styleConfig.BackgroundColour);
-			BorderBrush = Helpers.BrushFromColourString(styleConfig.BorderColour);
+			Background = styleConfig.BackgroundColour;
+			BorderBrush = styleConfig.BorderColour;
 			BorderThickness = styleConfig.BorderWidth;
 
 			TimerHelper.Current.TakeSnapshot("mainwnd-created");
@@ -198,13 +198,13 @@ namespace PassWinmenu.Windows
 
 			if (Selected != null)
 			{
-				Selected.Background = Helpers.BrushFromColourString(styleConfig.Options.BackgroundColour);
-				Selected.Foreground = Helpers.BrushFromColourString(styleConfig.Options.TextColour);
+				Selected.Background = styleConfig.Options.BackgroundColour;
+				Selected.Foreground = styleConfig.Options.TextColour;
 				// TODO: Handle border width / colour
 			}
 			Selected = label;
-			Selected.Background = Helpers.BrushFromColourString(styleConfig.Selection.BackgroundColour);
-			Selected.Foreground = Helpers.BrushFromColourString(styleConfig.Selection.TextColour);
+			Selected.Background = styleConfig.Selection.BackgroundColour;
+			Selected.Foreground = styleConfig.Selection.TextColour;
 		}
 
 		/// <summary>

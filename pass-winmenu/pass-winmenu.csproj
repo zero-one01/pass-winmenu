@@ -100,6 +100,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\Actions\ActionDispatcher.cs" />
+    <Compile Include="src\Configuration\BrushConverter.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
     <Compile Include="src\Configuration\Classes\UpdateSource.cs" />

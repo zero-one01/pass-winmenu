@@ -36,13 +36,13 @@ namespace PassWinmenu.Windows
 			InitializeComponent();
 
 			LabelBorder.BorderThickness = labelStyle.BorderWidth;
-			LabelBorder.BorderBrush = Helpers.BrushFromColourString(labelStyle.BorderColour);
-			Background = Helpers.BrushFromColourString(labelStyle.BackgroundColour);
+			LabelBorder.BorderBrush = labelStyle.BorderColour;
+			Background = labelStyle.BackgroundColour;
 
 			LabelText.Text = content;
 			LabelText.FontSize = fontSize;
 			LabelText.FontFamily = fontFamily;
-			LabelText.Foreground = Helpers.BrushFromColourString(labelStyle.TextColour);
+			LabelText.Foreground = labelStyle.TextColour;
 			Cursor = Cursors.Hand;
 		}
 	}

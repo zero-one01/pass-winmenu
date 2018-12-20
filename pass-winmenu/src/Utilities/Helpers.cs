@@ -128,7 +128,7 @@ namespace PassWinmenu.Utilities
 			{
 				return SystemParameters.WindowGlassBrush;
 			}
-			return new SolidColorBrush(Helpers.ColourFromString(colour));
+			return new SolidColorBrush(ColourFromString(colour));
 		}
 
 		/// <summary>

@@ -75,8 +75,9 @@ namespace PassWinmenu.Configuration
 		private static IDeserializer BuildDeserialiser()
 		{
 			var builder = new DeserializerBuilder()
-			              .WithNamingConvention(new HyphenatedNamingConvention())
-			              .WithTypeConverter(new WidthConverter());
+				.WithNamingConvention(new HyphenatedNamingConvention())
+				.WithTypeConverter(new WidthConverter())
+				.WithTypeConverter(new BrushConverter());
 			return builder.Build();
 		}
 
