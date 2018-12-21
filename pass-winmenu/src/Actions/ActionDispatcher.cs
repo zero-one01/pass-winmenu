@@ -167,7 +167,7 @@ namespace PassWinmenu.Actions
 				else
 				{
 					notificationService.Raise($"No new updates available (latest available version is " +
-					                          $"{latest.Value.VersionNumber.ToString(SemanticVersionFormat.PrefixedDefault)}).",
+					                          $"{latest.Value}).",
 					                          Severity.Info);
 				}
 

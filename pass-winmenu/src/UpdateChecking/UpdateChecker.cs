@@ -75,7 +75,7 @@ namespace PassWinmenu.UpdateChecking
 			var update = GetUpdate();
 			if (update == null)
 			{
-				Log.Send("No update found.", LogLevel.Debug);
+				Log.Send($"No update found (latest version is {LatestVersion}).", LogLevel.Debug);
 				return false;
 			}
 

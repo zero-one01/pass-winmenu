@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,5 +19,10 @@ namespace PassWinmenu.UpdateChecking
 		/// True if the update to this version includes one or more important vulnerability fixes.
 		/// </summary>
 		public bool Important { get; set; }
+
+		public override string ToString()
+		{
+			return VersionNumber.ToString(SemanticVersionFormat.PrefixedDefault);
+		}
 	}
 }

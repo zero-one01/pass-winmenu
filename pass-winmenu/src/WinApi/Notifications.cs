@@ -152,7 +152,7 @@ namespace PassWinmenu.WinApi
 		{
 			Helpers.AssertOnUiThread();
 
-			downloadUpdate.Text += $" ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)})";
+			downloadUpdate.Text += $" ({args.Version})";
 			downloadUpdate.Visible = true;
 			downloadSeparator.Visible = true;
 
@@ -160,17 +160,17 @@ namespace PassWinmenu.WinApi
 			    (ConfigManager.Config.Notifications.Types.UpdateAvailable ||
 			     ConfigManager.Config.Notifications.Types.ImportantUpdateAvailable))
 			{
-				Raise($"An important vulnerability fix ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)}) is available. Check the release for more information.", Severity.Info);
+				Raise($"An important vulnerability fix ({args.Version}) is available. Check the release for more information.", Severity.Info);
 			}
 			else if (ConfigManager.Config.Notifications.Types.UpdateAvailable)
 			{
 				if (args.Version.IsPrerelease)
 				{
-					Raise($"A new pre-release ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)}) is available.", Severity.Info);
+					Raise($"A new pre-release ({args.Version}) is available.", Severity.Info);
 				}
 				else
 				{
-					Raise($"A new update ({args.Version.VersionNumber.ToString(SemanticVersionFormat.PrefixedConcise)}) is available.", Severity.Info);
+					Raise($"A new update ({args.Version}) is available.", Severity.Info);
 				}
 			}
 		}
