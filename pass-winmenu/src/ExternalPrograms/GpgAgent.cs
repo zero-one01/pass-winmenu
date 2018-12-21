@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -171,7 +171,7 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			else
 			{
-				Log.Send("Modifying GPG agent config file.");
+				Log.Send($"Modifying GPG agent config file ({string.Join(", ", keys.Keys)})");
 				File.WriteAllLines(agentConf, newLines);
 			}
 		}
