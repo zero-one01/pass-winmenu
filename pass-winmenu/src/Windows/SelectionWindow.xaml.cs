@@ -18,9 +18,14 @@ namespace PassWinmenu.Windows
 	/// </summary>
 	internal abstract partial class SelectionWindow
 	{
-		private int scrollBoundary;
+		private readonly int scrollBoundary;
+		private readonly StyleConfig styleConfig;
 		private int scrollOffset;
+		private bool isClosing;
+		private bool tryRemainOnTop = true;
+		private bool firstActivation = true;
 		private List<string> optionStrings = new List<string>();
+
 		protected readonly List<SelectionLabel> Options = new List<SelectionLabel>();
 		/// <summary>
 		/// The label that is currently selected.
@@ -31,13 +36,8 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		public bool Success { get; protected set; }
 
+		// TODO: either use this or remove it
 		public string SearchHint { get; set; } = "Search...";
-
-		private bool tryRemainOnTop = false;
-
-		private bool isClosing;
-		private bool firstActivation = true;
-		private readonly StyleConfig styleConfig;
 
 		/// <summary>
 		/// Initialises the window with the provided options.
@@ -173,11 +173,18 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		private void SetLabelContents(List<string> values)
 		{
-			SelectFirst();
+			// First unset our selection.
+			UnselectCurrent();
 			for (var i = 0; i < Options.Count; i++)
 			{
 				if (values.Count > i)
 				{
+					// Only select a label if we've supplied one or more values,
+					// and only if it's the first label.
+					if (i == 0)
+					{
+						SelectFirst();
+					}
 					Options[i].Visibility = Visibility.Visible;
 					Options[i].Text = values[i];
 				}
@@ -200,13 +207,26 @@ namespace PassWinmenu.Windows
 			{
 				Selected.Background = styleConfig.Options.BackgroundColour;
 				Selected.Foreground = styleConfig.Options.TextColour;
-				// TODO: Handle border width / colour
+				Selected.LabelBorder.BorderBrush = styleConfig.Options.BorderColour;
+				Selected.LabelBorder.BorderThickness = styleConfig.Options.BorderWidth;
 			}
 			Selected = label;
 			Selected.Background = styleConfig.Selection.BackgroundColour;
 			Selected.Foreground = styleConfig.Selection.TextColour;
+			Selected.LabelBorder.BorderBrush = styleConfig.Selection.BorderColour;
+			Selected.LabelBorder.BorderThickness = styleConfig.Selection.BorderWidth;
 		}
 
+		private void UnselectCurrent()
+		{
+			if (Selected == null) return;
+			Selected.Background = styleConfig.Options.BackgroundColour;
+			Selected.Foreground = styleConfig.Options.TextColour;
+			Selected.LabelBorder.BorderBrush = styleConfig.Options.BorderColour;
+			Selected.LabelBorder.BorderThickness = styleConfig.Options.BorderWidth;
+			Selected = null;
+		}
+		
 		/// <summary>
 		/// Returns the text on the currently selected label.
 		/// </summary>
