@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Windows;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -27,7 +28,14 @@ namespace PassWinmenu.Configuration
 				// Wait a moment to allow the writing process to close the file.
 				Thread.Sleep(500);
 				Log.Send($"Configuration file changed (change type: {args.ChangeType}), attempting reload.");
-				Reload(fileName);
+
+				// This needs to be done on the main thread reloading the configuration file
+				// involves creating UI resources (Brush/Thickness) that need to be created
+				// on the same thread as the thread that will apply those resources to the interface.
+				Application.Current.Dispatcher.Invoke(() =>
+				{
+					Reload(fileName);
+				});
 			};
 		}
 
