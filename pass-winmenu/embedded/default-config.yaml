@@ -191,7 +191,7 @@ output:
 #      - copy-to-clipboard: (true/false)
 #        Copy the value of the field to the clipboard.
 #      - field-name: <fieldname>
-#        Name of the field to decrypt. If this is left empty, you will be
+#        Name of the field to decrypt. If this is not specified, you will be
 #        prompted with a menu where you can choose the correct field.
 #      - type: (true/false)
 #        Type the value of the field into the topmost window.
