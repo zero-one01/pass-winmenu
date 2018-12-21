@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -16,12 +14,6 @@ namespace PassWinmenu.Windows
 		{
 			this.baseDirectory = baseDirectory;
 			autocomplete = new DirectoryAutocomplete(baseDirectory);
-		}
-		
-		protected override void OnContentRendered(EventArgs e)
-		{
-			base.OnContentRendered(e);
-
 			var completions = autocomplete.GetCompletionList("");
 			ResetLabels(completions);
 		}
