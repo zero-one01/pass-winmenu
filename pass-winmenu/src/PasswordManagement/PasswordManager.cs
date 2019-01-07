@@ -43,6 +43,10 @@ namespace PassWinmenu.PasswordManagement
 		public PasswordFile EncryptPassword(DecryptedPasswordFile file, bool overwrite)
 		{
 			file.Directory.Create();
+			if (overwrite && file.FileInfo.Exists)
+			{
+				file.FileInfo.Delete();
+			}
 			Crypto.Encrypt(file.Content, file.FullPath, GetGpgIds(file.FullPath));
 			return new PasswordFile(file.PasswordStore, file.RelativePath);
 		}

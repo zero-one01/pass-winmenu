@@ -10,23 +10,29 @@ namespace PassWinmenu.PasswordManagement
 		/// Represents the root password store directory this file lives in.
 		/// </summary>
 		public DirectoryInfo PasswordStore { get; }
+
 		/// <summary>
 		/// Represents the directory containing the password file.
 		/// </summary>
-		public DirectoryInfo Directory { get; }
+		public DirectoryInfo Directory => FileInfo.Directory;
+		/// <summary>
+		/// A <see cref="FileInfo"/> instance representing the password file.
+		/// </summary>
+		public FileInfo FileInfo { get; set; }
 		/// <summary>
 		/// Represents the path to the file, relative to the root of the password store.
 		/// </summary>
 		public string RelativePath { get; }
+
 		/// <summary>
 		/// The full path to this file.
 		/// </summary>
-		public string FullPath { get; }
+		public string FullPath => FileInfo.FullName;
 
 		/// <summary>
 		/// The name of the password file, including its extension.
 		/// </summary>
-		public string FileName => Path.GetFileName(FullPath);
+		public string FileName => FileInfo.Name;
 
 		/// <summary>
 		/// The base name of the password file, without its extension.
@@ -45,7 +51,7 @@ namespace PassWinmenu.PasswordManagement
 			{
 				throw new ArgumentNullException(nameof(path));
 			}
-
+			
 			if (Path.IsPathRooted(path))
 			{
 				RelativePath = Helpers.GetRelativePath(path, passwordStore.FullName);
@@ -54,13 +60,13 @@ namespace PassWinmenu.PasswordManagement
 			{
 				RelativePath = path;
 			}
-			FullPath = Path.Combine(PasswordStore.FullName, RelativePath);
-			var directory = Path.GetDirectoryName(FullPath);
-			if (directory == null)
+			var fullPath = Path.Combine(PasswordStore.FullName, RelativePath);
+
+			if (Path.GetDirectoryName(fullPath) == null)
 			{
 				throw new ArgumentException("Invalid password store path.");
 			}
-			Directory = new DirectoryInfo(directory);
+			FileInfo = new FileInfo(fullPath);
 		}
 	}
 }
