@@ -200,19 +200,6 @@ namespace PassWinmenu.ExternalPrograms
 			return result.Stdout;
 		}
 
-		/// <summary>
-		/// Decrypt a file to a plaintext file with GPG.
-		/// </summary>
-		/// <param name="encryptedFile">The path to the file to be decrypted.</param>
-		/// <param name="outputFile">The path where the decrypted file should be placed.</param>
-		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
-		public void DecryptToFile(string encryptedFile, string outputFile)
-		{
-			gpgAgent?.EnsureAgentResponsive();
-			var result = CallGpg($"--output \"{outputFile}\" --decrypt \"{encryptedFile}\"");
-			VerifyDecryption(result);
-		}
-
 		private void VerifyDecryption(GpgResult result)
 		{
 			if (result.HasStatusCodes(GpgStatusCode.FAILURE, GpgStatusCode.NODATA))
@@ -275,23 +262,6 @@ namespace PassWinmenu.ExternalPrograms
 			var recipientList = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 
 			var result = CallGpg($"--output \"{outputFile}\" {recipientList} --encrypt", data);
-			VerifyEncryption(result);
-		}
-
-		/// <summary>
-		/// Encrypt a file with GPG.
-		/// </summary>
-		/// <param name="inputFile">The path to the file to be encrypted.</param>
-		/// <param name="outputFile">The path to the output file.</param>
-		/// <param name="recipients">An array of GPG ids for which the file should be encrypted.</param>
-		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
-		public void EncryptFile(string inputFile, string outputFile, params string[] recipients)
-		{
-			if (recipients == null) recipients = new string[0];
-			var recipientList = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
-
-			var result = CallGpg($"--output \"{outputFile}\" {recipientList} --encrypt \"{inputFile}\"");
-			result.EnsureNonZeroExitCode();
 			VerifyEncryption(result);
 		}
 
