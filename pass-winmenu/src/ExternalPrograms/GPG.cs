@@ -134,7 +134,7 @@ namespace PassWinmenu.ExternalPrograms
 				// Explicitly define the encoding to not send a BOM, to ensure other platforms can handle our output.
 				using (var writer = new StreamWriter(gpgProc.StandardInput.BaseStream, new UTF8Encoding(false)))
 				{
-					writer.WriteLine(input);
+					writer.Write(input);
 					writer.Flush();
 					writer.Close();
 				}
