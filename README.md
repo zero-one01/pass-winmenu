@@ -6,7 +6,7 @@ Pass-winmenu follows the philosophy of (and is compatible with) the Linux passwo
 
 ---
 
-At request I've added a donation link. Donations will go to acquiring a code signing certificate; to verify the authenticity of downloads as well as allowing Windows Defender to eventually start trusting the application.
+At request I've added a donation link. Donations will go to acquiring a code signing certificate; for verifying downloads and allowing Windows Defender to eventually start trusting the application.
 
 [![Donation button](https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X46C4FW3NQAYS&source=url)
 
