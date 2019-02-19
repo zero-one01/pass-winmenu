@@ -108,7 +108,7 @@ namespace PassWinmenu
 			dialogCreator = new DialogCreator(notificationService, passwordManager, git, gpg);
 			InitialiseUpdateChecker();
 
-			actionDispatcher = new ActionDispatcher(notificationService, passwordManager, dialogCreator, clipboard, git, updateChecker);
+			actionDispatcher = new ActionDispatcher(notificationService, dialogCreator, git, updateChecker);
 
 			notificationService.AddMenuActions(actionDispatcher);
 

@@ -15,23 +15,17 @@ namespace PassWinmenu.Actions
 	class ActionDispatcher
 	{
 		private readonly INotificationService notificationService;
-		private readonly IPasswordManager passwordManager;
 		private readonly DialogCreator dialogCreator;
-		private readonly ClipboardHelper clipboard;
 		private readonly ISyncService syncService;
 		private readonly UpdateChecker updateChecker;
 
 		public ActionDispatcher(INotificationService notificationService,
-		                        IPasswordManager     passwordManager,
 		                        DialogCreator        dialogCreator,
-		                        ClipboardHelper      clipboard,
 		                        ISyncService         syncService,
 		                        UpdateChecker        updateChecker)
 		{
 			this.notificationService = notificationService;
-			this.passwordManager = passwordManager;
 			this.dialogCreator = dialogCreator;
-			this.clipboard = clipboard;
 			this.syncService = syncService;
 			this.updateChecker = updateChecker;
 		}
