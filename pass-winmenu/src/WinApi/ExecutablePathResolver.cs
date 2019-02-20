@@ -8,12 +8,6 @@ namespace PassWinmenu.WinApi
 		private readonly IFileSystem fileSystem;
 		private readonly IEnvironment environment;
 
-		public ExecutablePathResolver()
-		{
-			fileSystem  = new FileSystem();
-			environment = new SystemEnvironment();
-		}
-
 		public ExecutablePathResolver(IFileSystem fileSystem, IEnvironment environment)
 		{
 			this.fileSystem = fileSystem;

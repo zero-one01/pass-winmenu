@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -91,7 +92,7 @@ namespace PassWinmenu
 			LoadConfigFile();
 
 			// Create the GPG wrapper.
-			gpg = new GPG(new ExecutablePathResolver());
+			gpg = new GPG(new ExecutablePathResolver(new FileSystem(), new SystemEnvironment()));
 			gpg.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{
