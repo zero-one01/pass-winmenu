@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
@@ -15,12 +16,13 @@ namespace PassWinmenu.WinApi
 
 		public ExecutablePathResolverTests()
 		{
-			fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+			var mockFs = new MockFileSystem(new Dictionary<string, MockFileData>
 			{
 				{ "C:\\file.exe", new MockFileData("") },
 				{ "C:\\bin\\file.exe", new MockFileData("") }
 			},
 			"C:\\program");
+			fileSystem = mockFs;
 		}
 
 		[TestMethod, TestCategory(Category)]
@@ -100,6 +102,47 @@ namespace PassWinmenu.WinApi
 
 			Assert.ThrowsException<ExecutableNotFoundException>(() => resolver.Resolve("file.exe"));
 			environment.Verify(e => e.GetEnvironmentVariable("PATH"), Times.Once);
+		}
+
+		[TestMethod, TestCategory(Category)]
+		public void Resolve_WithEmptyPath_ThrowsExecutableNotFoundException()
+		{
+			var environment = new Mock<IEnvironment>();
+			environment.Setup(e => e.GetEnvironmentVariable("PATH")).Returns("");
+			var resolver = new ExecutablePathResolver(fileSystem, environment.Object);
+
+			Assert.ThrowsException<ExecutableNotFoundException>(() => resolver.Resolve("file.exe"));
+		}
+
+		[TestMethod, TestCategory(Category)]
+		public void Resolve_WithInvalidPathEntries_IgnoresThem()
+		{
+			var environment = new Mock<IEnvironment>();
+			environment.Setup(e => e.GetEnvironmentVariable("PATH"))
+				.Returns(@";?;;;/bin;  ;%;'';\\invalidNetworkShare;");
+			var resolver = new ExecutablePathResolver(fileSystem, environment.Object);
+
+			var location = resolver.Resolve($"file.exe");
+
+			Assert.AreEqual("C:\\bin\\file.exe", location);
+		}
+
+		[TestMethod, TestCategory(Category)]
+		public void Resolve_GetFullPathFails_IgnoresEntry()
+		{
+			var environment = new Mock<IEnvironment>();
+			environment.Setup(e => e.GetEnvironmentVariable("PATH"))
+				.Returns(@"fail;/bin");
+			var fileSystemMock = new Mock<IFileSystem>();
+			fileSystemMock.Setup(f => f.Path.GetFullPath("/bin")).Returns("C:\\bin");
+			fileSystemMock.Setup(f => f.Path.GetFullPath("fail")).Throws<Exception>();
+			fileSystemMock.Setup(f => f.Path.Combine("C:\\bin", "file.exe")).Returns("C:\\bin\\file.exe");
+			fileSystemMock.Setup(f => f.File.Exists(It.IsAny<string>())).Returns(true);
+			var resolver = new ExecutablePathResolver(fileSystemMock.Object, environment.Object);
+
+			var location = resolver.Resolve($"file.exe");
+
+			Assert.AreEqual("C:\\bin\\file.exe", location);
 		}
 	}
 }

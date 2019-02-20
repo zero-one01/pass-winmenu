@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
 
@@ -49,8 +51,7 @@ namespace PassWinmenu.WinApi
 				throw new ExecutableNotFoundException("PATH appears to be empty.");
 			}
 
-			var directories = path.Split(';').Select(p => fileSystem.Path.GetFullPath(p.Trim()));
-
+			var directories = ParsePathList(path);
 			foreach (var dir in directories)
 			{
 				var nameToTest = fileSystem.Path.Combine(dir, fileName);
@@ -58,6 +59,34 @@ namespace PassWinmenu.WinApi
 			}
 
 			throw new ExecutableNotFoundException("Executable not found in PATH.");
+		}
+
+		private IEnumerable<string> ParsePathList(string pathList)
+		{
+			var invalidPathChars = fileSystem.Path.GetInvalidPathChars();
+			foreach (var path in pathList.Split(';'))
+			{
+				if (string.IsNullOrWhiteSpace(path)) continue;
+
+				if (path.Any(c => invalidPathChars.Contains(c)))
+				{
+					Log.Send($"PATH location \"{path}\" contains invalid characters.", LogLevel.Warning);
+					continue;
+				}
+
+				string fullPath;
+				try
+				{
+					fullPath = fileSystem.Path.GetFullPath(path);
+				}
+				catch (Exception e)
+				{
+					Log.Send($"PATH location \"{path}\" appears to be invalid ({e.GetType().Name}: {e.Message}).", LogLevel.Warning);
+					continue;
+				}
+
+				yield return fullPath;
+			}
 		}
 	}
 }
