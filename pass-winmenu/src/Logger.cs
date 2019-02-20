@@ -37,8 +37,11 @@ namespace PassWinmenu
 		static Log()
 		{
 			AppDomain.CurrentDomain.UnhandledException += ReportException;
-			Application.Current.DispatcherUnhandledException += ReportDispatcherException;
 			TaskScheduler.UnobservedTaskException += ReportTaskSchedulerException;
+			if (Application.Current != null)
+			{
+				Application.Current.DispatcherUnhandledException += ReportDispatcherException;
+			}
 		}
 
 		public static void EnableFileLogging()
