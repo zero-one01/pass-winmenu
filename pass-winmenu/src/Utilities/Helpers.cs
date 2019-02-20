@@ -115,6 +115,7 @@ namespace PassWinmenu.Utilities
 			}
 		}
 
+		[Serializable]
 		class NotOnUiThreadException : Exception
 		{
 			public NotOnUiThreadException(string message) : base(message)

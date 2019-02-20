@@ -54,6 +54,8 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>true</DebugSymbols>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>embedded\pass-winmenu.ico</ApplicationIcon>
@@ -103,6 +105,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="src\Actions\ActionDispatcher.cs" />
     <Compile Include="src\Configuration\BrushConverter.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
@@ -110,6 +113,11 @@
     <Compile Include="src\Configuration\Classes\UpdateSource.cs" />
     <Compile Include="src\Configuration\WidthConverter.cs" />
     <Compile Include="src\Configuration\LoadResult.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgError.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgException.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgResult.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgStatusCode.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\StatusMessage.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
@@ -148,7 +156,7 @@
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
-    <Compile Include="src\ExternalPrograms\GpgAgent.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgAgent.cs" />
     <Compile Include="src\ExternalPrograms\ICryptoService.cs" />
     <Compile Include="src\Hotkeys\Hotkey.cs" />
     <Compile Include="src\Hotkeys\HotkeyRegistrars.KeyEventSource.cs" />
@@ -183,7 +191,7 @@
     <Compile Include="src\Configuration\ConfigManager.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\ScreenExtensions.cs" />
     <Compile Include="src\ExternalPrograms\Git.cs" />
-    <Compile Include="src\ExternalPrograms\GPG.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GPG.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\EmbeddedResources.cs" />
     <Compile Include="src\StartupLink.cs" />

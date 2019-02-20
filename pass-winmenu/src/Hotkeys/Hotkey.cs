@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Linq;
@@ -396,13 +396,7 @@ namespace PassWinmenu.Hotkeys
 		public static IHotkeyRegistrar DefaultRegistrar
 		{
 			get => _defaultRegistrar;
-			set
-			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
-				_defaultRegistrar = value;
-			}
+			set => _defaultRegistrar = value ?? throw new ArgumentNullException(nameof(value));
 		}
 
 

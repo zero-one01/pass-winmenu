@@ -20,9 +20,11 @@ namespace PassWinmenu.Configuration
 
 		public static void EnableAutoReloading(string fileName)
 		{
-			watcher = new FileSystemWatcher(Path.GetDirectoryName(fileName));
-			watcher.IncludeSubdirectories = false;
-			watcher.EnableRaisingEvents = true;
+			watcher = new FileSystemWatcher(Path.GetDirectoryName(fileName))
+			{
+				IncludeSubdirectories = false,
+				EnableRaisingEvents = true
+			};
 			watcher.Changed += (sender, args) =>
 			{
 				// Wait a moment to allow the writing process to close the file.

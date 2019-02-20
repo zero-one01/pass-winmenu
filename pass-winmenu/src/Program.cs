@@ -115,8 +115,10 @@ namespace PassWinmenu
 			InitialiseGit(ConfigManager.Config.Git, ConfigManager.Config.PasswordStore.Location);
 
 			// Initialise the internal password manager.
-			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore.Location, EncryptedFileExtension, gpg);
-			passwordManager.PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix;
+			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore.Location, EncryptedFileExtension, gpg)
+			{
+				PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix
+			};
 
 			clipboard = new ClipboardHelper();
 			dialogCreator = new DialogCreator(notificationService, passwordManager, git, gpg);
@@ -365,6 +367,7 @@ namespace PassWinmenu
 			git?.Dispose();
 			notificationService?.Dispose();
 			hotkeys?.Dispose();
+			updateChecker?.Dispose();
 		}
 	}
 }

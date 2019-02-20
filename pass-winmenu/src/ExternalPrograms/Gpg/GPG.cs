@@ -17,7 +17,7 @@ namespace PassWinmenu.ExternalPrograms
 		public const string GpgDefaultInstallDir = @"C:\Program Files (x86)\gnupg\bin";
 		public const string GpgExeName = "gpg.exe";
 
-		private const string statusMarker = "[GNUPG:] ";
+		private const string StatusMarker = "[GNUPG:] ";
 
 		private readonly IExecutablePathResolver executablePathResolver;
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
@@ -144,8 +144,6 @@ namespace PassWinmenu.ExternalPrograms
 				using (var writer = new StreamWriter(gpgProc.StandardInput.BaseStream, new UTF8Encoding(false)))
 				{
 					writer.Write(input);
-					writer.Flush();
-					writer.Close();
 				}
 			}
 			return gpgProc;
@@ -162,10 +160,10 @@ namespace PassWinmenu.ExternalPrograms
 			while ((stderrLine = gpgProc.StandardError.ReadLine()) != null)
 			{
 				Log.Send($"[GPG]: {stderrLine}");
-				if (stderrLine.StartsWith(statusMarker))
+				if (stderrLine.StartsWith(StatusMarker))
 				{
 					// This line is a status line, so extract status information from it.
-					var statusLine = stderrLine.Substring(statusMarker.Length);
+					var statusLine = stderrLine.Substring(StatusMarker.Length);
 					var spaceIndex = statusLine.IndexOf(" ", StringComparison.Ordinal);
 					if (spaceIndex == -1)
 					{

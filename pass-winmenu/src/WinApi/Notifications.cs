@@ -19,7 +19,7 @@ namespace PassWinmenu.WinApi
 	{
 		public NotifyIcon Icon { get; set; }
 
-		private string downloadUpdateString = "https://github.com/Baggykiin/pass-winmenu/releases";
+		private readonly string downloadUpdateString = "https://github.com/Baggykiin/pass-winmenu/releases";
 		private ToolStripMenuItem downloadUpdate;
 		private ToolStripSeparator downloadSeparator;
 		private const int ToolTipTimeoutMs = 5000;
@@ -31,9 +31,11 @@ namespace PassWinmenu.WinApi
 
 		public static Notifications Create()
 		{
-			var icon = new NotifyIcon();
-			icon.Icon = EmbeddedResources.Icon;
-			icon.Visible = true;
+			var icon = new NotifyIcon
+			{
+				Icon = EmbeddedResources.Icon,
+				Visible = true
+			};
 
 			return new Notifications(icon);
 		}
@@ -49,8 +51,10 @@ namespace PassWinmenu.WinApi
 			downloadUpdate.BackColor = Color.Beige;
 
 			downloadUpdate.Visible = false;
-			downloadSeparator = new ToolStripSeparator();
-			downloadSeparator.Visible = false;
+			downloadSeparator = new ToolStripSeparator
+			{
+				Visible = false
+			};
 
 			menu.Items.Add(downloadUpdate);
 			menu.Items.Add(downloadSeparator);
@@ -178,6 +182,7 @@ namespace PassWinmenu.WinApi
 		public void Dispose()
 		{
 			Icon?.Dispose();
+			downloadUpdate?.Dispose();
 		}
 	}
 
