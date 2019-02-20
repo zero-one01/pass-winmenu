@@ -91,7 +91,7 @@ namespace PassWinmenu
 			LoadConfigFile();
 
 			// Create the GPG wrapper.
-			gpg = new GPG();
+			gpg = new GPG(new ExecutablePathResolver());
 			gpg.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{

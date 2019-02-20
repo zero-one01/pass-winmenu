@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using PassWinmenu.Utilities;
+using PassWinmenu.WinApi;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -14,49 +14,59 @@ namespace PassWinmenu.ExternalPrograms
 	/// </summary>
 	internal class GPG : ICryptoService
 	{
-		private const string statusMarker = "[GNUPG:] ";
-		private const string gpgDefaultInstallDir = @"C:\Program Files (x86)\gnupg\bin";
-		private const string gpgExeName = "gpg.exe";
+		public const string GpgDefaultInstallDir = @"C:\Program Files (x86)\gnupg\bin";
+		public const string GpgExeName = "gpg.exe";
 
+		private const string statusMarker = "[GNUPG:] ";
+
+		private readonly IExecutablePathResolver executablePathResolver;
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
 		private GpgAgent gpgAgent;
 
 		public string GpgExePath { get; private set; }
 
+		public GPG(IExecutablePathResolver executablePathResolver)
+		{
+			this.executablePathResolver = executablePathResolver;
+		}
+
 		/// <summary>
 		/// Tries to find the GPG installation directory and configures the wrapper to use it.
 		/// </summary>
-		/// <param name="gpgExePath">Path to the GPG executable. When set to null,
+		/// <param name="gpgPathSpec">Path to the GPG executable. When set to null,
 		/// the default location will be used.</param>
-		public void FindGpgInstallation(string gpgExePath = null)
+		public void FindGpgInstallation(string gpgPathSpec = null)
 		{
 			Log.Send("Attempting to detect the GPG installation directory");
-			if (gpgExePath == string.Empty)
+			if (gpgPathSpec == string.Empty)
 			{
 				throw new ArgumentException("The GPG installation path is invalid.");
 			}
-			GpgExePath = gpgExePath;
 
-			string installDir = null;
-			if (gpgExePath == null)
+			string installDir;
+			if (gpgPathSpec == null)
 			{
 				Log.Send("No GPG executable path set, assuming GPG to be in its default installation directory.");
 				// No executable path is set, assume GPG to be in its default installation directory.
-				installDir = gpgDefaultInstallDir;
-				GpgExePath = Path.Combine(installDir, gpgExeName);
+				installDir = GpgDefaultInstallDir;
+				GpgExePath = Path.Combine(installDir, GpgExeName);
 			}
 			else
 			{
-				var resolved = Helpers.ResolveExecutableName(gpgExePath);
-				if (resolved == null || !File.Exists(resolved))
+				try
 				{
-					// Executable couldn't be found, most likely it doesn't exist. This is probably an error.
-					throw new ArgumentException("The GPG installation path is invalid.");
+					var resolved = executablePathResolver.Resolve(gpgPathSpec);
+					GpgExePath = resolved;
+					installDir = Path.GetDirectoryName(resolved);
 				}
-				GpgExePath = resolved;
-				installDir = Path.GetDirectoryName(resolved);
+				catch (FileNotFoundException e)
+				{
+					throw new ArgumentException("The GPG installation path is invalid.", e);
+				}
+
 				Log.Send("GPG executable found at the configured path. Assuming installation dir to be " + installDir);
 			}
+
 			gpgAgent = new GpgAgent(installDir);
 		}
 

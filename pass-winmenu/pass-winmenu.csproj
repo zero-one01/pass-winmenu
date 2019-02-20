@@ -76,6 +76,9 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Abstractions, Version=3.0.0.0, Culture=neutral, PublicKeyToken=96bf224d23c43e59, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Abstractions.3.0.10\lib\net40\System.IO.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -137,6 +140,10 @@
     <Compile Include="src\Configuration\Classes\UsernameDetectionRegexOptions.cs" />
     <Compile Include="src\Configuration\ConfigurationException.cs" />
     <Compile Include="src\Configuration\ConfigurationParseException.cs" />
+    <Compile Include="src\WinApi\Environment.cs" />
+    <Compile Include="src\WinApi\ExecutableNotFoundException.cs" />
+    <Compile Include="src\WinApi\ExecutablePathResolver.cs" />
+    <Compile Include="src\WinApi\IEnvironment.cs" />
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
@@ -186,6 +193,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\Windows\FileSelectionWindow.cs" />
+    <Compile Include="src\WinApi\IExecutablePathResolver.cs" />
     <Compile Include="src\Windows\LogViewer.xaml.cs">
       <DependentUpon>LogViewer.xaml</DependentUpon>
     </Compile>
