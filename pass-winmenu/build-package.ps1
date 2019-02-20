@@ -32,11 +32,8 @@ if($Clean){
 	}
 }
 
-Copy-Item -recurse "bin/Release/lib" "$PKGDIR/lib"
-# Linux and OSX are not supported, so their libraries do not have to be included.
-Remove-Item -recurse "$PKGDIR/lib/osx"
-Remove-Item -recurse "$PKGDIR/lib/linux"
-# The PDB files aren't used either, so they can be removed as well.
+Copy-Item -recurse "bin/Release/lib/win32" "$PKGDIR/lib/win32"
+# The PDB files aren't used, so they can be removed.
 Remove-Item -recurse "$PKGDIR/lib/win32/x64/*.pdb"
 Remove-Item -recurse "$PKGDIR/lib/win32/x86/*.pdb"
 
