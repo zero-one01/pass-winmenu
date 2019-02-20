@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -34,21 +34,36 @@ namespace PassWinmenu
 		private static StreamWriter writer;
 		public static List<LogLine> History { get; } = new List<LogLine>();
 
-		public static void Initialise()
+		static Log()
 		{
+			AppDomain.CurrentDomain.UnhandledException += ReportException;
+			Application.Current.DispatcherUnhandledException += ReportDispatcherException;
+			TaskScheduler.UnobservedTaskException += ReportTaskSchedulerException;
+		}
+
+		public static void EnableFileLogging()
+		{
+			if (writer != null) return;
+
 			try
 			{
 				writer = new StreamWriter(File.Open("pass-winmenu.log", FileMode.Append, FileAccess.Write, FileShare.Read));
+
+				// If log lines have already been generated, write them now.
+				foreach (var line in History)
+				{
+					writer.WriteLine(line);
+				}
+
+				writer.Flush();
+
+				// From now on, we should auto-flush to ensure lines get written to the log file as soon as possible.
 				writer.AutoFlush = true;
 			}
 			catch (Exception e)
 			{
 				MessageBox.Show($"The log file could not be created: an error occurred ({e.GetType().Name}: {e.Message})", "Failed to create log file");
 			}
-
-			AppDomain.CurrentDomain.UnhandledException += ReportException;
-			Application.Current.DispatcherUnhandledException += ReportDispatcherException;
-			TaskScheduler.UnobservedTaskException += ReportTaskSchedulerException;
 		}
 
 		private static void ReportTaskSchedulerException(object sender, UnobservedTaskExceptionEventArgs eventArgs)
@@ -80,8 +95,7 @@ namespace PassWinmenu
 			var bottomFrame = trace.GetFrame(0);
 			var indents = string.Concat(Enumerable.Repeat("  ", level));
 
-			var aggr = e as AggregateException;
-			if (aggr != null)
+			if (e is AggregateException aggr)
 			{
 				// Don't log the stack trace, instead log all inner exceptions and log their stacktraces instead.
 				SendRaw($"{indents}AggregateException in {bottomFrame?.GetFileName()}:{bottomFrame?.GetFileLineNumber()}:{bottomFrame?.GetFileColumnNumber()} - Sub-exceptions:");

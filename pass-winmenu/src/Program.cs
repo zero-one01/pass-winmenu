@@ -53,9 +53,21 @@ namespace PassWinmenu
 			}
 			catch (Exception e)
 			{
+				Log.EnableFileLogging();
 				Log.Send("Could not start pass-winmenu: An exception occurred.", LogLevel.Error);
 				Log.ReportException(e);
-				notificationService.ShowErrorWindow($"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})");
+
+				string errorMessage = $"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})";
+				if (notificationService == null)
+				{
+					// We have no notification service yet. Instantiating one is risky,
+					// so we'll make do with a call to MessageBox.Show() instead.
+					MessageBox.Show(errorMessage, "An error occurred.", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
+				else
+				{
+					notificationService.ShowErrorWindow(errorMessage);
+				}
 				Exit();
 			}
 		}
@@ -65,14 +77,6 @@ namespace PassWinmenu
 		/// </summary>
 		private void Initialise()
 		{
-#if DEBUG
-			Log.Initialise();
-#else
-			if (ConfigManager.Config.CreateLogFile)
-			{
-				Log.Initialise();
-			}
-#endif
 			// Load compiled-in resources.
 			EmbeddedResources.Load();
 
@@ -90,6 +94,15 @@ namespace PassWinmenu
 			// Now load the configuration options that we'll need 
 			// to continue initialising the rest of the applications.
 			LoadConfigFile();
+
+#if DEBUG
+			Log.EnableFileLogging();
+#else
+			if (ConfigManager.Config.CreateLogFile)
+			{
+				Log.EnableFileLogging();
+			}
+#endif
 
 			// Create the GPG wrapper.
 			gpg = new GPG(new ExecutablePathResolver(new FileSystem(), new SystemEnvironment()));
@@ -333,6 +346,9 @@ namespace PassWinmenu
 			}
 			catch (Exception e) when (e is ArgumentException || e is HotkeyException)
 			{
+				Log.Send("Failed to register hotkeys", LogLevel.Error);
+				Log.ReportException(e);
+
 				notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
 				Exit();
 			}
@@ -340,6 +356,7 @@ namespace PassWinmenu
 
 		public static void Exit()
 		{
+			Log.Send("Shutting down.");
 			Environment.Exit(0);
 		}
 
