@@ -8,20 +8,24 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
+
 using LibGit2Sharp;
+
 using McSherry.SemanticVersioning;
-using PassWinmenu.Hotkeys;
+
+using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
+using PassWinmenu.Hotkeys;
+using PassWinmenu.PasswordManagement;
 using PassWinmenu.UpdateChecking;
+using PassWinmenu.UpdateChecking.Chocolatey;
+using PassWinmenu.UpdateChecking.Dummy;
 using PassWinmenu.UpdateChecking.GitHub;
 using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
+
 using YamlDotNet.Core;
-using PassWinmenu.PasswordManagement;
-using PassWinmenu.Actions;
-using PassWinmenu.UpdateChecking.Chocolatey;
-using PassWinmenu.UpdateChecking.Dummy;
 
 namespace PassWinmenu
 {
@@ -189,14 +193,7 @@ namespace PassWinmenu
 			{
 				try
 				{
-					if (config.SyncMode == SyncMode.NativeGit)
-					{
-						git = new Git(passwordStorePath, config.GitPath);
-					}
-					else
-					{
-						git = new Git(passwordStorePath);
-					}
+					git = new SyncServiceFactory().BuildSyncService(config, passwordStorePath);
 				}
 				catch (RepositoryNotFoundException)
 				{

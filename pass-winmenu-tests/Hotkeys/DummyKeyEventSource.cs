@@ -1,12 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Reflection;
+
 using PassWinmenu.Utilities.ExtensionMethods;
 
 namespace PassWinmenu.Hotkeys
@@ -24,7 +20,7 @@ namespace PassWinmenu.Hotkeys
 		{
 			_dummyPresentationSource = new HwndSource(
 				0, 0, 0, 0, 0, String.Empty, IntPtr.Zero
-				);
+			);
 		}
 
 

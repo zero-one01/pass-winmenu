@@ -1,39 +1,39 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
+using Xunit;
 
 namespace PassWinmenu.Utilities
 {
 	/// <summary>
 	/// Tests the <see cref="Disposable"/> class.
 	/// </summary>
-	[TestClass]
-	public class DisposableTests
+		public class DisposableTests
 	{
 		private const string Category = "Utilities: IDisposable wrapper";
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void _Is_IDisposable()
 		{
 			var d = new Disposable(() => {});
 
-			Assert.IsTrue(d is IDisposable);
+			Assert.True(d is IDisposable);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Throws_OnNullAction()
 		{
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => new Disposable(null, true));
 
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => new Disposable(null, false));
 
 
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => new Disposable(null));
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Dispose_DisallowMultipleDispose()
 		{
 			int i = 0;
@@ -43,9 +43,9 @@ namespace PassWinmenu.Utilities
 			d.Dispose();
 			d.Dispose();
 
-			Assert.AreEqual(1, i);
+			Assert.Equal(1, i);
 		}
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Dispose_AllowMultipleDispose()
 		{
 			int i = 0;
@@ -55,7 +55,7 @@ namespace PassWinmenu.Utilities
 			d.Dispose();
 			d.Dispose();
 
-			Assert.AreEqual(2, i);
+			Assert.Equal(2, i);
 		}
 	}
 }

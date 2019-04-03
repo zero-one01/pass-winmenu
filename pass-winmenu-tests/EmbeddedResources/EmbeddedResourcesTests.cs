@@ -1,19 +1,18 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PassWinmenu.PasswordManagement;
+using PassWinmenu.Utilities;
+
+using Xunit;
 
 namespace PassWinmenu.Tests
 {
-	[TestClass]
-	public class EmbeddedResourcesTests
+		public class EmbeddedResourcesTests
 	{
 		private const string Category = "Core: Embedded resources";
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void EmbeddedResources_ContainsVersionString()
 		{
 			EmbeddedResources.Load();
-			Assert.IsFalse(string.IsNullOrWhiteSpace(EmbeddedResources.Version));
+			Assert.False(string.IsNullOrWhiteSpace(EmbeddedResources.Version));
 		}
 	}
 }

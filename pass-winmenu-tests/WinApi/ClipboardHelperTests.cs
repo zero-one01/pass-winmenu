@@ -1,17 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Threading;
-using System.Windows;
-using System.Windows.Threading;
+using PassWinmenu.Utilities;
+
+using Xunit;
 
 namespace PassWinmenu.WinApi
 {
-	[TestClass]
-	public class ClipboardHelperTests
+		public class ClipboardHelperTests
 	{
 		private const string Category = "Windows API: Clipboard Helper";
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void ClipboardHelper_PlacesText()
 		{
 			// TODO: Find a way to test this.
@@ -20,14 +17,14 @@ namespace PassWinmenu.WinApi
 			//var clipboard = new ClipboardHelper();
 			//var content = Guid.NewGuid().ToString();
 
-			//Assert.AreNotEqual(clipboard.GetText(), content);
+			//Assert.NotEqual(clipboard.GetText(), content);
 
 			//clipboard.Place(content, TimeSpan.FromSeconds(1));
 
-			//Assert.AreEqual(clipboard.GetText(), content);
+			//Assert.Equal(clipboard.GetText(), content);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void ClipboardHelper_RemovesText()
 		{
 			// TODO: Find a way to test this.
@@ -39,7 +36,7 @@ namespace PassWinmenu.WinApi
 			//var beforeText = clipboard.GetText();
 
 			//clipboard.Place(content, TimeSpan.FromSeconds(1));
-			//Assert.AreNotEqual(beforeText, clipboard.GetText());
+			//Assert.NotEqual(beforeText, clipboard.GetText());
 			//Thread.Sleep(1100);
 
 			//var waitAttempts = 20;
@@ -49,9 +46,9 @@ namespace PassWinmenu.WinApi
 			//}
 			//var clipText = clipboard.GetText();
 
-			//Assert.AreNotEqual(clipText, content, "Clipboard was not cleared.");
+			//Assert.NotEqual(clipText, content, "Clipboard was not cleared.");
 
-			//Assert.AreEqual(beforeText, clipText);
+			//Assert.Equal(beforeText, clipText);
 		}
 	}
 }

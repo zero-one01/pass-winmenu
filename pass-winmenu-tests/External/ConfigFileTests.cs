@@ -1,16 +1,18 @@
-﻿using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using PassWinmenu.Utilities;
+
+using Xunit;
+
 using YamlDotNet.Serialization;
 
 namespace PassWinmenu.External
 {
-	[TestClass]
-	public class ConfigFileTests
+		public class ConfigFileTests
 	{
 		private const string Category = "External: Configuration File";
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void ConfigFile_IsValidYaml()
 		{
 			var des = new DeserializerBuilder()

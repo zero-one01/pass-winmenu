@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
 using System.Reflection;
 using System.Windows.Input;
 using System.Windows.Interop;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Xunit;
 
 namespace PassWinmenu.Utilities.ExtensionMethods
 {
-	[TestClass]
-	public class KeyEventArgsExtensionsTests
+		public class KeyEventArgsExtensionsTests
 	{
 		private const string Category = "Utilities: KeyEventArgs extensions";
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void _KeyEventArgs_HasMethod_SetRepeat()
 		{
 			// The [KeyEventArgs] class has a private method used to set its
@@ -34,8 +30,8 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 				key: Key.A
 				);
 
-			Assert.IsNotNull(keArgs);
-			Assert.IsFalse(keArgs.IsRepeat);
+			Assert.NotNull(keArgs);
+			Assert.False(keArgs.IsRepeat);
 
 			var setRepeatInfo = typeof(KeyEventArgs).GetMethod(
 				name: "SetRepeat",
@@ -44,22 +40,22 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 
 			setRepeatInfo.Invoke(keArgs, new object[] { true });
 
-			Assert.IsTrue(keArgs.IsRepeat);
+			Assert.True(keArgs.IsRepeat);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void SetRepeat_ThrowsOnNull()
 		{
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => KeyEventArgsExtensions.SetRepeat(null, true)
 				);
 
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => KeyEventArgsExtensions.SetRepeat(null, false)
 				);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void SetRepeat_SetsProperty()
 		{
 			var keArgs = new KeyEventArgs(
@@ -69,18 +65,18 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 				key: Key.A
 				);
 
-			Assert.IsFalse(keArgs.IsRepeat);
+			Assert.False(keArgs.IsRepeat);
 
 			KeyEventArgsExtensions.SetRepeat(keArgs, true);
 
-			Assert.IsTrue(keArgs.IsRepeat);
+			Assert.True(keArgs.IsRepeat);
 
 			KeyEventArgsExtensions.SetRepeat(keArgs, false);
 
-			Assert.IsFalse(keArgs.IsRepeat);
+			Assert.False(keArgs.IsRepeat);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void SetRepeat_ReturnsArg()
 		{
 			var keArgs = new KeyEventArgs(
@@ -90,8 +86,8 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 				key: Key.A
 				);
 
-			Assert.AreSame(keArgs, keArgs.SetRepeat(true));
-			Assert.AreSame(keArgs, keArgs.SetRepeat(false));
+			Assert.Same(keArgs, keArgs.SetRepeat(true));
+			Assert.Same(keArgs, keArgs.SetRepeat(false));
 		}
 	}
 }

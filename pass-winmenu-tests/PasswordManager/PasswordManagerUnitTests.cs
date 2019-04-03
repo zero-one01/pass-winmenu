@@ -1,15 +1,13 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace PassWinmenu.PasswordManager
 {
-	[TestClass]
-	public class PasswordManagerUnitTests
+		public class PasswordManagerUnitTests
 	{
 		private const string Category = "Password Manager";
 
-		[TestMethod]
-		public void TestMethod1()
+		[Fact]
+		public void Fact1()
 		{
 		}
 	}

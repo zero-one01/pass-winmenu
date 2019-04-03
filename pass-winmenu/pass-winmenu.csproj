@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Costura.Fody.3.3.2\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.3.3.2\build\Costura.Fody.props')" />
+  <Import Project="..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props')" />
   <Import Project="..\packages\LibGit2Sharp.NativeBinaries.2.0.267\build\net46\LibGit2Sharp.NativeBinaries.props" Condition="Exists('..\packages\LibGit2Sharp.NativeBinaries.2.0.267\build\net46\LibGit2Sharp.NativeBinaries.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -64,8 +64,8 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Costura, Version=3.3.2.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Costura.Fody.3.3.2\lib\net40\Costura.dll</HintPath>
+    <Reference Include="Costura, Version=3.3.3.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Costura.Fody.3.3.3\lib\net40\Costura.dll</HintPath>
     </Reference>
     <Reference Include="LibGit2Sharp, Version=0.26.0.0, Culture=neutral, PublicKeyToken=7cbde695407f0333, processorArchitecture=MSIL">
       <HintPath>..\packages\LibGit2Sharp.0.26.0\lib\net46\LibGit2Sharp.dll</HintPath>
@@ -113,15 +113,20 @@
     <Compile Include="src\Configuration\Classes\UpdateSource.cs" />
     <Compile Include="src\Configuration\WidthConverter.cs" />
     <Compile Include="src\Configuration\LoadResult.cs" />
+    <Compile Include="src\ExternalPrograms\Git\GitException.cs" />
+    <Compile Include="src\ExternalPrograms\Git\LibGit2SharpSyncStrategy.cs" />
+    <Compile Include="src\ExternalPrograms\Git\NativeGitSyncStrategy.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgError.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgException.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgResult.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgStatusCode.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\StatusMessage.cs" />
+    <Compile Include="src\ExternalPrograms\Git\IGitSyncStrategy.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
     <Compile Include="src\PasswordManagement\PasswordFile.cs" />
+    <Compile Include="src\ExternalPrograms\SyncServiceFactory.cs" />
     <Compile Include="src\UpdateChecking\Dummy\DummyUpdateSource.cs" />
     <Compile Include="src\UpdateChecking\UpdateSourceExtensions.cs" />
     <Compile Include="src\WinApi\Clipboard.cs" />
@@ -190,7 +195,7 @@
     <Compile Include="src\Configuration\Classes\Config.cs" />
     <Compile Include="src\Configuration\ConfigManager.cs" />
     <Compile Include="src\Utilities\ExtensionMethods\ScreenExtensions.cs" />
-    <Compile Include="src\ExternalPrograms\Git.cs" />
+    <Compile Include="src\ExternalPrograms\Git\Git.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GPG.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\EmbeddedResources.cs" />
@@ -297,7 +302,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\LibGit2Sharp.NativeBinaries.2.0.267\build\net46\LibGit2Sharp.NativeBinaries.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LibGit2Sharp.NativeBinaries.2.0.267\build\net46\LibGit2Sharp.NativeBinaries.props'))" />
     <Error Condition="!Exists('..\packages\Fody.4.0.2\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.4.0.2\build\Fody.targets'))" />
-    <Error Condition="!Exists('..\packages\Costura.Fody.3.3.2\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.3.2\build\Costura.Fody.props'))" />
+    <Error Condition="!Exists('..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props'))" />
   </Target>
   <PropertyGroup>
     <PreBuildEvent>git describe --tags &gt; "$(ProjectDir)\embedded\version.txt"</PreBuildEvent>

@@ -2,46 +2,48 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using McSherry.SemanticVersioning;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using PassWinmenu.UpdateChecking.Dummy;
+using PassWinmenu.Utilities;
+
+using Xunit;
 
 namespace PassWinmenu.UpdateChecking
 {
-	[TestClass]
-	public class UpdateCheckerUnitTests
+		public class UpdateCheckerUnitTests
 	{
 		private const string Category = "Updates: update sources";
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void UpdateChecker_TriggersOnNewerVersion()
 		{
 			var raisesMajor = RaisesEvent(new SemanticVersion(1, 1, 1), new SemanticVersion(2, 0, 0));
-			Assert.IsTrue(raisesMajor);
+			Assert.True(raisesMajor);
 			var raisesMinor = RaisesEvent(new SemanticVersion(1, 1, 1), new SemanticVersion(1, 2, 0));
-			Assert.IsTrue(raisesMinor);
+			Assert.True(raisesMinor);
 			var raisesPatch = RaisesEvent(new SemanticVersion(1, 1, 1), new SemanticVersion(1, 1, 2));
-			Assert.IsTrue(raisesPatch);
+			Assert.True(raisesPatch);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void UpdateChecker_IgnoresEqualVersion()
 		{
 			var raisesEqual = RaisesEvent(new SemanticVersion(1, 0, 0), new SemanticVersion(1, 0, 0));
-			Assert.IsFalse(raisesEqual);
+			Assert.False(raisesEqual);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void UpdateChecker_IgnoresOlderVersion()
 		{
 			var raisesMajor = RaisesEvent(new SemanticVersion(2, 2, 2), new SemanticVersion(1, 3, 3));
-			Assert.IsFalse(raisesMajor);
+			Assert.False(raisesMajor);
 			var raisesMinor = RaisesEvent(new SemanticVersion(2, 2, 2), new SemanticVersion(2, 1, 3));
-			Assert.IsFalse(raisesMinor);
+			Assert.False(raisesMinor);
 			var raisesPatch = RaisesEvent(new SemanticVersion(2, 2, 2), new SemanticVersion(2, 2, 1));
-			Assert.IsFalse(raisesPatch);
+			Assert.False(raisesPatch);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void UpdateChecker_RaisesAfterSpecifiedTime()
 		{
 			const int checkBeforeMs = 800;
@@ -68,7 +70,7 @@ namespace PassWinmenu.UpdateChecking
 
 			// Validate that the event is not raised before the time specified in raiseAfterMs has expired.
 			Thread.Sleep(checkBeforeMs);
-			Assert.IsFalse(raised, "Notification was raised before update interval expired");
+			Assert.False(raised, "Notification was raised before update interval expired");
 
 			// Validate that the event has been raised now.
 			Thread.Sleep(checkAgainMs);
@@ -77,11 +79,11 @@ namespace PassWinmenu.UpdateChecking
 				Thread.Sleep(checkAgainMs);
 			}
 
-			Assert.IsTrue(raised, "Notification was not raised");
+			Assert.True(raised, "Notification was not raised");
 		}
 
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void UpdateChecker_UpdatesPreReleases()
 		{
 			var current = SemanticVersion.Parse("2.0.0-pre2", ParseMode.Lenient);
@@ -112,7 +114,7 @@ namespace PassWinmenu.UpdateChecking
 			{
 				AssertUpdateCheck(checker, (sender, args) =>
 				{
-					Assert.AreEqual(args.Version.VersionNumber, SemanticVersion.Parse("2.0.0-pre3", ParseMode.Lenient));
+					Assert.Equal(args.Version.VersionNumber, SemanticVersion.Parse("2.0.0-pre3", ParseMode.Lenient));
 				});
 			}
 
@@ -153,12 +155,12 @@ namespace PassWinmenu.UpdateChecking
 			{
 				AssertUpdateCheck(checker, (sender, args) =>
 				{
-					Assert.AreEqual(args.Version.VersionNumber, SemanticVersion.Parse("2.0.0", ParseMode.Lenient));
+					Assert.Equal(args.Version.VersionNumber, SemanticVersion.Parse("2.0.0", ParseMode.Lenient));
 				});
 			}
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void UpdateChecker_ProvidesCorrectReleaseType()
 		{
 			var sourceWithNewerPrerelease = new DummyUpdateSource
@@ -201,8 +203,8 @@ namespace PassWinmenu.UpdateChecking
 			{
 				AssertUpdateCheck(checker, (sender, args) =>
 				{
-					Assert.IsFalse(args.Version.IsPrerelease);
-					Assert.AreEqual(args.Version.VersionNumber, new SemanticVersion(2, 0, 0));
+					Assert.False(args.Version.IsPrerelease);
+					Assert.Equal(args.Version.VersionNumber, new SemanticVersion(2, 0, 0));
 				});
 			}
 
@@ -211,8 +213,8 @@ namespace PassWinmenu.UpdateChecking
 			{
 				AssertUpdateCheck(checker, (sender, args) =>
 				{
-					Assert.IsTrue(args.Version.IsPrerelease);
-					Assert.AreEqual(args.Version.VersionNumber, new SemanticVersion(3, 0, 0));
+					Assert.True(args.Version.IsPrerelease);
+					Assert.Equal(args.Version.VersionNumber, new SemanticVersion(3, 0, 0));
 				});
 			}
 
@@ -222,8 +224,8 @@ namespace PassWinmenu.UpdateChecking
 			{
 				AssertUpdateCheck(checker, (sender, args) =>
 				{
-					Assert.IsFalse(args.Version.IsPrerelease);
-					Assert.AreEqual(args.Version.VersionNumber, new SemanticVersion(3, 0, 0));
+					Assert.False(args.Version.IsPrerelease);
+					Assert.Equal(args.Version.VersionNumber, new SemanticVersion(3, 0, 0));
 				});
 			}
 		}
@@ -240,9 +242,10 @@ namespace PassWinmenu.UpdateChecking
 			for (var i = 0; i < 20; i++)
 			{
 				Thread.Sleep(50);
-				if (raised) return;
+				if (raised) break;
 			}
-			Assert.Fail("Update checker did not raise event.");
+
+			Assert.True(raised, "Update checker did not raise event.");
 		}
 
 		/// <summary>

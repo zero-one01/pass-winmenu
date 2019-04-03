@@ -1,16 +1,16 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Windows.Input;
+
+using PassWinmenu.Utilities;
+
+using Xunit;
 
 namespace PassWinmenu.Hotkeys
 {
 	/// <summary>
 	/// Unit tests for the <see cref="Hotkey"/> class.
 	/// </summary>
-	[TestClass]
-	public class HotkeyUnitTests
+		public class HotkeyUnitTests
 	{
 		private const string Category = "Hotkeys: general";
 
@@ -20,55 +20,44 @@ namespace PassWinmenu.Hotkeys
 
 		private Hotkey                    _hotkey;
 		private DummyHotkeyRegistrar      _registrar;
-		private readonly IHotkeyRegistrar _defaultRegistrar;
 
 		public HotkeyUnitTests()
 		{
 			// Save initial value so we can reset to it between tests
-			_defaultRegistrar = Hotkey.DefaultRegistrar;
-		}
-
-
-		// Executed before every test
-		[TestInitialize]
-		public void TestInit()
-		{
 			_registrar = new DummyHotkeyRegistrar();
 
 			_hotkey = Hotkey.With(_registrar)
-							.Register(Modifiers, KeyCode, Repeats);
-
-			Hotkey.DefaultRegistrar = _defaultRegistrar;
+			                .Register(Modifiers, KeyCode, Repeats);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void DefaultRegistrar_FailsOnNull()
 		{
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => Hotkey.DefaultRegistrar = null
 				);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Register_ReturnValue_ModifiersKeyRepeats()
 		{
 			var b = Hotkey.Register(Modifiers, KeyCode, Repeats);
 
-			Assert.AreEqual(Modifiers, b.ModifierKeys);
-			Assert.AreEqual(KeyCode,   b.Key);
-			Assert.AreEqual(Repeats,   b.Repeats);
+			Assert.Equal(Modifiers, b.ModifierKeys);
+			Assert.Equal(KeyCode,   b.Key);
+			Assert.Equal(Repeats,   b.Repeats);
 		}
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Register_ReturnValue_KeyRepeats()
 		{
 			var b = Hotkey.Register(KeyCode, Repeats);
 
-			Assert.AreEqual(ModifierKeys.None, b.ModifierKeys);
-			Assert.AreEqual(KeyCode, b.Key);
-			Assert.AreEqual(Repeats, b.Repeats);
+			Assert.Equal(ModifierKeys.None, b.ModifierKeys);
+			Assert.Equal(KeyCode, b.Key);
+			Assert.Equal(Repeats, b.Repeats);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Register_DefaultRegistration()
 		{
 			Hotkey.DefaultRegistrar = _registrar;
@@ -77,9 +66,9 @@ namespace PassWinmenu.Hotkeys
 
 			Hotkey.Register(KeyCode);
 
-			Assert.AreEqual(hkCount + 1, _registrar.Hotkeys.Count);
+			Assert.Equal(hkCount + 1, _registrar.Hotkeys.Count);
 		}
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Register_ExplicitRegistration()
 		{
 			Hotkey.DefaultRegistrar = HotkeyRegistrars.Windows;
@@ -88,56 +77,56 @@ namespace PassWinmenu.Hotkeys
 
 			Hotkey hk = Hotkey.With(_registrar).Register(KeyCode);
 
-			Assert.AreEqual(hkCount + 1, _registrar.Hotkeys.Count);
+			Assert.Equal(hkCount + 1, _registrar.Hotkeys.Count);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Triggered_WhenEnabled()
 		{
 			_hotkey.Enabled = true;
 
-			Assert.IsTrue(_hotkey.Enabled);
+			Assert.True(_hotkey.Enabled);
 
 			bool fired = false;
 			_hotkey.Triggered += (s, e) => fired = true;
 
 			_registrar.Hotkeys[(Modifiers, KeyCode)](_registrar, null);
 
-			Assert.IsTrue(fired);
+			Assert.True(fired);
 		}
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Triggered_WhenNotEnabled()
 		{
 			_hotkey.Enabled = false;
 
-			Assert.IsFalse(_hotkey.Enabled);
+			Assert.False(_hotkey.Enabled);
 
 			bool fired = false;
 			_hotkey.Triggered += (s, e) => fired = true;
 
 			_registrar.Hotkeys[(Modifiers, KeyCode)](_registrar, null);
 
-			Assert.IsFalse(fired);
+			Assert.False(fired);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Dispose_UnregistersWithRegistrar()
 		{
 			bool callsDispose = false;
 
 			_registrar.Disposal += (s, combo) =>
 			{
-				Assert.AreEqual(Modifiers, combo.Item1);
-				Assert.AreEqual(KeyCode, combo.Item2);
+				Assert.Equal(Modifiers, combo.Item1);
+				Assert.Equal(KeyCode, combo.Item2);
 
 				callsDispose = true;
 			};
 
 			_hotkey.Dispose();
 
-			Assert.IsTrue(callsDispose);
+			Assert.True(callsDispose);
 		}
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void Dispose_CanMakeMultipleCalls()
 		{
 			_hotkey.Dispose();
@@ -145,13 +134,13 @@ namespace PassWinmenu.Hotkeys
 			_hotkey.Dispose();
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[Fact, TestCategory(Category)]
 		public void _Properties_Initialised()
 		{
-			Assert.AreEqual(true, _hotkey.Enabled);
-			Assert.AreEqual(Modifiers, _hotkey.ModifierKeys);
-			Assert.AreEqual(KeyCode, _hotkey.Key);
-			Assert.AreEqual(Repeats, _hotkey.Repeats);
+			Assert.True(_hotkey.Enabled);
+			Assert.Equal(Modifiers, _hotkey.ModifierKeys);
+			Assert.Equal(KeyCode, _hotkey.Key);
+			Assert.Equal(Repeats, _hotkey.Repeats);
 		}
 
 	}

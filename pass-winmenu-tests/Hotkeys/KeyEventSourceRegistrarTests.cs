@@ -1,63 +1,58 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Input;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using PassWinmenu.Utilities;
+
+using Xunit;
 
 namespace PassWinmenu.Hotkeys
 {
-	[TestClass]
-	public class KeyEventSourceRegistrarTests
+		public class KeyEventSourceRegistrarTests
 	{
 		private const string Category = "Hotkeys: KeyEventSource";
 
-		private static readonly DummyKeyEventSource _dummyEventSource;
+		private readonly DummyKeyEventSource _dummyEventSource;
 
-		static KeyEventSourceRegistrarTests()
+		public KeyEventSourceRegistrarTests()
 		{
 			_dummyEventSource = new DummyKeyEventSource();
+			_registrar = HotkeyRegistrars.KeyEventSource.Create(_dummyEventSource);
 		}
 
 
 		private IHotkeyRegistrar _registrar;
 
-		// Run before each test
-		[TestInitialize]
-		public void TestInit()
-		{
-			_registrar = HotkeyRegistrars.KeyEventSource.Create(_dummyEventSource);
-		}
-
-
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Create_IKeyEventSource_ThrowsOnNullSource()
 		{
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => HotkeyRegistrars.KeyEventSource.Create(null)
 				);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Create_TSource_ThrowsOnNullSource()
 		{
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => HotkeyRegistrars.KeyEventSource.Create<object>(
 					null, o => throw new InvalidOperationException()
 					)
 				);
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Create_TSource_ThrowsOnNullAdaptor()
 		{
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => HotkeyRegistrars.KeyEventSource.Create<object>(
 					new object(), null
 					)
 				);
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Create_TSource_ThrowsOnFailedAdaptation()
 		{
-			Assert.ThrowsException<ArgumentException>(
+			Assert.Throws<ArgumentException>(
 				() => HotkeyRegistrars.KeyEventSource.Create<object>(
 					new object(), o => null
 					)
@@ -65,10 +60,10 @@ namespace PassWinmenu.Hotkeys
 		}
 
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_ThrowsOnNullHandler()
 		{
-			Assert.ThrowsException<ArgumentNullException>(
+			Assert.Throws<ArgumentNullException>(
 				() => _registrar.Register(
 					modifierKeys: ModifierKeys.Control,
 					key:          Key.P,
@@ -78,7 +73,7 @@ namespace PassWinmenu.Hotkeys
 				);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_KeyEquivalence_Control()
 		{
 			int firedCount = 0;
@@ -96,14 +91,14 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(left);
 			_dummyEventSource.Release(left);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(right);
 			_dummyEventSource.Release(right);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_KeyEquivalence_Shift()
 		{
 			int firedCount = 0;
@@ -121,14 +116,14 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(left);
 			_dummyEventSource.Release(left);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(right);
 			_dummyEventSource.Release(right);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_KeyEquivalence_Alt()
 		{
 			int firedCount = 0;
@@ -146,15 +141,15 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(left);
 			_dummyEventSource.Release(left);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(right);
 			_dummyEventSource.Release(right);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_CombinationSimple_NoRepeat()
 		{
 			int firedCount = 0;
@@ -171,23 +166,23 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(keys);
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(keys);
 			_dummyEventSource.Actuate(keys, isRepeat: true);
 			_dummyEventSource.Release(keys);
 
 			// Should ignore repeat actuations
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			deregisterer.Dispose();
 
 			_dummyEventSource.Actuate(keys);
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_CombinationSimple_Repeats()
 		{
 			int firedCount = 0;
@@ -204,35 +199,35 @@ namespace PassWinmenu.Hotkeys
 			// Actuate multiple times, indicating that the keys are repeats
 			// after the first time, to emulate a held-down key combo.
 
-			Assert.AreEqual(0, firedCount);
+			Assert.Equal(0, firedCount);
 
 			_dummyEventSource.Actuate(keys, isRepeat: false);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(keys, isRepeat: true);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			deregisterer.Dispose();
 
 			_dummyEventSource.Actuate(keys);
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			_dummyEventSource.Actuate(keys);
 			_dummyEventSource.Actuate(keys, isRepeat: true);
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_CombinationComplex_NoRepeat()
 		{
 			int firedCount = 0;
@@ -251,13 +246,13 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(keys);
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(keys);
 			_dummyEventSource.Actuate(keys, isRepeat: true);
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			deregisterer.Dispose();
 
@@ -265,9 +260,9 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(keys, isRepeat: true);
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_CombinationComplex_Repeats()
 		{
 			int firedCount = 0;
@@ -283,28 +278,28 @@ namespace PassWinmenu.Hotkeys
 
 			_dummyEventSource.Actuate(keys, isRepeat: false);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(keys, isRepeat: true);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			_dummyEventSource.Release(keys);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			deregisterer.Dispose();
 
 			_dummyEventSource.Actuate(keys, isRepeat: false);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			_dummyEventSource.Actuate(keys, isRepeat: true);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_UnreliableActuation()
 		{
 			// Unreliable actuation, i.e. where the user would actuate keys,
@@ -325,34 +320,34 @@ namespace PassWinmenu.Hotkeys
 
 			_dummyEventSource.Actuate(Key.LeftCtrl);
 
-			Assert.AreEqual(0, firedCount);
+			Assert.Equal(0, firedCount);
 
 			_dummyEventSource.Actuate(Key.LeftAlt);
 			_dummyEventSource.Actuate(Key.LeftCtrl, isRepeat: true);
 
-			Assert.AreEqual(0, firedCount);
+			Assert.Equal(0, firedCount);
 
 			_dummyEventSource.Release(Key.LeftAlt);
 			_dummyEventSource.Actuate(Key.LeftCtrl, isRepeat: true);
 
-			Assert.AreEqual(0, firedCount);
+			Assert.Equal(0, firedCount);
 
 			_dummyEventSource.Actuate(Key.LeftCtrl, isRepeat: true);
 
-			Assert.AreEqual(0, firedCount);
+			Assert.Equal(0, firedCount);
 
 			_dummyEventSource.Actuate(new[] { Key.LeftAlt, Key.A });
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(
 				new[] { Key.LeftCtrl, Key.LeftAlt, Key.A }, isRepeat: true
 				);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 		}
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_IrrelevantKeys()
 		{
 			// Other keys may be pressed while the combination is actuated. A hotkey
@@ -368,29 +363,29 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(new[] { Key.LeftCtrl, Key.F, Key.LeftShift, Key.A, Key.R });
 
 			// Fires initially with noise
-			Assert.AreEqual(1, fireCount);
+			Assert.Equal(1, fireCount);
 
 			_dummyEventSource.Actuate(new[] { Key.F, Key.LeftCtrl, Key.R, Key.A }, isRepeat: true);
 
 			// Fires subsequently with noise
-			Assert.AreEqual(2, fireCount);
+			Assert.Equal(2, fireCount);
 
 			_dummyEventSource.Actuate(new[] { Key.LeftShift, Key.LeftCtrl }, isRepeat: true);
 
 			// Continues not to fire, even with irrelevant keys, because of wrong key
 			// actuation order (modifiers first, then key)
-			Assert.AreEqual(2, fireCount);
+			Assert.Equal(2, fireCount);
 
 			_dummyEventSource.Actuate(new[] { Key.Escape, Key.A, Key.Q }, isRepeat: true);
 
 			// Fires, even with irrelevant keys, once the modifiers + key have been
 			// actuated in the correct order
-			Assert.AreEqual(3, fireCount);
+			Assert.Equal(3, fireCount);
 		}
 
-		[DataRow(true, DisplayName = "Repeats")]
-		[DataRow(false, DisplayName = "No Repeat")]
-		[DataTestMethod, TestCategory(Category)]
+		[StaTheory, TestCategory(Category)]
+		[InlineData(true)]
+		[InlineData(false)]
 		public void Register_HeldModifiers(bool isRepeat)
 		{
 			// For consistency with the Windows hotkey API, we want to trigger
@@ -433,7 +428,7 @@ namespace PassWinmenu.Hotkeys
 				new[] { Key.RightAlt, Key.LeftShift, Key.X }, isRepeat: false
 				);
 
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			// Release, re-actuate final key
 			_dummyEventSource.Release(Key.X);
@@ -442,7 +437,7 @@ namespace PassWinmenu.Hotkeys
 				);
 			_dummyEventSource.Actuate(Key.X, isRepeat: false);
 
-			Assert.AreEqual(2, firedCount);
+			Assert.Equal(2, firedCount);
 
 			// Further repeated release, re-actuates
 			_dummyEventSource.Release(Key.X);
@@ -451,7 +446,7 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(Key.X); // +1
 			_dummyEventSource.Release(Key.X);
 
-			Assert.AreEqual(4, firedCount);
+			Assert.Equal(4, firedCount);
 
 
 			// Release, re-actuate modifier and final key
@@ -459,7 +454,7 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(Key.RightAlt, isRepeat: true);
 			_dummyEventSource.Actuate(new[] { Key.LeftShift, Key.X });
 
-			Assert.AreEqual(5, firedCount);
+			Assert.Equal(5, firedCount);
 
 
 			// Release, re-actuate final key and different modifier
@@ -467,19 +462,19 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Actuate(Key.LeftShift, isRepeat: true);
 			_dummyEventSource.Actuate(new[] { Key.RightAlt, Key.X });
 
-			Assert.AreEqual(6, firedCount);
+			Assert.Equal(6, firedCount);
 
 
 			// Actuation order still enforced
 			_dummyEventSource.Release(new[] { Key.LeftShift, Key.X });
 			_dummyEventSource.Actuate(new[] { Key.X, Key.LeftShift });
 
-			Assert.AreEqual(6, firedCount);
+			Assert.Equal(6, firedCount);
 
 			_dummyEventSource.Release(new[] { Key.RightAlt, Key.X });
 			_dummyEventSource.Actuate(new[] { Key.X, Key.RightAlt });
 
-			Assert.AreEqual(6, firedCount);
+			Assert.Equal(6, firedCount);
 		}
 
 		// The Windows hotkey registrar cannot accept two hotkeys with the same
@@ -487,7 +482,7 @@ namespace PassWinmenu.Hotkeys
 		// anything preventing this with the [KeyEventSource] registrar, we prevent
 		// it for consistency.
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_MultipleHandlers_AllowedHomogeneous_NoRepeat()
 		{
 			string firedString = String.Empty;
@@ -509,10 +504,10 @@ namespace PassWinmenu.Hotkeys
 
 			_dummyEventSource.Actuate(new[] { Key.LeftAlt, Key.R });
 
-			Assert.AreEqual(1, firedString.Count(c => c == 'A'));
-			Assert.AreEqual(1, firedString.Count(c => c == 'B'));
+			Assert.Equal(1, firedString.Count(c => c == 'A'));
+			Assert.Equal(1, firedString.Count(c => c == 'B'));
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_MultipleHandlers_AllowedHomogeneous_Repeats()
 		{
 			string firedString = String.Empty;
@@ -534,17 +529,17 @@ namespace PassWinmenu.Hotkeys
 
 			_dummyEventSource.Actuate(new[] { Key.RightShift, Key.Y });
 
-			Assert.AreEqual(1, firedString.Count(c => c == 'A'));
-			Assert.AreEqual(1, firedString.Count(c => c == 'B'));
+			Assert.Equal(1, firedString.Count(c => c == 'A'));
+			Assert.Equal(1, firedString.Count(c => c == 'B'));
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_MultipleHandlers_FailsWithMixedRepeat()
 		{
 			// First doesn't repeat
 			_registrar.Register(ModifierKeys.Shift, Key.F, false, (s, e) => { });
 
 			// Second does
-			Assert.ThrowsException<HotkeyException>(() =>
+			Assert.Throws<HotkeyException>(() =>
 			{
 				_registrar.Register(ModifierKeys.Shift, Key.F, true, (s, e) => { });
 			});
@@ -558,7 +553,7 @@ namespace PassWinmenu.Hotkeys
 		// is the behaviour confirmed by experiment for the Windows
 		// hotkey registrar.
 
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_EnforceCombinationOrder_Basic()
 		{
 			// Basic test, correct order works and wrong order doesn't with a
@@ -577,15 +572,15 @@ namespace PassWinmenu.Hotkeys
 			_dummyEventSource.Release(keys);
 
 			// Correct order triggers
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 
 			_dummyEventSource.Actuate(keys.Reverse());
 			_dummyEventSource.Release(keys.Reverse());
 
 			// Wrong order does not trigger
-			Assert.AreEqual(1, firedCount);
+			Assert.Equal(1, firedCount);
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_EnforceCombinationOrder_ModifierOrderAgnostic()
 		{
 			// It should be possible to actuate the modifier keys in any order
@@ -625,10 +620,10 @@ namespace PassWinmenu.Hotkeys
 				_dummyEventSource.Actuate(validOrders[i]);
 				_dummyEventSource.Release(validOrders[i]);
 
-				Assert.AreEqual(i + 1, firedCount, $"Index {i}");
+				Assert.Equal(i + 1, firedCount);
 			}
 		}
-		[TestMethod, TestCategory(Category)]
+		[StaFact, TestCategory(Category)]
 		public void Register_EnforceCombinationOrder_RegularKeyLastOnly()
 		{
 			// The regular key must always come after the modifier keys in order
@@ -659,7 +654,7 @@ namespace PassWinmenu.Hotkeys
 				_dummyEventSource.Release(invalidOrders[i]);
 
 				// Invalid orders should never trigger the hotkey
-				Assert.AreEqual(0, firedCount, $"Index {i}");
+				Assert.Equal(0, firedCount);
 			}
 		}
 	}
