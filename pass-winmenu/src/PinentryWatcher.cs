@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -50,8 +50,15 @@ namespace PassWinmenu
 			if (pinentry.MainWindowHandle != foregroundHandle)
 			{
 				// Looks like pinentry has failed to bring itself to the foreground, let's help it out.
-				Log.Send("Sending pinentry window to foreground");
-				NativeMethods.SetForegroundWindow(pinentry.MainWindowHandle);
+				var windowSet = NativeMethods.SetForegroundWindow(pinentry.MainWindowHandle);
+				if (windowSet)
+				{
+					Log.Send("Sent pinentry window to foreground");
+				}
+				else
+				{
+					Log.Send("Failed to send pinentry window to foreground");
+				}
 			}
 			else
 			{
