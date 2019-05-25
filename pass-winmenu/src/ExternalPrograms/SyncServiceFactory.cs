@@ -14,7 +14,7 @@ namespace PassWinmenu.ExternalPrograms
 			IGitSyncStrategy strategy;
 			if (config.SyncMode == SyncMode.NativeGit)
 			{
-				strategy = new NativeGitSyncStrategy(config.GitPath);
+				strategy = new NativeGitSyncStrategy(config.GitPath, passwordStorePath);
 			}
 			else
 			{

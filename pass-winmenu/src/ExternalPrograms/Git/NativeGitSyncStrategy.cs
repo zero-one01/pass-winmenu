@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -13,9 +13,10 @@ namespace PassWinmenu.ExternalPrograms
 		private readonly string repositoryPath;
 		private readonly TimeSpan gitCallTimeout = TimeSpan.FromSeconds(5);
 
-		public NativeGitSyncStrategy(string gitPath)
+		public NativeGitSyncStrategy(string gitPath, string repositoryPath)
 		{
 			this.gitPath = gitPath;
+			this.repositoryPath = repositoryPath;
 		}
 
 		public void Fetch(Branch branch)
