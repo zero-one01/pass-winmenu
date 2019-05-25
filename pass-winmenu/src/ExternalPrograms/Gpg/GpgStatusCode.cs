@@ -1,4 +1,4 @@
-namespace PassWinmenu.ExternalPrograms
+namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	// Refer to the GPG source code, doc/DETAILS for a detailed explanation of status codes and their meaning.
 	internal enum GpgStatusCode

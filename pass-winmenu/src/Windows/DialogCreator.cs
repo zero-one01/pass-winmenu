@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
+using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.src.Windows;
 using PassWinmenu.Utilities;
@@ -19,15 +20,15 @@ namespace PassWinmenu.Windows
 		private readonly INotificationService notificationService;
 		private readonly ISyncService syncService;
 		private readonly IPasswordManager passwordManager;
-		private readonly GPG gpg;
+		private readonly PasswordShellHelper passwordShellHelper;
 		private readonly ClipboardHelper clipboard = new ClipboardHelper();
 
-		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, ISyncService syncService, GPG gpg)
+		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, ISyncService syncService, PasswordShellHelper passwordShellHelper)
 		{
 			this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
 			this.passwordManager = passwordManager ?? throw new ArgumentNullException(nameof(passwordManager));
 			this.syncService = syncService;
-			this.gpg = gpg;
+			this.passwordShellHelper = passwordShellHelper;
 		}
 
 		private void EnsureStaThread()
@@ -95,54 +96,7 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		internal void OpenPasswordShell()
 		{
-			var powershell = new ProcessStartInfo
-			{
-				FileName = "powershell",
-				WorkingDirectory = ConfigManager.Config.PasswordStore.Location,
-				UseShellExecute = false
-			};
-
-			var gpgLocation = gpg.GpgExePath;
-			if (gpgLocation.Contains(Path.DirectorySeparatorChar.ToString()) || gpgLocation.Contains(Path.AltDirectorySeparatorChar.ToString()))
-			{
-				// gpgLocation is a path, so ensure it's absolute.
-				gpgLocation = Path.GetFullPath(gpgLocation);
-			}
-			else if (gpgLocation == "gpg")
-			{
-				// This would conflict with our function name, so rename it to gpg.exe.
-				gpgLocation = "gpg.exe";
-			}
-
-			var homeDir = gpg.GetConfiguredHomeDir();
-			if (homeDir != null)
-			{
-				homeDir = $" --homedir \"{Path.GetFullPath(homeDir)}\"";
-			}
-			powershell.Arguments = $"-NoExit -Command \"function gpg() {{ & '{gpgLocation}'{homeDir} $args }}\"";
-			Process.Start(powershell);
-		}
-
-		/// <summary>
-		/// Display some information about configured variables.
-		/// </summary>
-		public void ShowDebugInfo()
-		{
-			// TODO: fetch Git reference from somewhere else
-			var git = (Git)syncService;
-			var gitData = "";
-			if (git != null)
-			{
-				gitData = $"\tbehind by:\t{git.GetTrackingDetails().BehindBy}\n" +
-				          $"\tahead by:\t\t{git.GetTrackingDetails().AheadBy}\n";
-			}
-
-			var debugInfo = $"gpg.exe path:\t\t{gpg.GpgExePath}\n" +
-			                $"gpg version:\t\t{gpg.GetVersion()}\n" +
-			                $"gpg homedir:\t\t{gpg.GetConfiguredHomeDir()}\n" +
-			                $"password store:\t\t{passwordManager.PasswordStore}\n" +
-			                $"git enabled:\t\t{git != null}\n{gitData}";
-			MessageBox.Show(debugInfo, "Debugging information", MessageBoxButton.OK, MessageBoxImage.None);
+			passwordShellHelper.OpenPasswordShell();
 		}
 
 		/// <summary>

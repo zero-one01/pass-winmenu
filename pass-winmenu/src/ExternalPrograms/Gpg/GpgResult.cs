@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PassWinmenu.ExternalPrograms
+namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	internal class GpgResult
 	{

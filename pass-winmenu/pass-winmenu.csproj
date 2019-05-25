@@ -118,8 +118,11 @@
     <Compile Include="src\ExternalPrograms\Git\NativeGitSyncStrategy.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgError.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgException.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgHomedirResolver.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgInstallationFinder.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgResult.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgStatusCode.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\GpgTransport.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\StatusMessage.cs" />
     <Compile Include="src\ExternalPrograms\Git\IGitSyncStrategy.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
@@ -159,6 +162,7 @@
     <Compile Include="src\WinApi\ExecutablePathResolver.cs" />
     <Compile Include="src\WinApi\IEnvironment.cs" />
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
+    <Compile Include="src\WinApi\SendKeysEscapeGenerator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgAgent.cs" />
@@ -215,6 +219,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\Windows\PasswordShellHelper.cs" />
     <Compile Include="src\Windows\SelectionLabel.xaml.cs">
       <DependentUpon>SelectionLabel.xaml</DependentUpon>
     </Compile>

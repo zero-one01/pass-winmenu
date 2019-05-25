@@ -1,6 +1,6 @@
 using System;
 
-namespace PassWinmenu.ExternalPrograms
+namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	internal class StatusMessage
 	{

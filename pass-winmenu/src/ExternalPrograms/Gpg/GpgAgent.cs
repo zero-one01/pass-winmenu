@@ -3,29 +3,24 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using PassWinmenu.Configuration;
 
-namespace PassWinmenu.ExternalPrograms
+namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	class GpgAgent
 	{
 		private const string gpgAgentConfigFileName = "gpg-agent.conf";
 		private const string managedByPassWinmenuComment = "# This configuration key is automatically managed by pass-winmenu";
-
 		private const string gpgAgentProcessName = "gpg-agent";
-		private const string gpgAgentFileName = "gpg-agent.exe";
-		private const string gpgConnectAgentFileName = "gpg-connect-agent.exe";
+
 		private readonly TimeSpan agentConnectTimeout = TimeSpan.FromSeconds(2);
 		private readonly TimeSpan agentReadyTimeout = TimeSpan.FromSeconds(3);
-		private readonly string gpgInstallDir;
+		private readonly GpgInstallation gpgInstallation;
 
 
-		public GpgAgent(string installDir)
+		public GpgAgent(GpgInstallation gpgInstallation)
 		{
-			gpgInstallDir = installDir;
+			this.gpgInstallation = gpgInstallation;
 		}
 
 		public void EnsureAgentResponsive()
@@ -40,10 +35,9 @@ namespace PassWinmenu.ExternalPrograms
 				return;
 			}
 
-			var connectAgent = Path.Combine(gpgInstallDir, gpgConnectAgentFileName);
-			if (!File.Exists(connectAgent))
+			if (!gpgInstallation.GpgConnectAgentExecutable.Exists)
 			{
-				Log.Send($"Unable to confirm that gpg-agent is alive. No connect-agent found at \"{connectAgent}\".", LogLevel.Warning);
+				Log.Send($"Unable to confirm that gpg-agent is alive. No connect-agent found at \"{gpgInstallation.GpgConnectAgentExecutable.FullName}\".", LogLevel.Warning);
 				return;
 			}
 
@@ -53,7 +47,7 @@ namespace PassWinmenu.ExternalPrograms
 				// We have a gpg-agent, let's see if we can connect to it.
 				proc = Process.Start(new ProcessStartInfo
 				{
-					FileName = connectAgent,
+					FileName = gpgInstallation.GpgConnectAgentExecutable.FullName,
 					Arguments = "/bye",
 					UseShellExecute = false,
 					RedirectStandardOutput = true,
@@ -115,10 +109,10 @@ namespace PassWinmenu.ExternalPrograms
 			// Now try to find the correct gpg-agent process.
 			// We'll start by looking for a process whose filename matches the installation directory we're working with.
 			// This means that if there are several gpg-agents running, we will ignore those that our gpg process likely won't try to connect to.
-			var matches = Process.GetProcesses().Where(p => p.MainModule.FileName == Path.Combine(Path.GetFullPath(gpgInstallDir), gpgAgentProcessName)).ToList();
+			var matches = Process.GetProcesses().Where(p => p.MainModule.FileName == gpgInstallation.GpgAgentExecutable.FullName).ToList();
 			if (matches.Any())
 			{
-				Log.Send($"Agent process(es) found (\"{gpgInstallDir}\")");
+				Log.Send($"Agent process(es) found (\"{gpgInstallation.InstallDirectory.FullName}\")");
 				// This should normally only return one match at most, but in certain cases
 				// GPG seems to be able to detect that the agent has become unresponsive, 
 				// and will start a new one without killing the old process.

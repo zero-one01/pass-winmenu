@@ -4,5 +4,6 @@ namespace PassWinmenu.ExternalPrograms
 	{
 		string Decrypt(string file);
 		void Encrypt(string data, string outputFile, params string[] recipients);
+		string GetVersion();
 	}
 }

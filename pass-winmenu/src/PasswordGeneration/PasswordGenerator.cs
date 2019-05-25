@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,8 +11,6 @@ namespace PassWinmenu.PasswordGeneration
 		public PasswordGenerationConfig Options { get; }
 
 		private readonly RNGCryptoServiceProvider csprng = new RNGCryptoServiceProvider();
-
-		public PasswordGenerator() : this(new PasswordGenerationConfig()) { }
 
 		public PasswordGenerator(PasswordGenerationConfig options)
 		{

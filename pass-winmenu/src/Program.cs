@@ -16,6 +16,7 @@ using McSherry.SemanticVersioning;
 using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
+using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.UpdateChecking;
@@ -109,8 +110,17 @@ namespace PassWinmenu
 #endif
 
 			// Create the GPG wrapper.
-			gpg = new GPG(new ExecutablePathResolver(new FileSystem(), new SystemEnvironment()));
-			gpg.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
+			var filesystem = new FileSystem();
+			var homedirResolver = new GpgHomedirResolver();
+			var exeResolver = new ExecutablePathResolver(new FileSystem(), new SystemEnvironment());
+			var installationResolver = new GpgInstallationFinder(filesystem, exeResolver);
+			var installation = installationResolver.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
+
+			var transport = new GpgTransport(homedirResolver, installation);
+			var agent = new GpgAgent(installation);
+
+			gpg = new GPG(exeResolver, transport, homedirResolver, agent);
+
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{
 				gpg.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys);
@@ -125,7 +135,8 @@ namespace PassWinmenu
 			};
 
 			clipboard = new ClipboardHelper();
-			dialogCreator = new DialogCreator(notificationService, passwordManager, git, gpg);
+			var passwordShellHelper = new PasswordShellHelper(installation, homedirResolver);
+			dialogCreator = new DialogCreator(notificationService, passwordManager, git, passwordShellHelper);
 			InitialiseUpdateChecker();
 
 			actionDispatcher = new ActionDispatcher(notificationService, dialogCreator, git, updateChecker);

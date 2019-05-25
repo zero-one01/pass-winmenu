@@ -170,7 +170,10 @@ namespace PassWinmenu.Actions
 
 		internal void ShowDebugInfo()
 		{
-			dialogCreator.ShowDebugInfo();
+			// TODO: determine how to handle this.
+			// Either create a new window accessible from 'More Actions',
+			// or add the information to the log viewer.
+			throw new NotImplementedException("Not implemented.");
 		}
 
 		internal void OpenPasswordShell()

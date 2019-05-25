@@ -1,6 +1,6 @@
 using System;
 
-namespace PassWinmenu.ExternalPrograms
+namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	/// <summary>
 	/// Represents an error type that is recognised by <see cref="GPG"/>.
