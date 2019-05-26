@@ -1,11 +1,27 @@
 using System;
 using System.IO;
+using System.IO.Abstractions;
 using PassWinmenu.Configuration;
+using PassWinmenu.WinApi;
 
 namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	class GpgHomedirResolver
 	{
+		private const string defaultHomeDirName = "gnupg";
+		private const string homedirEnvironmentVariableName = "GNUPGHOME";
+
+		private readonly GpgConfig config;
+		private readonly IEnvironment environment;
+		private readonly IFileSystem fileSystem;
+
+		public GpgHomedirResolver(GpgConfig config, IEnvironment environment, IFileSystem fileSystem)
+		{
+			this.config = config;
+			this.environment = environment;
+			this.fileSystem = fileSystem;
+		}
+
 		/// <summary>
 		/// Returns the path GPG will use as its home directory.
 		/// </summary>
@@ -18,11 +34,11 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		/// <returns></returns>
 		public string GetConfiguredHomeDir()
 		{
-			if (ConfigManager.Config.Gpg.GnupghomeOverride != null)
+			if (config.GnupghomeOverride != null)
 			{
-				return ConfigManager.Config.Gpg.GnupghomeOverride;
+				return config.GnupghomeOverride;
 			}
-			return Environment.GetEnvironmentVariable("GNUPGHOME");
+			return environment.GetEnvironmentVariable(homedirEnvironmentVariableName);
 		}
 
 		/// <summary>
@@ -31,8 +47,8 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		/// <returns></returns>
 		public string GetDefaultHomeDir()
 		{
-			var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			return Path.Combine(appdata, "gnupg");
+			var appData = environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+			return fileSystem.Path.Combine(appData, defaultHomeDirName);
 		}
 	}
 }

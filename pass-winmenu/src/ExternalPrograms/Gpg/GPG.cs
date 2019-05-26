@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using PassWinmenu.WinApi;
 
 namespace PassWinmenu.ExternalPrograms.Gpg
 {
@@ -11,14 +10,12 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 	/// </summary>
 	internal class GPG : ICryptoService
 	{
-		private readonly IExecutablePathResolver executablePathResolver;
 		private readonly GpgTransport gpgTransport;
 		private readonly GpgHomedirResolver homedirResolver;
 		private readonly GpgAgent gpgAgent;
 
-		public GPG(IExecutablePathResolver executablePathResolver, GpgTransport gpgTransport, GpgHomedirResolver homedirResolver, GpgAgent gpgAgent)
+		public GPG(GpgTransport gpgTransport, GpgHomedirResolver homedirResolver, GpgAgent gpgAgent)
 		{
-			this.executablePathResolver = executablePathResolver;
 			this.gpgTransport = gpgTransport;
 			this.homedirResolver = homedirResolver;
 			this.gpgAgent = gpgAgent;
@@ -32,7 +29,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
 		public string Decrypt(string file)
 		{
-			gpgAgent?.EnsureAgentResponsive();
+			gpgAgent.EnsureAgentResponsive();
 			var result = gpgTransport.CallGpg($"--decrypt \"{file}\"");
 			VerifyDecryption(result);
 			return result.Stdout;
@@ -105,7 +102,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 
 		private void ListSecretKeys()
 		{
-			gpgAgent?.EnsureAgentResponsive();
+			gpgAgent.EnsureAgentResponsive();
 			var result = gpgTransport.CallGpg("--list-secret-keys");
 			if (result.Stdout.Length == 0)
 			{
@@ -131,7 +128,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 
 		public void UpdateAgentConfig(Dictionary<string, string> configKeys)
 		{
-			gpgAgent?.UpdateAgentConfig(configKeys, homedirResolver.GetHomeDir());
+			gpgAgent.UpdateAgentConfig(configKeys, homedirResolver.GetHomeDir());
 		}
 	}
 }

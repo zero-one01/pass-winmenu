@@ -91,7 +91,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EmbeddedResources\EmbeddedResourcesTests.cs" />
-    <Compile Include="ExternalPrograms\GpgTests.cs" />
+    <Compile Include="ExternalPrograms\GpgHomedirResolverTests.cs" />
+    <Compile Include="ExternalPrograms\GpgInstallationFinderTests.cs" />
+    <Compile Include="Utilities\StubEnvironment.cs" />
     <Compile Include="External\ConfigFileTests.cs" />
     <Compile Include="Hotkeys\DummyHotkeyRegistrar.cs" />
     <Compile Include="Hotkeys\DummyKeyEventSource.cs" />

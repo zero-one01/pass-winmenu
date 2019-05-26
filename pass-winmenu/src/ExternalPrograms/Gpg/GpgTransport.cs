@@ -8,16 +8,18 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	internal class GpgTransport
 	{
-
 		private const string StatusMarker = "[GNUPG:] ";
+
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
 		private readonly GpgHomedirResolver homedirResolver;
 		private readonly GpgInstallation installation;
+		private readonly IProcessStarter starter;
 
-		public GpgTransport(GpgHomedirResolver homedirResolver, GpgInstallation installation)
+		public GpgTransport(GpgHomedirResolver homedirResolver, GpgInstallation installation, IProcessStarter starter)
 		{
 			this.homedirResolver = homedirResolver;
 			this.installation = installation;
+			this.starter = starter;
 		}
 
 		public GpgResult CallGpg(string arguments, string input = null)
@@ -73,7 +75,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 			// Only redirect stdin if we're going to send anything to it.
 			var psi = CreateGpgProcessStartInfo(arguments, input != null);
 
-			var gpgProc = Process.Start(psi);
+			var gpgProc = starter.Start(psi);
 			if (input != null)
 			{
 				// Explicitly define the encoding to not send a BOM, to ensure other platforms can handle our output.

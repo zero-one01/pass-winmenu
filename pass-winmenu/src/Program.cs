@@ -111,15 +111,15 @@ namespace PassWinmenu
 
 			// Create the GPG wrapper.
 			var filesystem = new FileSystem();
-			var homedirResolver = new GpgHomedirResolver();
+			var homedirResolver = new GpgHomedirResolver(ConfigManager.Config.Gpg, new SystemEnvironment(), new FileSystem());
 			var exeResolver = new ExecutablePathResolver(new FileSystem(), new SystemEnvironment());
 			var installationResolver = new GpgInstallationFinder(filesystem, exeResolver);
 			var installation = installationResolver.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
 
-			var transport = new GpgTransport(homedirResolver, installation);
+			var transport = new GpgTransport(homedirResolver, installation, new ProcessStarter());
 			var agent = new GpgAgent(installation);
 
-			gpg = new GPG(exeResolver, transport, homedirResolver, agent);
+			gpg = new GPG(transport, homedirResolver, agent);
 
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{

@@ -25,7 +25,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		}
 
 		/// <summary>
-		/// Tries to find the GPG installation directory and configures the wrapper to use it.
+		/// Tries to find the GPG installation directory from the given path.
 		/// </summary>
 		/// <param name="gpgPathSpec">Path to the GPG executable. When set to null,
 		/// the default location will be used.</param>
@@ -54,25 +54,18 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 
 		private GpgInstallation ResolveFromPath(string gpgPathSpec)
 		{
-			try
-			{
-				var resolved = executablePathResolver.Resolve(gpgPathSpec);
-				var executable = fileSystem.FileInfo.FromFileName(resolved);
+			var resolved = executablePathResolver.Resolve(gpgPathSpec);
+			var executable = fileSystem.FileInfo.FromFileName(resolved);
 
-				Log.Send("GPG executable found at the configured path. Assuming installation dir to be " + executable.Directory);
+			Log.Send("GPG executable found at the configured path. Assuming installation dir to be " + executable.Directory);
 
-				return new GpgInstallation
-				{
-					InstallDirectory = executable.Directory,
-					GpgExecutable = executable,
-					GpgAgentExecutable = ChildOf(executable.Directory, GpgAgentExeName),
-					GpgConnectAgentExecutable = ChildOf(executable.Directory, GpgConnectAgentExeName)
-				};
-			}
-			catch (FileNotFoundException e)
+			return new GpgInstallation
 			{
-				throw new ArgumentException("The GPG installation path is invalid.", e);
-			}
+				InstallDirectory = executable.Directory,
+				GpgExecutable = executable,
+				GpgAgentExecutable = ChildOf(executable.Directory, GpgAgentExeName),
+				GpgConnectAgentExecutable = ChildOf(executable.Directory, GpgConnectAgentExeName)
+			};
 		}
 
 		private FileInfoBase ChildOf(DirectoryInfoBase parent, string childName)

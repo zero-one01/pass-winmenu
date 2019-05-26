@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace PassWinmenu.WinApi
 {
-	class ExecutablePathResolver  : IExecutablePathResolver
+	internal class ExecutablePathResolver : IExecutablePathResolver
 	{
 		private readonly IFileSystem fileSystem;
 		private readonly IEnvironment environment;
