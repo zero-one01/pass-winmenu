@@ -7,10 +7,8 @@ using System.Text.RegularExpressions;
 
 namespace PassWinmenu.ExternalPrograms.Gpg
 {
-	class GpgAgent
+	class GpgAgent : IGpgAgent
 	{
-		private const string gpgAgentConfigFileName = "gpg-agent.conf";
-		private const string managedByPassWinmenuComment = "# This configuration key is automatically managed by pass-winmenu";
 		private const string gpgAgentProcessName = "gpg-agent";
 
 		private readonly TimeSpan agentConnectTimeout = TimeSpan.FromSeconds(2);
@@ -135,84 +133,6 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 					Log.Send($" > killing gpg-agent {match.Id} (started {match.StartTime:G}), path: \"{match.MainModule.FileName}\"");
 					match.Kill();
 				}
-			}
-		}
-
-		/// <summary>
-		/// Update the gpg-agent config file with the given keys.
-		/// </summary>
-		public void UpdateAgentConfig(Dictionary<string, string> keys, string homeDir)
-		{
-			if (!Directory.Exists(homeDir))
-			{
-				Log.Send("GPG homedir does not exist, config file cannot be updated.", LogLevel.Warning);
-				return;
-			}
-
-			var agentConf = Path.Combine(homeDir, gpgAgentConfigFileName);
-			if (!File.Exists(agentConf))
-			{
-				using (File.Create(agentConf)) { }
-			}
-			var lines = File.ReadAllLines(agentConf);
-			var keysToSet = keys.ToList();
-
-			var newLines = UpdateAgentConfigKeyCollection(lines, keysToSet).ToArray();
-
-			if (lines.SequenceEqual(newLines))
-			{
-				Log.Send("GPG agent config file already contains the correct settings; it'll be left untouched.");
-			}
-			else
-			{
-				Log.Send($"Modifying GPG agent config file ({string.Join(", ", keys.Keys)})");
-				File.WriteAllLines(agentConf, newLines);
-			}
-		}
-
-		/// <summary>
-		/// Iterates over a list of config lines, adding or replacing the given config keys.
-		/// </summary>
-		private IEnumerable<string> UpdateAgentConfigKeyCollection(string[] existingLines, List<KeyValuePair<string, string>> keysToSet)
-		{
-			var configKeyRegex = new Regex(@"^(\s*([^#^\s][^\s]*)\s+)(.*)$");
-			for (var i = 0; i < existingLines.Length; i++)
-			{
-				var line = existingLines[i];
-				var match = configKeyRegex.Match(line);
-				if (match.Success)
-				{
-					// This looks like a config key, let's see if we're supposed to change it.
-					var key = match.Groups[2].Value;
-					var matchedPair = keysToSet.FirstOrDefault(k => k.Key == key);
-					if (matchedPair.Key == key)
-					{
-						// This key will need to be changed. Let's remove it from the list first.
-						keysToSet.RemoveAll(k => k.Key == key);
-
-						// Insert a comment explaining that we're managing this key,
-						// unless such a comment already exists.
-						if (i == 0 || existingLines[i - 1] != managedByPassWinmenuComment)
-						{
-							yield return managedByPassWinmenuComment;
-						}
-						// Now return the updated key-value pair.
-						yield return $"{matchedPair.Key} {matchedPair.Value}";
-					}
-					else
-					{
-						yield return line;
-					}
-				}
-			}
-			
-			while (keysToSet.Any())
-			{
-				// Looks like some of the keys we need to set aren't in the config file yet, so let's add them.
-				var next = keysToSet[0];
-				keysToSet.RemoveAt(0);
-				yield return managedByPassWinmenuComment;
-				yield return $"{next.Key} {next.Value}";
 			}
 		}
 	}

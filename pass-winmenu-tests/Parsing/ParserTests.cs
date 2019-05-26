@@ -1,13 +1,11 @@
 using System.IO;
-
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.Utilities;
-
 using Xunit;
 
 namespace PassWinmenu.Tests
 {
-		public class ParserTests
+	public class ParserTests
 	{
 		private const string Category = "Core: Password File Parsing";
 
@@ -28,7 +26,7 @@ namespace PassWinmenu.Tests
 		public void Test_LineEndings_Metadata()
 		{
 			var crlf = "password\r\nmeta-data";
-			var cr= "password\rmeta-data";
+			var cr = "password\rmeta-data";
 			var lf = "password\nmeta-data";
 
 			var p = new PasswordFileParser();
@@ -49,7 +47,6 @@ namespace PassWinmenu.Tests
 		[Fact, TestCategory(Category)]
 		public void Test_LineEndings_PasswordOnly()
 		{
-
 			var crlf = "password\r\n";
 			var cr = "password\r";
 			var lf = "password\n";
@@ -115,7 +112,6 @@ namespace PassWinmenu.Tests
 			Assert.True(parsedMixed.Keys[0].Value == "user");
 			Assert.True(parsedMixed.Keys[1].Key == "Key");
 			Assert.True(parsedMixed.Keys[1].Value == "value");
-
 		}
 
 		[Fact, TestCategory(Category)]
@@ -141,10 +137,10 @@ namespace PassWinmenu.Tests
 		public void Test_Metadata_Multiple_Keys()
 		{
 			var duplicate = "password\r\n" +
-						  "Username: user\r\n" +
-			              "Duplicate: value1\r\n" +
-			              "Duplicate: value2\r\n" +
-			              "Duplicate: value3\r\n";
+			                "Username: user\r\n" +
+			                "Duplicate: value1\r\n" +
+			                "Duplicate: value2\r\n" +
+			                "Duplicate: value3\r\n";
 
 			var p = new PasswordFileParser();
 			var parsed = p.Parse(dummyFile, duplicate, false);

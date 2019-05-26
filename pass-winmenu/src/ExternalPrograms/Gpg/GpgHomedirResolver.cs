@@ -6,7 +6,7 @@ using PassWinmenu.WinApi;
 
 namespace PassWinmenu.ExternalPrograms.Gpg
 {
-	class GpgHomedirResolver
+	class GpgHomedirResolver : IGpgHomedirResolver
 	{
 		private const string defaultHomeDirName = "gnupg";
 		private const string homedirEnvironmentVariableName = "GNUPGHOME";

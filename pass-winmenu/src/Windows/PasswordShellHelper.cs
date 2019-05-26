@@ -8,9 +8,9 @@ namespace PassWinmenu.Windows
 	internal class PasswordShellHelper
 	{
 		private readonly GpgInstallation installation;
-		private readonly GpgHomedirResolver homedirResolver;
+		private readonly IGpgHomedirResolver homedirResolver;
 
-		public PasswordShellHelper(GpgInstallation installation, GpgHomedirResolver homedirResolver)
+		public PasswordShellHelper(GpgInstallation installation, IGpgHomedirResolver homedirResolver)
 		{
 			this.installation = installation;
 			this.homedirResolver = homedirResolver;

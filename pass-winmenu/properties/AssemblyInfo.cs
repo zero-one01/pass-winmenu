@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Runtime.CompilerServices;
@@ -53,4 +53,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyVersion("1")]
 [assembly: AssemblyFileVersion("1")]
 
+// Required for tests
 [assembly: InternalsVisibleTo("pass-winmenu-tests")]
+// Required for mocking internal interfaces
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

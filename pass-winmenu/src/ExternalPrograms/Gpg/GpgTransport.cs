@@ -6,16 +6,16 @@ using System.Text;
 
 namespace PassWinmenu.ExternalPrograms.Gpg
 {
-	internal class GpgTransport
+	internal class GpgTransport : IGpgTransport
 	{
 		private const string StatusMarker = "[GNUPG:] ";
 
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
-		private readonly GpgHomedirResolver homedirResolver;
+		private readonly IGpgHomedirResolver homedirResolver;
 		private readonly GpgInstallation installation;
 		private readonly IProcessStarter starter;
 
-		public GpgTransport(GpgHomedirResolver homedirResolver, GpgInstallation installation, IProcessStarter starter)
+		public GpgTransport(IGpgHomedirResolver homedirResolver, GpgInstallation installation, IProcessStarter starter)
 		{
 			this.homedirResolver = homedirResolver;
 			this.installation = installation;

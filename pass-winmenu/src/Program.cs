@@ -111,19 +111,26 @@ namespace PassWinmenu
 
 			// Create the GPG wrapper.
 			var filesystem = new FileSystem();
-			var homedirResolver = new GpgHomedirResolver(ConfigManager.Config.Gpg, new SystemEnvironment(), new FileSystem());
-			var exeResolver = new ExecutablePathResolver(new FileSystem(), new SystemEnvironment());
+			var environment = new SystemEnvironment();
+			var processStarter = new ProcessStarter();
+
+			var exeResolver = new ExecutablePathResolver(filesystem, environment);
+
 			var installationResolver = new GpgInstallationFinder(filesystem, exeResolver);
 			var installation = installationResolver.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
+			var homedirResolver = new GpgHomedirResolver(ConfigManager.Config.Gpg, environment, filesystem);
 
-			var transport = new GpgTransport(homedirResolver, installation, new ProcessStarter());
+			var configReader = new GpgAgentConfigReader(filesystem, homedirResolver);
+			var updater = new GpgAgentConfigUpdater(configReader);
+
+			var transport = new GpgTransport(homedirResolver, installation, processStarter);
 			var agent = new GpgAgent(installation);
 
-			gpg = new GPG(transport, homedirResolver, agent);
+			gpg = new GPG(transport, agent, new GpgResultVerifier());
 
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{
-				gpg.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys);
+				updater.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys);
 			}
 			// Create the Git wrapper, if enabled.
 			InitialiseGit(ConfigManager.Config.Git, ConfigManager.Config.PasswordStore.Location);

@@ -22,6 +22,13 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 			}
 		}
 
+		public StatusMessage(GpgStatusCode statusCode, string message)
+		{
+			StatusCode = statusCode;
+			RawStatusCode = statusCode.ToString();
+			Message = message;
+		}
+
 		public override string ToString() => $"[{RawStatusCode}] {Message}";
 	}
 }
