@@ -91,11 +91,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EmbeddedResources\EmbeddedResourcesTests.cs" />
+    <Compile Include="Utilities\FakeProcess.cs" />
+    <Compile Include="Utilities\FakeProcessBuilder.cs" />
     <Compile Include="ExternalPrograms\GpgAgentConfigReaderTests.cs" />
     <Compile Include="ExternalPrograms\GpgAgentConfigWriterTests.cs" />
+    <Compile Include="ExternalPrograms\GpgAgentTests.cs" />
     <Compile Include="ExternalPrograms\GpgHomedirResolverTests.cs" />
     <Compile Include="ExternalPrograms\GpgInstallationFinderTests.cs" />
     <Compile Include="ExternalPrograms\GpgTests.cs" />
+    <Compile Include="Utilities\BlockingStream.cs" />
+    <Compile Include="Utilities\GpgInstallationBuilder.cs" />
     <Compile Include="Utilities\GpgResultBuilder.cs" />
     <Compile Include="Utilities\StubHomedirResolver.cs" />
     <Compile Include="Utilities\StubEnvironment.cs" />

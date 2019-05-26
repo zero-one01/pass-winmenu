@@ -47,11 +47,6 @@ namespace PassWinmenu.PasswordGeneration
 		/// </summary>
 		private IEnumerable<int> GetIntegers(int max, int count)
 		{
-			if (max < 0)
-			{
-				throw new ArgumentException("Max value must be positive.", nameof(max));
-			}
-
 			for (var i = 0; i < count; i++)
 			{
 				yield return GetRandomInteger(max);

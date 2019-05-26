@@ -132,9 +132,11 @@
     <Compile Include="src\ExternalPrograms\Gpg\IGpgTransport.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\StatusMessage.cs" />
     <Compile Include="src\ExternalPrograms\Git\IGitSyncStrategy.cs" />
-    <Compile Include="src\ExternalPrograms\IProcessStarter.cs" />
+    <Compile Include="src\ExternalPrograms\IProcess.cs" />
+    <Compile Include="src\ExternalPrograms\IProcesses.cs" />
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
-    <Compile Include="src\ExternalPrograms\ProcessStarter.cs" />
+    <Compile Include="src\ExternalPrograms\Processes.cs" />
+    <Compile Include="src\ExternalPrograms\ProcessWrapper.cs" />
     <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
     <Compile Include="src\PasswordManagement\PasswordFile.cs" />

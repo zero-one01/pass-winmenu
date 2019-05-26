@@ -112,7 +112,7 @@ namespace PassWinmenu
 			// Create the GPG wrapper.
 			var filesystem = new FileSystem();
 			var environment = new SystemEnvironment();
-			var processStarter = new ProcessStarter();
+			var processes = new Processes();
 
 			var exeResolver = new ExecutablePathResolver(filesystem, environment);
 
@@ -123,8 +123,8 @@ namespace PassWinmenu
 			var configReader = new GpgAgentConfigReader(filesystem, homedirResolver);
 			var updater = new GpgAgentConfigUpdater(configReader);
 
-			var transport = new GpgTransport(homedirResolver, installation, processStarter);
-			var agent = new GpgAgent(installation);
+			var transport = new GpgTransport(homedirResolver, installation, processes);
+			var agent = new GpgAgent(processes, installation);
 
 			gpg = new GPG(transport, agent, new GpgResultVerifier());
 

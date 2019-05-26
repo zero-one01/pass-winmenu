@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PassWinmenu.Configuration;
 using PassWinmenu.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace PassWinmenu.PasswordGeneration
@@ -20,11 +21,29 @@ namespace PassWinmenu.PasswordGeneration
 			{
 				Length = 32
 			};
-			var generator = new PasswordGenerator(options);
+			using (var generator = new PasswordGenerator(options))
+			{
+				var password = generator.GeneratePassword();
 
-			var password = generator.GeneratePassword();
+				password.Length.ShouldBe(32);
+			}
 
-			Assert.Equal(32, password.Length);
+		}
+
+		[Fact, TestCategory(Category)]
+		public void GeneratePassword_NoCharacterGroups_Null()
+		{
+			var options = new PasswordGenerationConfig
+			{
+				Length = 32,
+				CharacterGroups = new CharacterGroupConfig[0]
+			};
+			using (var generator = new PasswordGenerator(options))
+			{
+				var password = generator.GeneratePassword();
+
+				password.ShouldBeNull();
+			}
 		}
 
 		[Theory, TestCategory(Category)]
@@ -33,7 +52,6 @@ namespace PassWinmenu.PasswordGeneration
 		[InlineData("1")]
 		public void GeneratePassword_OnlyContainsAllowedCharacters(string allowedCharacters)
 		{
-			var allowedSuperset = new HashSet<char>(allowedCharacters.Distinct());
 			var options = new PasswordGenerationConfig
 			{
 				CharacterGroups = new []
@@ -41,12 +59,12 @@ namespace PassWinmenu.PasswordGeneration
 					new CharacterGroupConfig("test", allowedCharacters, true), 
 				}
 			};
-			var generator = new PasswordGenerator(options);
+			using (var generator = new PasswordGenerator(options))
+			{
+				var password = generator.GeneratePassword();
 
-			var password = generator.GeneratePassword();
-			var passwordSet = new HashSet<char>(password);
-
-			Assert.Subset(allowedSuperset, passwordSet);
+				password.ShouldBeSubsetOf(allowedCharacters);
+			}
 		}
 	}
 }

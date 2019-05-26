@@ -13,19 +13,19 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		private readonly TimeSpan gpgCallTimeout = TimeSpan.FromSeconds(5);
 		private readonly IGpgHomedirResolver homedirResolver;
 		private readonly GpgInstallation installation;
-		private readonly IProcessStarter starter;
+		private readonly IProcesses processes;
 
-		public GpgTransport(IGpgHomedirResolver homedirResolver, GpgInstallation installation, IProcessStarter starter)
+		public GpgTransport(IGpgHomedirResolver homedirResolver, GpgInstallation installation, IProcesses processes)
 		{
 			this.homedirResolver = homedirResolver;
 			this.installation = installation;
-			this.starter = starter;
+			this.processes = processes;
 		}
 
 		public GpgResult CallGpg(string arguments, string input = null)
 		{
 			var gpgProc = CreateGpgProcess(arguments, input);
-			gpgProc.WaitForExit((int)gpgCallTimeout.TotalMilliseconds);
+			gpgProc.WaitForExit(gpgCallTimeout);
 
 			string stderrLine;
 			var stderrMessages = new List<string>();
@@ -69,13 +69,13 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		/// <summary>
 		/// Spawns a GPG process.
 		/// </summary>
-		private Process CreateGpgProcess(string arguments, string input = null)
+		private IProcess CreateGpgProcess(string arguments, string input = null)
 		{
 			Log.Send($"Calling GPG with \"{arguments}\"");
 			// Only redirect stdin if we're going to send anything to it.
 			var psi = CreateGpgProcessStartInfo(arguments, input != null);
 
-			var gpgProc = starter.Start(psi);
+			var gpgProc = processes.Start(psi);
 			if (input != null)
 			{
 				// Explicitly define the encoding to not send a BOM, to ensure other platforms can handle our output.
