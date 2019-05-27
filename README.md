@@ -1,5 +1,12 @@
 # pass-winmenu
 
+
+[![Build status](https://ci.appveyor.com/api/projects/status/40m387b1xshwmqny?svg=true)](https://ci.appveyor.com/project/baggykiin/pass-winmenu)
+[![Codecov badge](https://codecov.io/gh/Baggykiin/pass-winmenu/branch/master/graph/badge.svg)](https://codecov.io/gh/Baggykiin/pass-winmenu)
+[![Coverity badge](https://scan.coverity.com/projects/11544/badge.svg)](https://scan.coverity.com/projects/baggykiin-pass-winmenu)
+
+
+
 A simple, easy-to-use password manager for Windows.
 
 Pass-winmenu follows the philosophy of (and is compatible with) the Linux password manager [pass](https://www.passwordstore.org), which defines an open standard for password management that's easy to extend and customise to your personal requirements.
