@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EmbeddedResources\EmbeddedResourcesTests.cs" />
+    <Compile Include="ExternalPrograms\GpgTransportTests.cs" />
     <Compile Include="Utilities\FakeProcess.cs" />
     <Compile Include="Utilities\FakeProcessBuilder.cs" />
     <Compile Include="ExternalPrograms\GpgAgentConfigReaderTests.cs" />
