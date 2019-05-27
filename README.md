@@ -6,11 +6,11 @@ Pass-winmenu follows the philosophy of (and is compatible with) the Linux passwo
 
 ---
 
-At request I've added a donation link. Donations will go to acquiring a code signing certificate; for verifying downloads and allowing Windows Defender to eventually start trusting the application.
+![demonstration GIF](https://i.imgur.com/Yf9XBQn.gif)
+
+Donations to this project will go to acquiring a code signing certificate; for verifying downloads and allowing Windows Defender to eventually start trusting the application.
 
 [![Donation button](https://www.paypalobjects.com/en_US/NL/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X46C4FW3NQAYS&source=url)
-
-![demonstration GIF](https://i.imgur.com/Yf9XBQn.gif)
 
 ## Introduction
 
@@ -24,20 +24,16 @@ Its simplicity and modularity offer many advantages, most importantly:
 - Because the passwords are simply stored as encrypted files in directories, you can organise them
   with your file manager and synchronise them across your devices using whatever method you prefer
   (Git, Dropbox, Nextcloud, etc).
-- The passwords are securely encrypted with your own GPG keys, which can only be unlocked with
-  your master password. Even if someone manages to acquire your encrypted passwords and your GPG keys,
-  they won't be able to do anything unless they have your master password.
+- The passwords are encrypted with your GPG key, which can only be unlocked with
+  your master password. A potential attacker will need to have your encrypted passwords, you GPG keys, _and_ your master password to be able to do anything at all.
 
-Unfortunately, while there are many Linux integrations available, Windows integrations are more scarce.
-
-I wasn't happy with the existing ones, so I created my own, focusing on easy, keyboard-friendly
-interaction and a minimal interface that stays out of your way.
+While many Linux integrations for pass are available, there are fewer options for Windows. Pass-winmenu aims to fill that gap. It allows for easy, keyboard-friendly interaction and has a minimal interface that stays out of your way.
 
 ## Usage
 
 Bring up the password menu with the keyboard shortcut `Ctrl Alt P`.
-The password menu allows you to quickly browse through your passwords and select the right one.
-Select the right password file by double-clicking it, or by using the arrow keys and pressing Enter.
+The password menu allows you to quickly search through your passwords to find the one you are looking for.
+Navigate through the results by pressing Tab, and press Enter to decrypt the selected password.
 
 The password will be decrypted using GPG, and your GPG key passphrase may be requested through pinentry.
 The decrypted password will then be copied to your clipboard and/or entered into the active window,
@@ -51,8 +47,7 @@ The configuration file is extensively documented, and there are many settings th
 
 ## Dependencies
 
-Pass-winmenu is built against .NET Framework 4.5.2, which should already be installed on every version
-of Windows since Windows 7.
+Pass-winmenu is built against .NET Framework 4.6.2, included by default in Windows 10, and should usually be installed on older Windows versions already.
 
 Git support is provided by LibGit2Sharp, which requires some native dependencies which are contained within the
 release builds.
@@ -70,8 +65,8 @@ This process is explained below.
 
 ### Setting up GPG:
 
-If you already have a GPG key, you may want to consider importing it and using that (see ['accessing an existing password store on a different host'](
-#accessing-an-existing-password-store-on-a-different-host)).
+If you already have a GPG key, you can skip this step and go to ['creating a new password store'](
+#creating-a-new-password-store).
 If you've never used GPG before, you can generate a new key. Start pass-winmenu, right click the key icon
 in the notification area, and click `Open shell`.
 
@@ -82,17 +77,7 @@ Start by generating a new key:
 powershell> gpg --gen-key
 ```
 
-Follow the instructions to generate your GPG keys. If it asks you what kind of keys
-you want to generate, don't pick any of the `sign only` options, as they don't
-include an encryption key, which is required for encrypting passwords.
-The default, RSA and RSA, is recommended.
-
-When it asks you for an email address, remember that address, as you'll need to enter
-it again in a bit.
-
-Finally, you'll be asked to enter a passphrase. Make sure this is a very secure,
-unique passphrase, as it can be used to decrypt all your passwords, but don't
-make it *too* hard  to enter, since you'll need to enter it regularly.
+Follow the instructions to generate your GPG keys. You'll be asked to enter a passphrase, this is the passphrase that you will use to decrypt your passwords, so make sure it is secure enough.
 
 ### Creating a new password store:
 
@@ -103,24 +88,23 @@ If you want to use that directory, create it:
 powershell> mkdir $HOME\.password-store
 ```
 
-Save the email address you used for creating your GPG key into a `.gpg-id` file
-in the root of your password directory.
+Save the email address you used for creating your GPG key into a `.gpg-id` file in the root of your password directory.
+If you have multiple keys with the same email address, you can also use the key ID instead.
 ```
 powershell> echo "myemail@example.com" | Out-File -Encoding utf8 $HOME\.password-store\.gpg-id
 ```
 
 If you've used a different location for your password store directory, you'll have to point pass-winmenu to it.
 Open `pass-winmenu.yaml` in the directory where you've installed the application, and set the `password-store`
-variable to the correct location. Exit pass-winmenu (right click the icon > Quit), and start it again.
+variable to the correct location. Exit pass-winmenu if it was running, and start it again.
 
 You should now have a working password manager.
 
 ### Password synchronisation
 
 If you want to access your passwords on multiple devices, you have several options.
-What follows are the instructions for setting up Git, but all software 
+What follows are the instructions for setting up Git (which is by far the most popular option), but all software 
 able to synchronise directories will work: Git, SVN, Dropbox, Google Drive, ownCloud, network shares, bittorrent sync...
-
 
 To synchronise your passwords using Git, initialise a new Git repository at the root of your password store:
 ```
@@ -133,9 +117,7 @@ powershell> git commit -m "Initialise password repository"
 You'll also need a remote Git server. GitLab offers free private repositories, and GitHub does too if
 you're a student. Alternatively, you can of course run your own Git server.
 
-Add an empty repository on your Git provider of choice, then connect your password store to it.
-Depending on where you're hosting your repository, it might differ a bit, but you'll usually
-have to do something like this:
+Add an empty repository on your Git provider of choice, then connect your password store to it. It will usually come down to something like this:
 
 ```
 powershell> git remote add origin https://github.com/yourusername/password-store.git
@@ -145,8 +127,7 @@ powershell> git push --set-upstream origin master
 ### Accessing an existing password store on a different host
 
 If you already have a password store and you want to access it from another computer, you'll have
-to import your GPG keys on it. Follow the above instructions for installing GPG and Git, then export
-your GPG keys on the machine where you already have a working password store:
+to import your GPG keys on it. Install pass-winmenu on your target PC, then export your GPG keys on the machine where you already have a working password store:
 
 ```
 powershell> gpg --export-secret-key -a youremailaddress@example.com > private.key
