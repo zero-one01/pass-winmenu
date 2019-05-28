@@ -47,7 +47,7 @@ The configuration file is extensively documented, and there are many settings th
 
 ## Dependencies
 
-Pass-winmenu is built against .NET Framework 4.6.2, included by default in Windows 10, and should usually be installed on older Windows versions already.
+Pass-winmenu is built against .NET Framework 4.6.2, which is included by default in Windows 10, and usually already installed on older Windows versions.
 
 Git support is provided by LibGit2Sharp, which requires some native dependencies which are contained within the
 release builds.
