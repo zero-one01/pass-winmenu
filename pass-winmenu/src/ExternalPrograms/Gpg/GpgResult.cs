@@ -37,19 +37,5 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		{
 			return required.All(StatusCodes.Contains);
 		}
-
-		public void EnsureSuccess(GpgStatusCode[] requiredCodes, GpgStatusCode[] disallowedCodes)
-		{
-			var missing = requiredCodes.Where(c => !StatusCodes.Contains(c)).ToList();
-			if (missing.Count > 0)
-			{
-				throw new GpgException($"Expected status(es) \"{string.Join(", ", missing)}\" not returned by GPG");
-			}
-			var present = disallowedCodes.Where(c => StatusCodes.Contains(c)).ToList();
-			if (present.Count > 0)
-			{
-				throw new GpgException($"GPG returned disallowes status(es) \"{string.Join(", ", present)}\"");
-			}
-		}
 	}
 }

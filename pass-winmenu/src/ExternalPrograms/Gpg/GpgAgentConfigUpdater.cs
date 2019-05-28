@@ -10,11 +10,11 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	internal class GpgAgentConfigUpdater
 	{
-		private const string managedByPassWinmenuComment = "# This configuration key is automatically managed by pass-winmenu";
+		public const string ManagedByPassWinmenuComment = "# This configuration key is automatically managed by pass-winmenu";
 
-		private readonly GpgAgentConfigReader reader;
+		private readonly IGpgAgentConfigReader reader;
 
-		public GpgAgentConfigUpdater(GpgAgentConfigReader reader)
+		public GpgAgentConfigUpdater(IGpgAgentConfigReader reader)
 		{
 			this.reader = reader;
 		}
@@ -47,7 +47,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 			Log.Send($"Modifying GPG agent config file ({string.Join(", ", keys.Keys)})");
 			try
 			{
-				reader.WriteConfigLines(lines);
+				reader.WriteConfigLines(newLines);
 			}
 			catch (Exception e)
 			{
@@ -59,46 +59,58 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		/// <summary>
 		/// Iterates over a list of config lines, adding or replacing the given config keys.
 		/// </summary>
-		private IEnumerable<string> UpdateAgentConfigKeyCollection(string[] existingLines, List<KeyValuePair<string, string>> keysToSet)
+		private IEnumerable<string> UpdateAgentConfigKeyCollection(string[] existingLines, List<KeyValuePair<string, string>> pairsToUpdate)
 		{
 			var configKeyRegex = new Regex(@"^(\s*([^#^\s][^\s]*)\s+)(.*)$");
 			for (var i = 0; i < existingLines.Length; i++)
 			{
 				var line = existingLines[i];
 				var match = configKeyRegex.Match(line);
-				if (match.Success)
+				if (!match.Success)
 				{
-					// This looks like a config key, let's see if we're supposed to change it.
-					var key = match.Groups[2].Value;
-					var matchedPair = keysToSet.FirstOrDefault(k => k.Key == key);
-					if (matchedPair.Key == key)
-					{
-						// This key will need to be changed. Let's remove it from the list first.
-						keysToSet.RemoveAll(k => k.Key == key);
-
-						// Insert a comment explaining that we're managing this key,
-						// unless such a comment already exists.
-						if (i == 0 || existingLines[i - 1] != managedByPassWinmenuComment)
-						{
-							yield return managedByPassWinmenuComment;
-						}
-						// Now return the updated key-value pair.
-						yield return $"{matchedPair.Key} {matchedPair.Value}";
-					}
-					else
-					{
-						yield return line;
-					}
+					// This line does not look like a config key, best not touch it.
+					yield return line;
+					continue;
 				}
-				// TODO: should we not yield the line here?
+
+				// Line looks like a a configuration pair, let's check if we want to do something with it.
+				var key = match.Groups[2].Value;
+				var value = match.Groups[3].Value;
+				var pairToSet = pairsToUpdate.FirstOrDefault(k => k.Key == key);
+				if (pairToSet.Key == null)
+				{
+					// We don't recognise the key in this pair, so no need to change it.
+					yield return line;
+					continue;
+				}
+
+				// This pair may need its value updated, so remove it.
+				pairsToUpdate.RemoveAll(k => k.Key == key);
+
+				if (pairToSet.Value == value)
+				{
+					// The value is already correct, no need to do anything.
+					yield return line;
+					continue;
+				}
+
+				// Insert a comment explaining that we're managing this key,
+				// unless such a comment already exists.
+				if (i == 0 || existingLines[i - 1] != ManagedByPassWinmenuComment)
+				{
+					yield return ManagedByPassWinmenuComment;
+				}
+
+				// Now return the updated key-value pair.
+				yield return $"{pairToSet.Key} {pairToSet.Value}";
 			}
 
-			while (keysToSet.Any())
+			while (pairsToUpdate.Any())
 			{
 				// Looks like some of the keys we need to set aren't in the config file yet, so let's add them.
-				var next = keysToSet[0];
-				keysToSet.RemoveAt(0);
-				yield return managedByPassWinmenuComment;
+				var next = pairsToUpdate[0];
+				pairsToUpdate.RemoveAt(0);
+				yield return ManagedByPassWinmenuComment;
 				yield return $"{next.Key} {next.Value}";
 			}
 		}

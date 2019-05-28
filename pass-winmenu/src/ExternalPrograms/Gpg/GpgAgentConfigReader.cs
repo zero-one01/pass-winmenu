@@ -3,7 +3,7 @@ using System.IO.Abstractions;
 
 namespace PassWinmenu.ExternalPrograms.Gpg
 {
-	class GpgAgentConfigReader
+	class GpgAgentConfigReader : IGpgAgentConfigReader
 	{
 		private const string gpgAgentConfigFileName = "gpg-agent.conf";
 

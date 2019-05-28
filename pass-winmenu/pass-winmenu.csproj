@@ -127,6 +127,7 @@
     <Compile Include="src\ExternalPrograms\Gpg\GpgStatusCode.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgTransport.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\IGpgAgent.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\IGpgAgentConfigReader.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\IGpgHomedirResolver.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\IGpgResultVerifier.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\IGpgTransport.cs" />
