@@ -1,8 +1,7 @@
-using PassWinmenu.Utilities;
-
+using PassWinmenuTests.Utilities;
 using Xunit;
 
-namespace PassWinmenu.WinApi
+namespace PassWinmenuTests.WinApi
 {
 		public class ClipboardHelperTests
 	{

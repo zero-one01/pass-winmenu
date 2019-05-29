@@ -1,6 +1,6 @@
 using PassWinmenu.ExternalPrograms.Gpg;
 
-namespace PassWinmenu.Utilities
+namespace PassWinmenuTests.Utilities
 {
 	public class StubHomedirResolver : IGpgHomedirResolver
 	{

@@ -1,8 +1,8 @@
 using System;
-
+using PassWinmenu.Utilities;
 using Xunit;
 
-namespace PassWinmenu.Utilities
+namespace PassWinmenuTests.Utilities
 {
 	/// <summary>
 	/// Tests the <see cref="Disposable"/> class.

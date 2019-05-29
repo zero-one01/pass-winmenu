@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PassWinmenu.Configuration;
-using PassWinmenu.Utilities;
+using PassWinmenu.PasswordGeneration;
+using PassWinmenuTests.Utilities;
 using Shouldly;
 using Xunit;
 
-namespace PassWinmenu.PasswordGeneration
+namespace PassWinmenuTests.PasswordGeneration
 {
 	public class PasswordGeneratorTests
 	{

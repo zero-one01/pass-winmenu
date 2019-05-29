@@ -1,4 +1,4 @@
-namespace PassWinmenu.UpdateChecking
+namespace PassWinmenuTests.UpdateChecking
 {
 		public class UpdateSourceUnitTests
 	{

@@ -1,8 +1,7 @@
-using PassWinmenu.Utilities;
-
+using PassWinmenuTests.Utilities;
 using Xunit;
 
-namespace PassWinmenu.Tests
+namespace PassWinmenuTests.EmbeddedResources
 {
 		public class EmbeddedResourcesTests
 	{
@@ -11,8 +10,8 @@ namespace PassWinmenu.Tests
 		[Fact, TestCategory(Category)]
 		public void EmbeddedResources_ContainsVersionString()
 		{
-			EmbeddedResources.Load();
-			Assert.False(string.IsNullOrWhiteSpace(EmbeddedResources.Version));
+			PassWinmenu.EmbeddedResources.Load();
+			Assert.False(string.IsNullOrWhiteSpace(PassWinmenu.EmbeddedResources.Version));
 		}
 	}
 }

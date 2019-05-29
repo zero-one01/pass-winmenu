@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PassWinmenu.WinApi;
 
-namespace PassWinmenu.Utilities
+namespace PassWinmenuTests.Utilities
 {
 	public class StubEnvironment : IEnvironment
 	{

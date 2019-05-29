@@ -1,11 +1,10 @@
 using System;
 using System.Windows.Input;
-
-using PassWinmenu.Utilities;
-
+using PassWinmenu.Hotkeys;
+using PassWinmenuTests.Utilities;
 using Xunit;
 
-namespace PassWinmenu.Hotkeys
+namespace PassWinmenuTests.Hotkeys
 {
 	/// <summary>
 	/// Unit tests for the <see cref="Hotkey"/> class.

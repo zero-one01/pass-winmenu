@@ -1,11 +1,12 @@
 using System.IO;
+using PassWinmenu;
 using PassWinmenu.PasswordManagement;
-using PassWinmenu.Utilities;
+using PassWinmenuTests.Utilities;
 using Xunit;
 
-namespace PassWinmenu.Tests
+namespace PassWinmenuTests.Parsing
 {
-	public class ParserTests
+	public class PasswordParserTests
 	{
 		private const string Category = "Core: Password File Parsing";
 

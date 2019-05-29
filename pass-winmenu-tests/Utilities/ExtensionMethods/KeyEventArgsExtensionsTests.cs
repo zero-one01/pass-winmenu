@@ -2,12 +2,12 @@ using System;
 using System.Reflection;
 using System.Windows.Input;
 using System.Windows.Interop;
-
+using PassWinmenu.Utilities.ExtensionMethods;
 using Xunit;
 
-namespace PassWinmenu.Utilities.ExtensionMethods
+namespace PassWinmenuTests.Utilities.ExtensionMethods
 {
-		public class KeyEventArgsExtensionsTests
+	public class KeyEventArgsExtensionsTests
 	{
 		private const string Category = "Utilities: KeyEventArgs extensions";
 
@@ -28,7 +28,7 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 				inputSource: new HwndSource(0, 0, 0, 0, 0, String.Empty, IntPtr.Zero),
 				timestamp: 0,
 				key: Key.A
-				);
+			);
 
 			Assert.NotNull(keArgs);
 			Assert.False(keArgs.IsRepeat);
@@ -36,9 +36,9 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 			var setRepeatInfo = typeof(KeyEventArgs).GetMethod(
 				name: "SetRepeat",
 				bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance
-				);
+			);
 
-			setRepeatInfo.Invoke(keArgs, new object[] { true });
+			setRepeatInfo.Invoke(keArgs, new object[] {true});
 
 			Assert.True(keArgs.IsRepeat);
 		}
@@ -48,11 +48,11 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 		{
 			Assert.Throws<ArgumentNullException>(
 				() => KeyEventArgsExtensions.SetRepeat(null, true)
-				);
+			);
 
 			Assert.Throws<ArgumentNullException>(
 				() => KeyEventArgsExtensions.SetRepeat(null, false)
-				);
+			);
 		}
 
 		[StaFact, TestCategory(Category)]
@@ -63,7 +63,7 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 				inputSource: new HwndSource(0, 0, 0, 0, 0, String.Empty, IntPtr.Zero),
 				timestamp: 0,
 				key: Key.A
-				);
+			);
 
 			Assert.False(keArgs.IsRepeat);
 
@@ -84,7 +84,7 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 				inputSource: new HwndSource(0, 0, 0, 0, 0, String.Empty, IntPtr.Zero),
 				timestamp: 0,
 				key: Key.A
-				);
+			);
 
 			Assert.Same(keArgs, keArgs.SetRepeat(true));
 			Assert.Same(keArgs, keArgs.SetRepeat(false));

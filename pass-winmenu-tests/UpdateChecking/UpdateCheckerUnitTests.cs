@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using McSherry.SemanticVersioning;
-
+using PassWinmenu.UpdateChecking;
 using PassWinmenu.UpdateChecking.Dummy;
-using PassWinmenu.Utilities;
-
+using PassWinmenuTests.Utilities;
 using Xunit;
 
-namespace PassWinmenu.UpdateChecking
+namespace PassWinmenuTests.UpdateChecking
 {
 		public class UpdateCheckerUnitTests
 	{

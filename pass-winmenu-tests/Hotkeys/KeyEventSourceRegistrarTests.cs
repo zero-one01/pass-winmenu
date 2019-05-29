@@ -1,12 +1,11 @@
 using System;
 using System.Linq;
 using System.Windows.Input;
-
-using PassWinmenu.Utilities;
-
+using PassWinmenu.Hotkeys;
+using PassWinmenuTests.Utilities;
 using Xunit;
 
-namespace PassWinmenu.Hotkeys
+namespace PassWinmenuTests.Hotkeys
 {
 		public class KeyEventSourceRegistrarTests
 	{

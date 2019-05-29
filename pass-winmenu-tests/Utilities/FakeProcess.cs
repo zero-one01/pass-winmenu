@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using PassWinmenu.ExternalPrograms;
 
-namespace PassWinmenu.Utilities
+namespace PassWinmenuTests.Utilities
 {
 	public class FakeProcess : IProcess
 	{

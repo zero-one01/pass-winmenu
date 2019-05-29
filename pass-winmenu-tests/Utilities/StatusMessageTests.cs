@@ -2,7 +2,7 @@ using PassWinmenu.ExternalPrograms.Gpg;
 using Shouldly;
 using Xunit;
 
-namespace PassWinmenu.Utilities
+namespace PassWinmenuTests.Utilities
 {
 	public class StatusMessageTests
 	{

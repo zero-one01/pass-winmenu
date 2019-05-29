@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System.Windows.Interop;
-
+using PassWinmenu.Hotkeys;
 using PassWinmenu.Utilities.ExtensionMethods;
 
-namespace PassWinmenu.Hotkeys
+namespace PassWinmenuTests.Hotkeys
 {
 	/// <summary>
 	/// A dummy, manipulable <see cref="IKeyEventSource"/> for use in testing.

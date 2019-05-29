@@ -8,7 +8,7 @@
     <ProjectGuid>{1818BB4C-A1BA-4DBA-84FC-AE12A7E252A4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PassWinmenu</RootNamespace>
+    <RootNamespace>PassWinmenuTests</RootNamespace>
     <AssemblyName>pass-winmenu-tests</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -92,33 +92,33 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EmbeddedResources\EmbeddedResourcesTests.cs" />
-    <Compile Include="ExternalPrograms\GpgResultTests.cs" />
-    <Compile Include="ExternalPrograms\GpgResultVerifierTests.cs" />
-    <Compile Include="ExternalPrograms\GpgTransportTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgResultTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgResultVerifierTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgTransportTests.cs" />
     <Compile Include="Utilities\FakeProcess.cs" />
     <Compile Include="Utilities\FakeProcessBuilder.cs" />
-    <Compile Include="ExternalPrograms\GpgAgentConfigReaderTests.cs" />
-    <Compile Include="ExternalPrograms\GpgAgentConfigWriterTests.cs" />
-    <Compile Include="ExternalPrograms\GpgAgentTests.cs" />
-    <Compile Include="ExternalPrograms\GpgHomedirResolverTests.cs" />
-    <Compile Include="ExternalPrograms\GpgInstallationFinderTests.cs" />
-    <Compile Include="ExternalPrograms\GpgTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgAgentConfigReaderTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgAgentConfigWriterTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgAgentTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgHomedirResolverTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgInstallationFinderTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgTests.cs" />
     <Compile Include="Utilities\BlockingStream.cs" />
-    <Compile Include="ExternalPrograms\GpgAgentConfigUpdaterTests.cs" />
+    <Compile Include="ExternalPrograms\Gpg\GpgAgentConfigUpdaterTests.cs" />
     <Compile Include="Utilities\GpgInstallationBuilder.cs" />
     <Compile Include="Utilities\GpgResultBuilder.cs" />
     <Compile Include="Utilities\StatusMessageTests.cs" />
     <Compile Include="Utilities\FakeGpgAgentConfigReader.cs" />
     <Compile Include="Utilities\StubHomedirResolver.cs" />
     <Compile Include="Utilities\StubEnvironment.cs" />
-    <Compile Include="External\ConfigFileTests.cs" />
+    <Compile Include="Configuration\ConfigFileTests.cs" />
     <Compile Include="Hotkeys\DummyHotkeyRegistrar.cs" />
     <Compile Include="Hotkeys\DummyKeyEventSource.cs" />
     <Compile Include="Hotkeys\HotkeyUnitTests.cs" />
     <Compile Include="Hotkeys\KeyEventSourceRegistrarTests.cs" />
     <Compile Include="Parsing\ParserTests.cs" />
     <Compile Include="PasswordGeneration\PasswordGeneratorTests.cs" />
-    <Compile Include="PasswordManager\PasswordManagerUnitTests.cs" />
+    <Compile Include="PasswordManager\PasswordManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\TestCategoryAttribute.cs" />
     <Compile Include="Utilities\HelpersTests.cs" />

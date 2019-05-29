@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-
 using Moq;
-
-using PassWinmenu.Utilities;
-
+using PassWinmenu.WinApi;
+using PassWinmenuTests.Utilities;
 using Xunit;
 
-namespace PassWinmenu.WinApi
+namespace PassWinmenuTests.WinApi
 {
 		public class ExecutablePathResolverTests
 	{
