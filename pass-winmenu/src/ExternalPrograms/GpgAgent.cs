@@ -186,29 +186,33 @@ namespace PassWinmenu.ExternalPrograms
 			{
 				var line = existingLines[i];
 				var match = configKeyRegex.Match(line);
-				if (match.Success)
+				if (!match.Success)
 				{
-					// This looks like a config key, let's see if we're supposed to change it.
-					var key = match.Groups[2].Value;
-					var matchedPair = keysToSet.FirstOrDefault(k => k.Key == key);
-					if (matchedPair.Key == key)
-					{
-						// This key will need to be changed. Let's remove it from the list first.
-						keysToSet.RemoveAll(k => k.Key == key);
+					// This line does not look like a config key, best not touch it.
+					yield return line;
+					continue;
+				}
 
-						// Insert a comment explaining that we're managing this key,
-						// unless such a comment already exists.
-						if (i == 0 || existingLines[i - 1] != managedByPassWinmenuComment)
-						{
-							yield return managedByPassWinmenuComment;
-						}
-						// Now return the updated key-value pair.
-						yield return $"{matchedPair.Key} {matchedPair.Value}";
-					}
-					else
+				// This looks like a config key, let's see if we're supposed to change it.
+				var key = match.Groups[2].Value;
+				var matchedPair = keysToSet.FirstOrDefault(k => k.Key == key);
+				if (matchedPair.Key == key)
+				{
+					// This key will need to be changed. Let's remove it from the list first.
+					keysToSet.RemoveAll(k => k.Key == key);
+
+					// Insert a comment explaining that we're managing this key,
+					// unless such a comment already exists.
+					if (i == 0 || existingLines[i - 1] != managedByPassWinmenuComment)
 					{
-						yield return line;
+						yield return managedByPassWinmenuComment;
 					}
+					// Now return the updated key-value pair.
+					yield return $"{matchedPair.Key} {matchedPair.Value}";
+				}
+				else
+				{
+					yield return line;
 				}
 			}
 			
