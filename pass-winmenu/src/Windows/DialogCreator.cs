@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Windows;
 using PassWinmenu.Configuration;
@@ -11,6 +12,7 @@ using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.src.Windows;
 using PassWinmenu.Utilities;
+using PassWinmenu.Utilities.ExtensionMethods;
 using PassWinmenu.WinApi;
 
 namespace PassWinmenu.Windows
@@ -22,6 +24,7 @@ namespace PassWinmenu.Windows
 		private readonly IPasswordManager passwordManager;
 		private readonly PasswordShellHelper passwordShellHelper;
 		private readonly ClipboardHelper clipboard = new ClipboardHelper();
+		private readonly PathDisplayHelper pathDisplayHelper;
 
 		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, ISyncService syncService, PasswordShellHelper passwordShellHelper)
 		{
@@ -29,6 +32,7 @@ namespace PassWinmenu.Windows
 			this.passwordManager = passwordManager ?? throw new ArgumentNullException(nameof(passwordManager));
 			this.syncService = syncService;
 			this.passwordShellHelper = passwordShellHelper;
+			this.pathDisplayHelper = new PathDisplayHelper(ConfigManager.Config.Interface.DirectorySeparator);
 		}
 
 		private void EnsureStaThread()
@@ -117,9 +121,9 @@ namespace PassWinmenu.Windows
 				MessageBox.Show("Your password store doesn't appear to contain any passwords yet.", "Empty password store", MessageBoxButton.OK, MessageBoxImage.Information);
 				return null;
 			}
-			var selection = ShowPasswordMenu(passFiles.Select(f => f.RelativePath));
+			var selection = ShowPasswordMenu(passFiles.Select(pathDisplayHelper.GetDisplayPath));
 			if (selection == null) return null;
-			return passFiles.Single(f => f.RelativePath == selection);
+			return passFiles.Single(f => pathDisplayHelper.GetDisplayPath(f) == selection);
 		}
 
 
@@ -127,7 +131,7 @@ namespace PassWinmenu.Windows
 		{
 			Helpers.AssertOnUiThread();
 
-			using (var window = new EditWindow(file.RelativePath, file.Content, ConfigManager.Config.PasswordStore.PasswordGeneration))
+			using (var window = new EditWindow(pathDisplayHelper.GetDisplayPath(file), file.Content, ConfigManager.Config.PasswordStore.PasswordGeneration))
 			{
 				if (!window.ShowDialog() ?? true)
 				{
@@ -136,10 +140,10 @@ namespace PassWinmenu.Windows
 
 				try
 				{
-					var newFile = new DecryptedPasswordFile(file.PasswordStore, file.FullPath, window.PasswordContent.Text);
+					var newFile = new DecryptedPasswordFile(file, window.PasswordContent.Text);
 					passwordManager.EncryptPassword(newFile, true);
 
-					syncService?.EditPassword(newFile.RelativePath);
+					syncService?.EditPassword(newFile.FullPath);
 					if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
 					{
 						notificationService.Raise($"Password file \"{newFile.FileNameWithoutExtension}\" has been updated.", Severity.Info);
@@ -258,10 +262,10 @@ namespace PassWinmenu.Windows
 				EnsureRemoval(plaintextFile);
 
 				// Re-encrypt the file.
-				var newPasswordFile = new DecryptedPasswordFile(selectedFile.PasswordStore, selectedFile.RelativePath, content);
+				var newPasswordFile = new DecryptedPasswordFile(selectedFile, content);
 				passwordManager.EncryptPassword(newPasswordFile, true);
 
-				syncService?.EditPassword(selectedFile.RelativePath);
+				syncService?.EditPassword(selectedFile.FullPath);
 				if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
 				{
 					notificationService.Raise($"Password file \"{selectedFile}\" has been updated.", Severity.Info);
@@ -301,8 +305,7 @@ namespace PassWinmenu.Windows
 			PasswordFile passwordFile;
 			try
 			{
-				var file = new ParsedPasswordFile(passwordManager.PasswordStore, passwordFilePath, password, metadata);
-				passwordFile = passwordManager.EncryptPassword(file, false);
+				passwordFile = passwordManager.AddPassword(passwordFilePath, password, metadata);
 			}
 			catch (GpgException e)
 			{
@@ -322,7 +325,7 @@ namespace PassWinmenu.Windows
 				notificationService.Raise($"The new password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
 			}
 			// Add the password to Git
-			syncService?.AddPassword(passwordFile.RelativePath);
+			syncService?.AddPassword(passwordFile.FullPath);
 		}
 
 		/// <summary>
@@ -509,6 +512,33 @@ namespace PassWinmenu.Windows
 		{
 			var viewer = new LogViewer(string.Join("\n", Log.History.Select(l => l.ToString())));
 			viewer.ShowDialog();
+		}
+	}
+
+	internal class PathDisplayHelper
+	{
+		private readonly string directorySeparator;
+
+		public PathDisplayHelper(string directorySeparator)
+		{
+			this.directorySeparator = directorySeparator;
+		}
+
+		public string GetDisplayPath(PasswordFile file)
+		{
+			var names = new List<string>
+			{
+				file.FileNameWithoutExtension
+			};
+
+			var current = file.Directory;
+			while (!current.PathEquals(file.PasswordStore))
+			{
+				names.Insert(0, current.Name);
+				current = current.Parent;
+			}
+
+			return string.Join(directorySeparator, names);
 		}
 	}
 }

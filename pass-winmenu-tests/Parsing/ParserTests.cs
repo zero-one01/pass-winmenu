@@ -1,4 +1,5 @@
 using System.IO;
+using System.IO.Abstractions.TestingHelpers;
 using PassWinmenu;
 using PassWinmenu.PasswordManagement;
 using PassWinmenuTests.Utilities;
@@ -10,7 +11,15 @@ namespace PassWinmenuTests.Parsing
 	{
 		private const string Category = "Core: Password File Parsing";
 
-		private readonly PasswordFile dummyFile = new PasswordFile(new DirectoryInfo("\\password-store"), "dummy-password");
+		private readonly PasswordFile dummyFile;
+
+		public PasswordParserTests()
+		{
+			var fileSystem = new MockFileSystem();
+			var dirInfo = new MockDirectoryInfo(fileSystem, "\\password-store");
+			var fileInfo = new MockFileInfo(fileSystem, "\\password-store\\dummy-password");
+			dummyFile = new PasswordFile(fileInfo, dirInfo);
+		}
 
 		[Fact, TestCategory(Category)]
 		public void Test_EmptyFile()

@@ -13,12 +13,15 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		private readonly IGpgTransport gpgTransport;
 		private readonly IGpgAgent gpgAgent;
 		private readonly IGpgResultVerifier gpgResultVerifier;
+		private readonly PinentryWatcher pinentryWatcher = new PinentryWatcher();
+		private readonly bool enablePinentryFix;
 
-		public GPG(IGpgTransport gpgTransport, IGpgAgent gpgAgent, IGpgResultVerifier gpgResultVerifier)
+		public GPG(IGpgTransport gpgTransport, IGpgAgent gpgAgent, IGpgResultVerifier gpgResultVerifier, bool enablePinentryFix)
 		{
 			this.gpgTransport = gpgTransport;
 			this.gpgAgent = gpgAgent;
 			this.gpgResultVerifier = gpgResultVerifier;
+			this.enablePinentryFix = enablePinentryFix;
 		}
 
 		/// <summary>
@@ -29,6 +32,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		/// <exception cref="GpgException">Thrown when decryption fails.</exception>
 		public string Decrypt(string file)
 		{
+			if(enablePinentryFix) pinentryWatcher.BumpPinentryWindow();
 			gpgAgent.EnsureAgentResponsive();
 			var result = gpgTransport.CallGpg($"--decrypt \"{file}\"");
 			gpgResultVerifier.VerifyDecryption(result);

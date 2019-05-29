@@ -61,6 +61,16 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 				                   "Make sure that you have imported and trusted the keys belonging to those recipients.");
 			}
 
+			if (result.HasStatusCodes(GpgStatusCode.FAILURE))
+			{
+				result.GenerateError();
+			}
+
+			if (result.HasStatusCodes(GpgStatusCode.END_ENCRYPTION))
+			{
+				return;
+			}
+
 			result.EnsureNonZeroExitCode();
 		}
 	}

@@ -14,7 +14,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 			var transportMock = new Mock<IGpgTransport>();
 			transportMock.Setup(t => t.CallGpg(It.IsAny<string>(), null)).Returns(GetSuccessResult);
 			var agentMock = new Mock<IGpgAgent>();
-			var gpg = new GPG(transportMock.Object, agentMock.Object, StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, agentMock.Object, StubGpgResultVerifier.AlwaysValid, false);
 
 			gpg.Decrypt("file");
 
@@ -26,7 +26,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 		{
 			var transportMock = new Mock<IGpgTransport>();
 			transportMock.Setup(t => t.CallGpg(It.IsAny<string>(), null)).Returns(GetSuccessResult);
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			gpg.Decrypt("file");
 
@@ -46,7 +46,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 				.Returns(new GpgResultBuilder()
 					.WithStdout(fileContent)
 					.Build());
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			var decryptedContent = gpg.Decrypt("file");
 
@@ -58,7 +58,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 		{
 			var transportMock = new Mock<IGpgTransport>();
 			transportMock.Setup(t => t.CallGpg(It.IsNotNull<string>(), It.IsNotNull<string>())).Returns(GetSuccessResult);
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			gpg.Encrypt("data", "file");
 
@@ -70,7 +70,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 		{
 			var transportMock = new Mock<IGpgTransport>();
 			transportMock.Setup(t => t.CallGpg(It.IsNotNull<string>(), It.IsNotNull<string>())).Returns(GetSuccessResult);
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			gpg.Encrypt("data", "file", null);
 
@@ -82,7 +82,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 		{
 			var transportMock = new Mock<IGpgTransport>();
 			transportMock.Setup(t => t.CallGpg(It.IsNotNull<string>(), It.IsNotNull<string>())).Returns(GetSuccessResult);
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			gpg.Encrypt("data", "file", "rcp_0", "rcp_1");
 
@@ -100,7 +100,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 					.WithStdout("secret keys")
 					.Build());
 			var agentMock = new Mock<IGpgAgent>();
-			var gpg = new GPG(transportMock.Object, agentMock.Object, StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, agentMock.Object, StubGpgResultVerifier.AlwaysValid, false);
 
 			gpg.StartAgent();
 
@@ -116,7 +116,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 				.Returns(new GpgResultBuilder()
 					.WithStdout("secret keys")
 					.Build());
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			gpg.StartAgent();
 
@@ -132,7 +132,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 				.Returns(new GpgResultBuilder()
 					.WithStdout("")
 					.Build());
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			Should.Throw<GpgError>(() => gpg.StartAgent());
 		}
@@ -146,7 +146,7 @@ namespace PassWinmenuTests.ExternalPrograms.Gpg
 				.Returns(new GpgResultBuilder()
 					.WithStdout("GPG version 1.0\r\nmore info")
 					.Build());
-			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid);
+			var gpg = new GPG(transportMock.Object, Mock.Of<IGpgAgent>(), StubGpgResultVerifier.AlwaysValid, false);
 
 			var version = gpg.GetVersion();
 

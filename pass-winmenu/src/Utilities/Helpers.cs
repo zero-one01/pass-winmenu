@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
-using PassWinmenu.Configuration;
 using PassWinmenu.Utilities.ExtensionMethods;
 
 namespace PassWinmenu.Utilities

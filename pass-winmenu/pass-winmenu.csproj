@@ -138,10 +138,14 @@
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\ExternalPrograms\Processes.cs" />
     <Compile Include="src\ExternalPrograms\ProcessWrapper.cs" />
+    <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
+    <Compile Include="src\PasswordManagement\GpgRecipientFinder.cs" />
     <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\IPasswordManager.cs" />
+    <Compile Include="src\PasswordManagement\ParsedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\PasswordFile.cs" />
     <Compile Include="src\ExternalPrograms\SyncServiceFactory.cs" />
+    <Compile Include="src\PasswordManagement\IRecipientFinder.cs" />
     <Compile Include="src\UpdateChecking\Dummy\DummyUpdateSource.cs" />
     <Compile Include="src\UpdateChecking\UpdateSourceExtensions.cs" />
     <Compile Include="src\WinApi\Clipboard.cs" />

@@ -1,33 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PassWinmenu.ExternalPrograms;
-using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.Utilities;
-using PassWinmenu.Utilities.ExtensionMethods;
 
 namespace PassWinmenu.PasswordManagement
 {
 	internal class PasswordManager : IPasswordManager
 	{
-		internal const string GpgIdFileName = ".gpg-id";
+		private readonly DirectoryInfoBase passwordStore;
+		private readonly ICryptoService cryptoService;
+		private readonly IRecipientFinder recipientFinder;
 
-		private readonly PinentryWatcher pinentryWatcher = new PinentryWatcher();
+		private IFileSystem FileSystem => passwordStore.FileSystem;
 
-		public DirectoryInfo PasswordStore { get; }
-		public ICryptoService Crypto { get; }
-		public bool PinentryFixEnabled { get; set; }
-		public readonly string EncryptedFileExtension;
-
-		public PasswordManager(string passwordStore, string encryptedFileExtension, GPG crypto)
+		public PasswordManager(DirectoryInfoBase passwordStore, ICryptoService cryptoService, IRecipientFinder recipientFinder)
 		{
-			var normalised = Helpers.NormaliseDirectory(passwordStore);
-			PasswordStore = new DirectoryInfo(normalised);
-
-			EncryptedFileExtension = encryptedFileExtension;
-			Crypto = crypto;
+			this.recipientFinder = recipientFinder;
+			this.passwordStore = passwordStore;
+			this.cryptoService = cryptoService;
 		}
 
 		/// <summary>
@@ -48,18 +42,22 @@ namespace PassWinmenu.PasswordManagement
 			{
 				file.FileInfo.Delete();
 			}
-			Crypto.Encrypt(file.Content, file.FullPath, GetGpgIds(file.FullPath));
-			return new PasswordFile(file.PasswordStore, file.RelativePath);
+			cryptoService.Encrypt(file.Content, file.FullPath, recipientFinder.FindRecipients(file));
+			return new PasswordFile(file);
 		}
 
-		public string DecryptText(PasswordFile file)
+		public PasswordFile AddPassword(string path, string password, string metadata)
 		{
-			if (!File.Exists(file.FullPath)) throw new ArgumentException($"The password file \"{file.FullPath}\" does not exist.");
+			if (path == null)
+			{
+				throw new ArgumentNullException(nameof(path));
+			}
 
-			if(PinentryFixEnabled) pinentryWatcher.BumpPinentryWindow();
-			return Crypto.Decrypt(file.FullPath);
+			var file = PasswordFileFromPath(path);
+			var parsed = new ParsedPasswordFile(file, password, metadata);
+			return EncryptPassword(parsed, false);
 		}
-
+		
 		/// <summary>
 		/// Get the content from an encrypted password file.
 		/// </summary>
@@ -70,7 +68,9 @@ namespace PassWinmenu.PasswordManagement
 		/// <returns></returns>
 		public KeyedPasswordFile DecryptPassword(PasswordFile file, bool passwordOnFirstLine)
 		{
-			var content = DecryptText(file);
+			if (!file.FileInfo.Exists) throw new ArgumentException($"The password file \"{file.FullPath}\" does not exist.");
+
+			var content = cryptoService.Decrypt(file.FullPath);
 			return new PasswordFileParser().Parse(file, content, !passwordOnFirstLine);
 		}
 
@@ -83,44 +83,31 @@ namespace PassWinmenu.PasswordManagement
 		{
 			var patternRegex = new Regex(pattern);
 
-			var files = Directory.EnumerateFiles(PasswordStore.FullName, "*", SearchOption.AllDirectories);
-			var matchingFiles = files.Where(f => patternRegex.IsMatch(Path.GetFileName(f)));
-			var passwordFiles = matchingFiles.Select(n => new PasswordFile(PasswordStore, n));
+			var files = passwordStore.EnumerateFiles("*", SearchOption.AllDirectories);
+			var matchingFiles = files.Where(f => patternRegex.IsMatch(f.Name));
+			var passwordFiles = matchingFiles.Select(CreatePasswordFile);
 
 			return passwordFiles;
 		}
 
-		/// <summary>
-		/// Searches the given path for a gpg-id file.
-		/// </summary>
-		/// <param name="path">The path that should be searched. This path does not have to point to an
-		/// existing file or directory, but it must be located within the password store.</param>
-		/// <returns>An array of GPG ids taken from the first gpg-id file that is encountered,
-		/// or null if no gpg-id file was found.</returns>
-		private string[] GetGpgIds(string path)
+		private PasswordFile CreatePasswordFile(FileInfoBase file)
 		{
-			// Ensure the path does not contain any trailing slashes or AltDirectorySeparatorChars
-			path = Helpers.NormaliseDirectory(path);
+			return new PasswordFile(file, passwordStore);
+		}
 
-			// Ensure the password file directory is actually located within the password store.
-			if (!PasswordStore.IsParentOf(path))
+		private PasswordFile PasswordFileFromPath(string path)
+		{
+			var relativePath = FileSystem.Path.IsPathRooted(path) 
+				? Helpers.GetRelativePath(path, passwordStore.FullName)
+				: path;
+
+			var fullPath = FileSystem.Path.Combine(passwordStore.FullName, relativePath);
+			if (FileSystem.Path.GetDirectoryName(fullPath) == null)
 			{
-				throw new ArgumentException("The given directory is not a subdirectory of the password store.");
+				throw new ArgumentException("Invalid password store path.");
 			}
 
-			// Walk up from the innermost directory, and keep moving up until an existing directory 
-			// containing a gpg-id file is found.
-			var current = new DirectoryInfo(path);
-			while (!current.Exists || !current.ContainsFile(GpgIdFileName))
-			{
-				if (current.Parent == null || current.PathEquals(PasswordStore))
-				{
-					return null;
-				}
-				current = current.Parent;
-			}
-
-			return File.ReadAllLines(Path.Combine(current.FullName, GpgIdFileName));
+			return new PasswordFile(FileSystem.FileInfo.FromFileName(fullPath), passwordStore);
 		}
 	}
 }

@@ -39,7 +39,6 @@ namespace PassWinmenu
 		public const string PlaintextFileExtension = ".txt";
 		public const string ConfigFileName = @".\pass-winmenu.yaml";
 
-		private ClipboardHelper clipboard;
 		private ActionDispatcher actionDispatcher;
 		private HotkeyManager hotkeys;
 		private DialogCreator dialogCreator;
@@ -126,7 +125,7 @@ namespace PassWinmenu
 			var transport = new GpgTransport(homedirResolver, installation, processes);
 			var agent = new GpgAgent(processes, installation);
 
-			gpg = new GPG(transport, agent, new GpgResultVerifier());
+			gpg = new GPG(transport, agent, new GpgResultVerifier(), ConfigManager.Config.Gpg.PinentryFix);
 
 			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
 			{
@@ -136,12 +135,10 @@ namespace PassWinmenu
 			InitialiseGit(ConfigManager.Config.Git, ConfigManager.Config.PasswordStore.Location);
 
 			// Initialise the internal password manager.
-			passwordManager = new PasswordManager(ConfigManager.Config.PasswordStore.Location, EncryptedFileExtension, gpg)
-			{
-				PinentryFixEnabled = ConfigManager.Config.Gpg.PinentryFix
-			};
+			var passwordStore = filesystem.DirectoryInfo.FromDirectoryName(ConfigManager.Config.PasswordStore.Location);
+			var recipientFinder = new GpgRecipientFinder(passwordStore);
+			passwordManager = new PasswordManager(passwordStore, gpg, recipientFinder);
 
-			clipboard = new ClipboardHelper();
 			var passwordShellHelper = new PasswordShellHelper(installation, homedirResolver);
 			dialogCreator = new DialogCreator(notificationService, passwordManager, git, passwordShellHelper);
 			InitialiseUpdateChecker();

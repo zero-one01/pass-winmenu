@@ -24,7 +24,7 @@ namespace PassWinmenu
 			if (entireFile)
 			{
 				// If the password contains any line endings, there is no additional metadata available.
-				return new KeyedPasswordFile(file.PasswordStore, file.RelativePath, content, null, null);
+				return new KeyedPasswordFile(file, content, null, null);
 			}
 			else
 			{
@@ -35,7 +35,7 @@ namespace PassWinmenu
 
 				var keys = ExtractKeys(metadata);
 
-				return new KeyedPasswordFile(file.PasswordStore, file.RelativePath, password, metadata, keys.ToList());
+				return new KeyedPasswordFile(file, password, metadata, keys.ToList());
 			}
 		}
 
