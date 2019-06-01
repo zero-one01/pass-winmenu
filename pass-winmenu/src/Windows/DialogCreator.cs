@@ -141,7 +141,7 @@ namespace PassWinmenu.Windows
 				try
 				{
 					var newFile = new DecryptedPasswordFile(file, window.PasswordContent.Text);
-					passwordManager.EncryptPassword(newFile, true);
+					passwordManager.EncryptPassword(newFile);
 
 					syncService?.EditPassword(newFile.FullPath);
 					if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
@@ -263,7 +263,7 @@ namespace PassWinmenu.Windows
 
 				// Re-encrypt the file.
 				var newPasswordFile = new DecryptedPasswordFile(selectedFile, content);
-				passwordManager.EncryptPassword(newPasswordFile, true);
+				passwordManager.EncryptPassword(newPasswordFile);
 
 				syncService?.EditPassword(selectedFile.FullPath);
 				if (ConfigManager.Config.Notifications.Types.PasswordUpdated)

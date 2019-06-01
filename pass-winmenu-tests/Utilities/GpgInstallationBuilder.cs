@@ -6,15 +6,10 @@ namespace PassWinmenuTests.Utilities
 {
 	internal class GpgInstallationBuilder
 	{
-		private readonly MockFileSystem fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-		{
-			{@"C:\gpg\bin\gpg.exe", MockFileData.NullObject },
-			{@"C:\gpg\bin\gpg-agent.exe", MockFileData.NullObject },
-			{@"C:\gpg\bin\gpg-connect-agent.exe", MockFileData.NullObject }
-		});
 
 		public GpgInstallation Build()
 		{
+			var fileSystem = new MockFileSystemBuilder().Build();
 			return new GpgInstallation
 			{
 				InstallDirectory = fileSystem.DirectoryInfo.FromDirectoryName(@"C:\gpg\bin"),

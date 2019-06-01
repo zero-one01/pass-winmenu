@@ -8,7 +8,7 @@ namespace PassWinmenu.PasswordManagement
 
 		KeyedPasswordFile DecryptPassword(PasswordFile file, bool passwordOnFirstLine);
 
-		PasswordFile EncryptPassword(DecryptedPasswordFile file, bool overwrite);
+		PasswordFile EncryptPassword(DecryptedPasswordFile file);
 		
 		PasswordFile AddPassword(string path, string password, string metadata);
 	}

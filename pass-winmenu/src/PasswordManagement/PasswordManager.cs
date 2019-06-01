@@ -32,20 +32,19 @@ namespace PassWinmenu.PasswordManagement
 		/// A <see cref="KeyedPasswordFile"/> instance specifying the contents
 		/// of the password file to be encrypted.
 		/// </param>
-		/// <param name="overwrite">
-		/// If this file already exists, should it be overwritten?
-		/// </param>
-		public PasswordFile EncryptPassword(DecryptedPasswordFile file, bool overwrite)
+		public PasswordFile EncryptPassword(DecryptedPasswordFile file)
 		{
-			file.Directory.Create();
-			if (overwrite && file.FileInfo.Exists)
-			{
-				file.FileInfo.Delete();
-			}
-			cryptoService.Encrypt(file.Content, file.FullPath, recipientFinder.FindRecipients(file));
-			return new PasswordFile(file);
+			return EncryptPasswordInternal(file, true);
 		}
 
+		/// <summary>
+		/// Adds a new password file at the specified path.
+		/// </summary>
+		/// <param name="path">A path, either absolute or relative to the password store,
+		/// indicating where the password should be created.</param>
+		/// <param name="password">The password to be encrypted.</param>
+		/// <param name="metadata">Any metadata that should be added.</param>
+		/// <exception cref="InvalidOperationException">If a file already exists at the given location.</exception>
 		public PasswordFile AddPassword(string path, string password, string metadata)
 		{
 			if (path == null)
@@ -53,9 +52,9 @@ namespace PassWinmenu.PasswordManagement
 				throw new ArgumentNullException(nameof(path));
 			}
 
-			var file = PasswordFileFromPath(path);
+			var file = CreatePasswordFileFromPath(path);
 			var parsed = new ParsedPasswordFile(file, password, metadata);
-			return EncryptPassword(parsed, false);
+			return EncryptPasswordInternal(parsed, false);
 		}
 		
 		/// <summary>
@@ -65,7 +64,6 @@ namespace PassWinmenu.PasswordManagement
 		/// <param name="passwordOnFirstLine">Should be true if the first line of the file contains the password.
 		/// Any content in the remaining lines will be considered metadata.
 		/// If set to false, the contents of the entire file are considered to be the password.</param>
-		/// <returns></returns>
 		public KeyedPasswordFile DecryptPassword(PasswordFile file, bool passwordOnFirstLine)
 		{
 			if (!file.FileInfo.Exists) throw new ArgumentException($"The password file \"{file.FullPath}\" does not exist.");
@@ -78,7 +76,6 @@ namespace PassWinmenu.PasswordManagement
 		/// Returns all password files that match a search pattern.
 		/// </summary>
 		/// <param name="pattern">The pattern against which the files should be matched.</param>
-		/// <returns></returns>
 		public IEnumerable<PasswordFile> GetPasswordFiles(string pattern)
 		{
 			var patternRegex = new Regex(pattern);
@@ -90,12 +87,30 @@ namespace PassWinmenu.PasswordManagement
 			return passwordFiles;
 		}
 
+		private PasswordFile EncryptPasswordInternal(DecryptedPasswordFile file, bool overwrite)
+		{
+			file.Directory.Create();
+			if (file.FileInfo.Exists)
+			{
+				if (overwrite)
+				{
+					file.FileInfo.Delete();
+				}
+				else
+				{
+					throw new InvalidOperationException("A password file already exists at the specified location.");
+				}
+			}
+			cryptoService.Encrypt(file.Content, file.FullPath, recipientFinder.FindRecipients(file));
+			return new PasswordFile(file);
+		}
+
 		private PasswordFile CreatePasswordFile(FileInfoBase file)
 		{
 			return new PasswordFile(file, passwordStore);
 		}
 
-		private PasswordFile PasswordFileFromPath(string path)
+		private PasswordFile CreatePasswordFileFromPath(string path)
 		{
 			var relativePath = FileSystem.Path.IsPathRooted(path) 
 				? Helpers.GetRelativePath(path, passwordStore.FullName)

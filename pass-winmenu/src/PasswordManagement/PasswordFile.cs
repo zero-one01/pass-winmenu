@@ -30,10 +30,10 @@ namespace PassWinmenu.PasswordManagement
 		/// </summary>
 		public string FileNameWithoutExtension => FileInfo.Name.RemoveEnd(FileInfo.Extension);
 		
-		public PasswordFile(FileInfoBase file, DirectoryInfoBase directory)
+		public PasswordFile(FileInfoBase file, DirectoryInfoBase passwordStore)
 		{
 			FileInfo = file;
-			PasswordStore = directory;
+			PasswordStore = passwordStore;
 		}
 
 		public PasswordFile(PasswordFile original)
