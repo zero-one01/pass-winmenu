@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
@@ -29,16 +30,16 @@ namespace PassWinmenu.Utilities
 		/// <param name="filespec">The path to the file or directory for which the relative path should be calculated.</param>
 		/// <param name="root">The root directory relative to which the relative path should be calculated.</param>
 		/// <returns></returns>
-		internal static string GetRelativePath(string filespec, string root)
+		internal static string GetRelativePath(IFileSystem fileSystem, string filespec, string root)
 		{
-			if(!Path.IsPathRooted(filespec)) throw new ArgumentException("File spec should be absolute", nameof(filespec));
-			if(!Path.IsPathRooted(root)) throw new ArgumentException("Root path must be absolute", nameof(root));
+			if(!fileSystem.Path.IsPathRooted(filespec)) throw new ArgumentException("File spec should be absolute", nameof(filespec));
+			if(!fileSystem.Path.IsPathRooted(root)) throw new ArgumentException("Root path must be absolute", nameof(root));
 
-			var rootDir = new DirectoryInfo(root);
+			var rootDir = fileSystem.DirectoryInfo.FromDirectoryName(root);
 			// Even if fileDir is pointing to a file, creating a DirectoryInfo is fine,
 			// since we're only concerned about comparing their paths, and DirectoryInfo
 			// does not actually check if a directory exists at its location.
-			var fileDir = new DirectoryInfo(filespec);
+			var fileDir = fileSystem.DirectoryInfo.FromDirectoryName(filespec);
 			if (!rootDir.IsParentOf(fileDir))
 			{
 				throw new ArgumentException("File spec should point to a path within the root directory", nameof(filespec));

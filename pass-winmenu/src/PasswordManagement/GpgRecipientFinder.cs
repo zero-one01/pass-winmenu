@@ -7,10 +7,10 @@ namespace PassWinmenu.PasswordManagement
 	{
 		internal const string GpgIdFileName = ".gpg-id";
 
-		private readonly DirectoryInfoBase passwordStore;
+		private readonly IDirectoryInfo passwordStore;
 		private readonly IFileSystem fileSystem;
 
-		public GpgRecipientFinder(DirectoryInfoBase passwordStore)
+		public GpgRecipientFinder(IDirectoryInfo passwordStore)
 		{
 			this.passwordStore = passwordStore;
 			this.fileSystem = passwordStore.FileSystem;
@@ -18,7 +18,7 @@ namespace PassWinmenu.PasswordManagement
 
 		public string[] FindRecipients(PasswordFile file)
 		{
-			var current = file.Directory;
+			IDirectoryInfo current = file.Directory;
 
 			// Walk up from the innermost directory, and keep moving up until an existing directory 
 			// containing a gpg-id file is found.

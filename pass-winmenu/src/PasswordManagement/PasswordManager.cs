@@ -11,13 +11,13 @@ namespace PassWinmenu.PasswordManagement
 {
 	internal class PasswordManager : IPasswordManager
 	{
-		private readonly DirectoryInfoBase passwordStore;
+		private readonly IDirectoryInfo passwordStore;
 		private readonly ICryptoService cryptoService;
 		private readonly IRecipientFinder recipientFinder;
 
 		private IFileSystem FileSystem => passwordStore.FileSystem;
 
-		public PasswordManager(DirectoryInfoBase passwordStore, ICryptoService cryptoService, IRecipientFinder recipientFinder)
+		public PasswordManager(IDirectoryInfo passwordStore, ICryptoService cryptoService, IRecipientFinder recipientFinder)
 		{
 			this.recipientFinder = recipientFinder;
 			this.passwordStore = passwordStore;
@@ -105,7 +105,7 @@ namespace PassWinmenu.PasswordManagement
 			return new PasswordFile(file);
 		}
 
-		private PasswordFile CreatePasswordFile(FileInfoBase file)
+		private PasswordFile CreatePasswordFile(IFileInfo file)
 		{
 			return new PasswordFile(file, passwordStore);
 		}
@@ -113,7 +113,7 @@ namespace PassWinmenu.PasswordManagement
 		private PasswordFile CreatePasswordFileFromPath(string path)
 		{
 			var relativePath = FileSystem.Path.IsPathRooted(path) 
-				? Helpers.GetRelativePath(path, passwordStore.FullName)
+				? Helpers.GetRelativePath(FileSystem, path, passwordStore.FullName)
 				: path;
 
 			var fullPath = FileSystem.Path.Combine(passwordStore.FullName, relativePath);

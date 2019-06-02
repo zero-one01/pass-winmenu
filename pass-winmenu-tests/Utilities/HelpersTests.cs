@@ -1,4 +1,5 @@
 using System;
+using System.IO.Abstractions.TestingHelpers;
 using PassWinmenu.Utilities;
 using Xunit;
 
@@ -16,7 +17,7 @@ namespace PassWinmenuTests.Utilities
 		{
 			var fileSpec = "C:\\base\\path\\test\\file";
 			var root = "C:\\base\\path";
-			var relative = Helpers.GetRelativePath(fileSpec, root);
+			var relative = Helpers.GetRelativePath(new MockFileSystem(), fileSpec, root);
 
 			Assert.Equal("test\\file", relative);
 		}
@@ -27,7 +28,7 @@ namespace PassWinmenuTests.Utilities
 			var fileSpec = "C:\\base\\path\\test\\file";
 			var root = "C:\\other\\path";
 
-			Assert.Throws<ArgumentException>(() => Helpers.GetRelativePath(fileSpec, root));
+			Assert.Throws<ArgumentException>(() => Helpers.GetRelativePath(new MockFileSystem(), fileSpec, root));
 		}
 
 		[Fact, TestCategory(Category)]
@@ -36,7 +37,7 @@ namespace PassWinmenuTests.Utilities
 			var fileSpec = "C:\\base\\path\\test\\file";
 			var root = "base\\path";
 
-			Assert.Throws<ArgumentException>(() => Helpers.GetRelativePath(fileSpec, root));
+			Assert.Throws<ArgumentException>(() => Helpers.GetRelativePath(new MockFileSystem(), fileSpec, root));
 		}
 
 		[Fact, TestCategory(Category)]
@@ -44,7 +45,7 @@ namespace PassWinmenuTests.Utilities
 		{
 			var fileSpec = "base\\path\\test\\file";
 			var root = "base\\path";
-			Assert.Throws<ArgumentException>(() => Helpers.GetRelativePath(fileSpec, root));
+			Assert.Throws<ArgumentException>(() => Helpers.GetRelativePath(new MockFileSystem(), fileSpec, root));
 		}
 	}
 }

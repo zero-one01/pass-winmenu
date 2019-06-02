@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
@@ -8,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
-
+using Autofac;
 using LibGit2Sharp;
 
 using McSherry.SemanticVersioning;
@@ -27,6 +26,7 @@ using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
 
 using YamlDotNet.Core;
+using IContainer = Autofac.IContainer;
 
 namespace PassWinmenu
 {
@@ -44,9 +44,10 @@ namespace PassWinmenu
 		private DialogCreator dialogCreator;
 		private UpdateChecker updateChecker;
 		private ISyncService git;
-		private GPG gpg;
 		private PasswordManager passwordManager;
 		private Notifications notificationService;
+
+		private IContainer container;
 
 		public Program()
 		{
@@ -92,12 +93,22 @@ namespace PassWinmenu
 			// We only use this for update checking (Git push over HTTPS is not handled by .NET).
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
+			// Initialise the DI Container builder.
+			var builder = new ContainerBuilder();
+
+
 			// Create the notification service first, so it's available if initialisation fails.
 			notificationService = Notifications.Create();
-
+			builder.Register(_ => notificationService)
+				.AsImplementedInterfaces()
+				.SingleInstance();
+			
 			// Now load the configuration options that we'll need 
 			// to continue initialising the rest of the applications.
 			LoadConfigFile();
+
+			builder.Register(_ => ConfigManager.Config).AsSelf();
+			builder.Register(_ => ConfigManager.Config.Gpg).AsSelf();
 
 #if DEBUG
 			Log.EnableFileLogging();
@@ -108,36 +119,55 @@ namespace PassWinmenu
 			}
 #endif
 
-			// Create the GPG wrapper.
-			var filesystem = new FileSystem();
-			var environment = new SystemEnvironment();
-			var processes = new Processes();
+			// Register environment wrappers
+			builder.RegisterTypes(
+				typeof(FileSystem),
+				typeof(SystemEnvironment),
+				typeof(Processes),
+				typeof(ExecutablePathResolver)
+			).AsImplementedInterfaces();
 
-			var exeResolver = new ExecutablePathResolver(filesystem, environment);
+			// Register GPG types
+			builder.RegisterTypes(
+					typeof(GpgInstallationFinder),
+					typeof(GpgHomedirResolver),
+					typeof(GpgAgentConfigReader),
+					typeof(GpgAgentConfigUpdater),
+					typeof(GpgTransport),
+					typeof(GpgAgent),
+					typeof(GpgResultVerifier)
+				).AsImplementedInterfaces()
+				.AsSelf();
 
-			var installationResolver = new GpgInstallationFinder(filesystem, exeResolver);
-			var installation = installationResolver.FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath);
-			var homedirResolver = new GpgHomedirResolver(ConfigManager.Config.Gpg, environment, filesystem);
+			// Register GPG installation
+			builder.Register(context => context.Resolve<GpgInstallationFinder>().FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath));
 
-			var configReader = new GpgAgentConfigReader(filesystem, homedirResolver);
-			var updater = new GpgAgentConfigUpdater(configReader);
+			// Register GPG
+			builder.Register(context => new GPG(
+					context.Resolve<IGpgTransport>(),
+					context.Resolve<IGpgAgent>(),
+					context.Resolve<IGpgResultVerifier>(),
+					context.Resolve<GpgConfig>().PinentryFix))
+				.AsImplementedInterfaces()
+				.AsSelf();
 
-			var transport = new GpgTransport(homedirResolver, installation, processes);
-			var agent = new GpgAgent(processes, installation);
+			container = builder.Build();
 
-			gpg = new GPG(transport, agent, new GpgResultVerifier(), ConfigManager.Config.Gpg.PinentryFix);
-
-			if (ConfigManager.Config.Gpg.GpgAgent.Config.AllowConfigManagement)
+			var gpgConfig = container.Resolve<GpgConfig>();
+			if (gpgConfig.GpgAgent.Config.AllowConfigManagement)
 			{
-				updater.UpdateAgentConfig(ConfigManager.Config.Gpg.GpgAgent.Config.Keys);
+				container.Resolve<GpgAgentConfigUpdater>().UpdateAgentConfig(gpgConfig.GpgAgent.Config.Keys);
 			}
+
+			var fileSystem = container.Resolve<IFileSystem>();
+
 			// Create the Git wrapper, if enabled.
 			InitialiseGit(ConfigManager.Config.Git, ConfigManager.Config.PasswordStore.Location);
 
 			// Initialise the internal password manager.
-			var passwordStore = filesystem.DirectoryInfo.FromDirectoryName(ConfigManager.Config.PasswordStore.Location);
+			var passwordStore = fileSystem.DirectoryInfo.FromDirectoryName(ConfigManager.Config.PasswordStore.Location);
 			var recipientFinder = new GpgRecipientFinder(passwordStore);
-			passwordManager = new PasswordManager(passwordStore, gpg, recipientFinder);
+			passwordManager = new PasswordManager(passwordStore, container.Resolve<ICryptoService>(), recipientFinder);
 
 			dialogCreator = new DialogCreator(notificationService, passwordManager, git);
 			InitialiseUpdateChecker();
@@ -234,6 +264,8 @@ namespace PassWinmenu
 		/// </summary>
 		private void RunInitialCheck()
 		{
+			var gpg = container.Resolve<GPG>();
+
 			if (!Directory.Exists(ConfigManager.Config.PasswordStore.Location))
 			{
 				notificationService.ShowErrorWindow($"Could not find the password store at {Path.GetFullPath(ConfigManager.Config.PasswordStore.Location)}. Please make sure it exists.");
@@ -244,7 +276,7 @@ namespace PassWinmenu
 			{
 				Log.Send("Using GPG version " + gpg.GetVersion());
 			}
-			catch (Win32Exception)
+			catch (System.ComponentModel.Win32Exception)
 			{
 				notificationService.ShowErrorWindow("Could not find GPG. Make sure your gpg-path is set correctly.");
 				Exit();

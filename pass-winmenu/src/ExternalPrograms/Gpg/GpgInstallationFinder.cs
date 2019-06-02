@@ -9,7 +9,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 	{
 		private readonly IFileSystem fileSystem;
 		private readonly IExecutablePathResolver executablePathResolver;
-		private readonly DirectoryInfoBase gpgDefaultInstallDir;
+		private readonly IDirectoryInfo gpgDefaultInstallDir;
 
 		public const string GpgExeName = "gpg.exe";
 		public const string GpgAgentExeName = "gpg-agent.exe";
@@ -68,7 +68,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 			};
 		}
 
-		private FileInfoBase ChildOf(DirectoryInfoBase parent, string childName)
+		private IFileInfo ChildOf(IDirectoryInfo parent, string childName)
 		{
 			var fullPath = Path.Combine(parent.FullName, childName);
 			return fileSystem.FileInfo.FromFileName(fullPath);
@@ -77,9 +77,9 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 
 	internal class GpgInstallation
 	{
-		public DirectoryInfoBase InstallDirectory { get; set; }
-		public FileInfoBase GpgExecutable { get; set; }
-		public FileInfoBase GpgAgentExecutable { get; set; }
-		public FileInfoBase GpgConnectAgentExecutable { get; set; }
+		public IDirectoryInfo InstallDirectory { get; set; }
+		public IFileInfo GpgExecutable { get; set; }
+		public IFileInfo GpgAgentExecutable { get; set; }
+		public IFileInfo GpgConnectAgentExecutable { get; set; }
 	}
 }

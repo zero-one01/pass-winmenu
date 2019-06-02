@@ -12,7 +12,7 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 		/// </summary>
 		/// <returns>True if the current directory is a parent of the given directory,
 		/// or if they're the same directory. False otherwise.</returns>
-		internal static bool IsChildOf(this DirectoryInfoBase child, DirectoryInfoBase parent)
+		internal static bool IsChildOf(this IDirectoryInfo child, IDirectoryInfo parent)
 		{
 			for (var current = child; !current.PathEquals(parent); current = current.Parent)
 			{
@@ -29,7 +29,7 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 		/// </summary>
 		/// <returns>True if the current directory is a parent of the given directory, 
 		/// or if they're the same directory. False otherwise.</returns>
-		internal static bool IsParentOf(this DirectoryInfo parent, DirectoryInfo child)
+		internal static bool IsParentOf(this IDirectoryInfo parent, IDirectoryInfo child)
 		{
 			return IsChildOf(child, parent);
 		}
@@ -39,16 +39,16 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 		/// </summary>
 		/// <returns>True if the current directory is a parent of the given directory, 
 		/// or if they're the same directory. False otherwise.</returns>
-		internal static bool IsParentOf(this DirectoryInfo parent, string child)
+		internal static bool IsParentOf(this IDirectoryInfo parent, string child)
 		{
-			return IsChildOf(new DirectoryInfo(child), parent);
+			return IsChildOf(parent.FileSystem.DirectoryInfo.FromDirectoryName(child), parent);
 		}
 
 		/// <summary>
 		/// Checks whether the directory contains the given file.
 		/// </summary>
 		/// <returns>True if the directory contains the file, false otherwise.</returns>
-		internal static bool ContainsFile(this DirectoryInfoBase directory, string name)
+		internal static bool ContainsFile(this IDirectoryInfo directory, string name)
 		{
 			return directory.EnumerateFiles(name).Any();
 		}
@@ -59,7 +59,7 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 		/// this method ignores trailing slashes.
 		/// </summary>
 		/// <returns>True if both DirectoryInfo objects reference the same directory, false otherwise.</returns>
-		internal static bool PathEquals(this DirectoryInfoBase a, DirectoryInfoBase b)
+		internal static bool PathEquals(this IDirectoryInfo a, IDirectoryInfo b)
 		{
 			var pathA = Helpers.NormaliseDirectory(a.FullName);
 			var pathB = Helpers.NormaliseDirectory(b.FullName);

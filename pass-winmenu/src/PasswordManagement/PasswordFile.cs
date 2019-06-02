@@ -11,16 +11,16 @@ namespace PassWinmenu.PasswordManagement
 		/// <summary>
 		/// Represents the root password store directory this file lives in.
 		/// </summary>
-		public DirectoryInfoBase PasswordStore { get; }
+		public IDirectoryInfo PasswordStore { get; }
 		/// <summary>
 		/// A <see cref="FileInfo"/> instance representing the password file.
 		/// </summary>
-		public FileInfoBase FileInfo { get; }
+		public IFileInfo FileInfo { get; }
 
 		/// <summary>
 		/// Represents the directory containing the password file.
 		/// </summary>
-		public DirectoryInfoBase Directory => FileInfo.Directory;
+		public IDirectoryInfo Directory => FileInfo.Directory;
 		/// <summary>
 		/// The full path to this file.
 		/// </summary>
@@ -30,7 +30,7 @@ namespace PassWinmenu.PasswordManagement
 		/// </summary>
 		public string FileNameWithoutExtension => FileInfo.Name.RemoveEnd(FileInfo.Extension);
 		
-		public PasswordFile(FileInfoBase file, DirectoryInfoBase passwordStore)
+		public PasswordFile(IFileInfo file, IDirectoryInfo passwordStore)
 		{
 			FileInfo = file;
 			PasswordStore = passwordStore;
