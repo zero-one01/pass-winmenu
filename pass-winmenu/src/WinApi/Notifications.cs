@@ -63,15 +63,15 @@ namespace PassWinmenu.WinApi
 			menu.Items.Add("Add new Password", null, (sender, args) => actionDispatcher.AddPassword());
 			menu.Items.Add("Edit Password File", null, (sender, args) => actionDispatcher.EditPassword());
 			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Push to Remote", null, (sender, args) => actionDispatcher.CommitChanges());
-			menu.Items.Add("Pull from Remote", null, (sender, args) => actionDispatcher.UpdatePasswordStore());
+			menu.Items.Add("Push to Remote", null, (sender, args) => actionDispatcher.Dispatch(HotkeyAction.GitPush));
+			menu.Items.Add("Pull from Remote", null, (sender, args) => actionDispatcher.Dispatch(HotkeyAction.GitPull));
 			menu.Items.Add(new ToolStripSeparator());
-			menu.Items.Add("Open Explorer", null, (sender, args) => actionDispatcher.OpenExplorer());
-			menu.Items.Add("Open Shell", null, (sender, args) => Task.Run(() => actionDispatcher.OpenPasswordShell()));
+			menu.Items.Add("Open Explorer", null, (sender, args) => actionDispatcher.Dispatch(HotkeyAction.OpenExplorer));
+			menu.Items.Add("Open Shell", null, (sender, args) => Task.Run(() => actionDispatcher.Dispatch(HotkeyAction.OpenShell)));
 			menu.Items.Add(new ToolStripSeparator());
 
 			var dropDown = new ToolStripMenuItem("More Actions");
-			dropDown.DropDownItems.Add("Check for Updates", null, (sender, args) => actionDispatcher.CheckForUpdates());
+			dropDown.DropDownItems.Add("Check for Updates", null, (sender, args) => actionDispatcher.Dispatch(HotkeyAction.CheckForUpdates));
 			dropDown.DropDownItems.Add("Edit Configuration", null, (sender, args) => actionDispatcher.EditConfiguration());
 			dropDown.DropDownItems.Add("View Log", null, (sender, args) => actionDispatcher.ViewLogs());
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
@@ -75,20 +75,12 @@ namespace PassWinmenu.Hotkeys
 					case HotkeyAction.EditPassword:
 						AddHotKey(keys, actionDispatcher.EditPassword);
 						break;
-					case HotkeyAction.GitPull:
-						AddHotKey(keys, actionDispatcher.UpdatePasswordStore);
-						break;
-					case HotkeyAction.GitPush:
-						AddHotKey(keys, actionDispatcher.CommitChanges);
-						break;
-					case HotkeyAction.OpenShell:
-						AddHotKey(keys, actionDispatcher.OpenPasswordShell);
-						break;
 					case HotkeyAction.ShowDebugInfo:
-						AddHotKey(keys, actionDispatcher.ShowDebugInfo);
-						break;
 					case HotkeyAction.CheckForUpdates:
-						AddHotKey(keys, actionDispatcher.CheckForUpdates);
+					case HotkeyAction.GitPull:
+					case HotkeyAction.GitPush:
+					case HotkeyAction.OpenShell:
+						AddHotKey(keys, actionDispatcher.Dispatch(action));
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();

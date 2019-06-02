@@ -22,16 +22,14 @@ namespace PassWinmenu.Windows
 		private readonly INotificationService notificationService;
 		private readonly ISyncService syncService;
 		private readonly IPasswordManager passwordManager;
-		private readonly PasswordShellHelper passwordShellHelper;
 		private readonly ClipboardHelper clipboard = new ClipboardHelper();
 		private readonly PathDisplayHelper pathDisplayHelper;
 
-		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, ISyncService syncService, PasswordShellHelper passwordShellHelper)
+		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, ISyncService syncService)
 		{
 			this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
 			this.passwordManager = passwordManager ?? throw new ArgumentNullException(nameof(passwordManager));
 			this.syncService = syncService;
-			this.passwordShellHelper = passwordShellHelper;
 			this.pathDisplayHelper = new PathDisplayHelper(ConfigManager.Config.Interface.DirectorySeparator);
 		}
 
@@ -92,15 +90,6 @@ namespace PassWinmenu.Windows
 				return menu.GetSelection();
 			}
 			return null;
-		}
-
-		/// <summary>
-		/// Opens a password shell in which the user can manage their passwords.
-		/// A gpg() function will be created in the shell and pointed to the local GPG installation.
-		/// </summary>
-		internal void OpenPasswordShell()
-		{
-			passwordShellHelper.OpenPasswordShell();
 		}
 
 		/// <summary>

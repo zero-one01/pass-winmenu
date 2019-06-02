@@ -107,6 +107,11 @@
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="src\Actions\ActionDispatcher.cs" />
+    <Compile Include="src\Actions\CheckForUpdatesAction.cs" />
+    <Compile Include="src\Actions\CommitChangesAction.cs" />
+    <Compile Include="src\Actions\OpenExplorerAction.cs" />
+    <Compile Include="src\Actions\OpenPasswordShellAction.cs" />
+    <Compile Include="src\Actions\RetrieveChangesAction.cs" />
     <Compile Include="src\Configuration\BrushConverter.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
@@ -235,7 +240,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\Windows\PasswordShellHelper.cs" />
     <Compile Include="src\Windows\SelectionLabel.xaml.cs">
       <DependentUpon>SelectionLabel.xaml</DependentUpon>
     </Compile>

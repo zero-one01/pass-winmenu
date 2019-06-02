@@ -1,13 +1,13 @@
 using LibGit2Sharp;
 
 using PassWinmenu.Configuration;
+using PassWinmenu.WinApi;
 
 namespace PassWinmenu.ExternalPrograms
 {
 	internal class SyncServiceFactory
 	{
-		// TODO: Stop relying on a concrete implementation
-		public Git BuildSyncService(GitConfig config, string passwordStorePath)
+		public ISyncService BuildSyncService(GitConfig config, string passwordStorePath)
 		{
 			var repository = new Repository(passwordStorePath);
 

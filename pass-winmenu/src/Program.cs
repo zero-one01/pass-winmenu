@@ -43,7 +43,7 @@ namespace PassWinmenu
 		private HotkeyManager hotkeys;
 		private DialogCreator dialogCreator;
 		private UpdateChecker updateChecker;
-		private Git git;
+		private ISyncService git;
 		private GPG gpg;
 		private PasswordManager passwordManager;
 		private Notifications notificationService;
@@ -139,11 +139,14 @@ namespace PassWinmenu
 			var recipientFinder = new GpgRecipientFinder(passwordStore);
 			passwordManager = new PasswordManager(passwordStore, gpg, recipientFinder);
 
-			var passwordShellHelper = new PasswordShellHelper(installation, homedirResolver);
-			dialogCreator = new DialogCreator(notificationService, passwordManager, git, passwordShellHelper);
+			dialogCreator = new DialogCreator(notificationService, passwordManager, git);
 			InitialiseUpdateChecker();
 
-			actionDispatcher = new ActionDispatcher(notificationService, dialogCreator, git, updateChecker);
+			var actions = new Dictionary<HotkeyAction, IAction>
+			{
+			};
+
+			actionDispatcher = new ActionDispatcher(dialogCreator, actions);
 
 			notificationService.AddMenuActions(actionDispatcher);
 
@@ -376,7 +379,6 @@ namespace PassWinmenu
 
 		public void Dispose()
 		{
-			git?.Dispose();
 			notificationService?.Dispose();
 			hotkeys?.Dispose();
 			updateChecker?.Dispose();
