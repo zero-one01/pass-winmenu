@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PassWinmenu.Configuration;
 using PassWinmenu.UpdateChecking;
 using PassWinmenu.WinApi;
 
@@ -12,6 +8,8 @@ namespace PassWinmenu.Actions
 	{
 		private readonly UpdateChecker updateChecker;
 		private readonly INotificationService notificationService;
+
+		public HotkeyAction ActionType => HotkeyAction.CheckForUpdates;
 
 		public CheckForUpdatesAction(UpdateChecker updateChecker, INotificationService notificationService)
 		{

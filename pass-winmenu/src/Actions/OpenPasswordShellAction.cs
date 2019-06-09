@@ -14,6 +14,8 @@ namespace PassWinmenu.Actions
 		private readonly IFileSystem fileSystem;
 		private readonly IProcesses processes;
 
+		public HotkeyAction ActionType => HotkeyAction.OpenShell;
+
 		public OpenPasswordShellAction(GpgInstallation installation, PasswordStoreConfig passwordStore, IGpgHomedirResolver homedirResolver, IFileSystem fileSystem, IProcesses processes)
 		{
 			this.installation = installation;
@@ -47,5 +49,6 @@ namespace PassWinmenu.Actions
 	internal interface IAction
 	{
 		void Execute();
+		HotkeyAction ActionType { get; }
 	}
 }

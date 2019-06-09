@@ -1,4 +1,5 @@
 using LibGit2Sharp;
+using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.WinApi;
 
@@ -8,6 +9,8 @@ namespace PassWinmenu.Actions
 	{
 		private readonly ISyncService syncService;
 		private readonly INotificationService notificationService;
+
+		public HotkeyAction ActionType => HotkeyAction.GitPull;
 
 		public RetrieveChangesAction(ISyncService syncService, INotificationService notificationService)
 		{

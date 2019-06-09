@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 
@@ -13,6 +8,8 @@ namespace PassWinmenu.Actions
 	{
 		private readonly IProcesses processes;
 		private readonly PasswordStoreConfig passwordStore;
+
+		public HotkeyAction ActionType => HotkeyAction.OpenExplorer;
 
 		public OpenExplorerAction(IProcesses processes, PasswordStoreConfig passwordStore)
 		{

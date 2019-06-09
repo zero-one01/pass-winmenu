@@ -5,13 +5,11 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using Autofac;
 using LibGit2Sharp;
-
-using McSherry.SemanticVersioning;
-
 using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -19,9 +17,6 @@ using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.UpdateChecking;
-using PassWinmenu.UpdateChecking.Chocolatey;
-using PassWinmenu.UpdateChecking.Dummy;
-using PassWinmenu.UpdateChecking.GitHub;
 using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
 
@@ -41,10 +36,7 @@ namespace PassWinmenu
 
 		private ActionDispatcher actionDispatcher;
 		private HotkeyManager hotkeys;
-		private DialogCreator dialogCreator;
 		private UpdateChecker updateChecker;
-		private ISyncService git;
-		private PasswordManager passwordManager;
 		private Notifications notificationService;
 
 		private IContainer container;
@@ -93,12 +85,12 @@ namespace PassWinmenu
 			// We only use this for update checking (Git push over HTTPS is not handled by .NET).
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
+			// Create the notification service first, so it's available if initialisation fails.
+			notificationService = Notifications.Create();
+			
 			// Initialise the DI Container builder.
 			var builder = new ContainerBuilder();
 
-
-			// Create the notification service first, so it's available if initialisation fails.
-			notificationService = Notifications.Create();
 			builder.Register(_ => notificationService)
 				.AsImplementedInterfaces()
 				.SingleInstance();
@@ -109,6 +101,9 @@ namespace PassWinmenu
 
 			builder.Register(_ => ConfigManager.Config).AsSelf();
 			builder.Register(_ => ConfigManager.Config.Gpg).AsSelf();
+			builder.Register(_ => ConfigManager.Config.Git).AsSelf();
+			builder.Register(_ => ConfigManager.Config.PasswordStore).AsSelf();
+			builder.Register(_ => ConfigManager.Config.Application.UpdateChecking).AsSelf();
 
 #if DEBUG
 			Log.EnableFileLogging();
@@ -118,6 +113,17 @@ namespace PassWinmenu
 				Log.EnableFileLogging();
 			}
 #endif
+
+			// Register actions
+			builder.RegisterAssemblyTypes(Assembly.GetAssembly(typeof(ActionDispatcher)))
+				.InNamespaceOf<ActionDispatcher>()
+				.Except<ActionDispatcher>()
+				.AsImplementedInterfaces();
+
+			builder.RegisterType<ActionDispatcher>()
+				.WithParameter(
+					(p, ctx) => p.ParameterType == typeof(Dictionary<HotkeyAction, IAction>),
+					(info, context) => context.Resolve<IEnumerable<IAction>>().ToDictionary(a => a.ActionType));
 
 			// Register environment wrappers
 			builder.RegisterTypes(
@@ -151,6 +157,31 @@ namespace PassWinmenu
 				.AsImplementedInterfaces()
 				.AsSelf();
 
+			builder.RegisterType<DialogCreator>()
+				.AsSelf();
+
+			// Register the internal password manager
+			builder.Register(context => context.Resolve<IFileSystem>().DirectoryInfo.FromDirectoryName(context.Resolve<PasswordStoreConfig>().Location))
+				.Named("PasswordStore", typeof(IDirectoryInfo));
+
+			builder.RegisterType<GpgRecipientFinder>().WithParameter(
+					(parameter, context) => true,
+					(parameter, context) => context.ResolveNamed<IDirectoryInfo>("PasswordStore"))
+				.AsImplementedInterfaces();
+
+			builder.RegisterType<PasswordManager>().WithParameter(
+					(parameter, context) => parameter.ParameterType == typeof(IDirectoryInfo),
+					(parameter, context) => context.ResolveNamed<IDirectoryInfo>("PasswordStore"))
+				.AsImplementedInterfaces()
+				.AsSelf();
+
+			// Create the Git wrapper, if enabled.
+			builder.Register(RegisterSyncService)
+				.AsImplementedInterfaces();
+
+			builder.Register(context => UpdateCheckerFactory.CreateUpdateChecker(context.Resolve<UpdateCheckingConfig>(), context.Resolve<INotificationService>()));
+
+			// Build the container
 			container = builder.Build();
 
 			var gpgConfig = container.Resolve<GpgConfig>();
@@ -159,24 +190,7 @@ namespace PassWinmenu
 				container.Resolve<GpgAgentConfigUpdater>().UpdateAgentConfig(gpgConfig.GpgAgent.Config.Keys);
 			}
 
-			var fileSystem = container.Resolve<IFileSystem>();
-
-			// Create the Git wrapper, if enabled.
-			InitialiseGit(ConfigManager.Config.Git, ConfigManager.Config.PasswordStore.Location);
-
-			// Initialise the internal password manager.
-			var passwordStore = fileSystem.DirectoryInfo.FromDirectoryName(ConfigManager.Config.PasswordStore.Location);
-			var recipientFinder = new GpgRecipientFinder(passwordStore);
-			passwordManager = new PasswordManager(passwordStore, container.Resolve<ICryptoService>(), recipientFinder);
-
-			dialogCreator = new DialogCreator(notificationService, passwordManager, git);
-			InitialiseUpdateChecker();
-
-			var actions = new Dictionary<HotkeyAction, IAction>
-			{
-			};
-
-			actionDispatcher = new ActionDispatcher(dialogCreator, actions);
+			actionDispatcher = container.Resolve<ActionDispatcher>();
 
 			notificationService.AddMenuActions(actionDispatcher);
 
@@ -185,63 +199,17 @@ namespace PassWinmenu
 			AssignHotkeys(hotkeys);
 		}
 
-		private void InitialiseUpdateChecker()
+		private static ISyncService RegisterSyncService (IComponentContext context)
 		{
-			var updateCfg = ConfigManager.Config.Application.UpdateChecking;
-			if (!updateCfg.CheckForUpdates) return;
+			var config = context.Resolve<GitConfig>();
+			var passwordStore = context.ResolveNamed<IDirectoryInfo>("PasswordStore");
+			var notificationService = context.Resolve<INotificationService>();
 
-			IUpdateSource updateSource;
-			switch (updateCfg.UpdateSource)
-			{
-				case UpdateSource.GitHub:
-					updateSource = new GitHubUpdateSource();
-					break;
-				case UpdateSource.Chocolatey:
-					updateSource = new ChocolateyUpdateSource();
-					break;
-				case UpdateSource.Dummy:
-					updateSource = new DummyUpdateSource
-					{
-						Versions = new List<ProgramVersion>
-						{
-							new ProgramVersion
-							{
-								VersionNumber = new SemanticVersion(10, 0, 0),
-								Important = true,
-							},
-							new ProgramVersion
-							{
-								VersionNumber = SemanticVersion.Parse("v11.0-pre1", ParseMode.Lenient),
-								IsPrerelease = true,
-							},
-						}
-					};
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(null, "Invalid update provider.");
-			}
-			var versionString = Version.Split('-').First();
-
-			updateChecker = new UpdateChecker(updateSource,
-			                                  SemanticVersion.Parse(versionString, ParseMode.Lenient),
-			                                  updateCfg.AllowPrereleases,
-			                                  updateCfg.CheckIntervalTimeSpan,
-			                                  updateCfg.InitialDelayTimeSpan);
-
-			updateChecker.UpdateAvailable += (sender, args) =>
-			{
-				notificationService.HandleUpdateAvailable(args);
-			};
-			updateChecker.Start();
-		}
-
-		private void InitialiseGit(GitConfig config, string passwordStorePath)
-		{
 			if (config.UseGit)
 			{
 				try
 				{
-					git = new SyncServiceFactory().BuildSyncService(config, passwordStorePath);
+					return new SyncServiceFactory().BuildSyncService(config, passwordStore.FullName);
 				}
 				catch (RepositoryNotFoundException)
 				{
@@ -257,6 +225,8 @@ namespace PassWinmenu
 					notificationService.ShowErrorWindow($"Failed to open the password store Git repository ({e.GetType().Name}: {e.Message}). Git support will be disabled.");
 				}
 			}
+
+			return null;
 		}
 
 		/// <summary>

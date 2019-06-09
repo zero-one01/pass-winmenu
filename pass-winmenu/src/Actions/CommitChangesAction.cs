@@ -10,6 +10,8 @@ namespace PassWinmenu.Actions
 		private readonly ISyncService syncService;
 		private readonly INotificationService notificationService;
 
+		public HotkeyAction ActionType => HotkeyAction.GitPush;
+
 		public CommitChangesAction(ISyncService syncService, INotificationService notificationService)
 		{
 			this.syncService = syncService;
