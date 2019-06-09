@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using PassWinmenu.Utilities;
 
-namespace PassWinmenu
+namespace PassWinmenu.ExternalPrograms.Gpg
 {
 	// As it turns out, the Windows version of pinentry is slightly bugged. If you have a multi-monitor setup,
 	// it often fails to bring its window to the foreground, which means you have to click the pinentry

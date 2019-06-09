@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace PassWinmenu
+namespace PassWinmenu.WinApi
 {
 	internal class StartupLink
 	{

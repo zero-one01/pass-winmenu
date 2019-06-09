@@ -95,6 +95,7 @@
     <Compile Include="ExternalPrograms\Gpg\GpgResultTests.cs" />
     <Compile Include="ExternalPrograms\Gpg\GpgResultVerifierTests.cs" />
     <Compile Include="ExternalPrograms\Gpg\GpgTransportTests.cs" />
+    <Compile Include="PasswordManagement\GpgRecipientFinderTests.cs" />
     <Compile Include="Utilities\ExtensionMethods\StringExtensionsTests.cs" />
     <Compile Include="Utilities\FakeCryptoService.cs" />
     <Compile Include="Utilities\FakeProcess.cs" />

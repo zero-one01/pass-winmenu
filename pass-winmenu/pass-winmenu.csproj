@@ -188,7 +188,7 @@
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
     <Compile Include="src\WinApi\SendKeysEscapeGenerator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
-    <Compile Include="src\DirectoryAutocomplete.cs" />
+    <Compile Include="src\Utilities\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgAgent.cs" />
     <Compile Include="src\ExternalPrograms\ICryptoService.cs" />
     <Compile Include="src\Hotkeys\Hotkey.cs" />
@@ -201,10 +201,10 @@
     <Compile Include="src\WinApi\INotificationService.cs" />
     <Compile Include="src\Logger.cs" />
     <Compile Include="src\WinApi\Notifications.cs" />
-    <Compile Include="src\PasswordFileParser.cs" />
+    <Compile Include="src\PasswordManagement\PasswordFileParser.cs" />
     <Compile Include="src\PasswordGeneration\PasswordGenerator.cs" />
     <Compile Include="src\PasswordManagement\PasswordManager.cs" />
-    <Compile Include="src\PinentryWatcher.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\PinentryWatcher.cs" />
     <Compile Include="src\UpdateChecking\Chocolatey\ChocolateyUpdateSource.cs" />
     <Compile Include="src\UpdateChecking\GitHub\GitHubUpdateSource.cs" />
     <Compile Include="src\UpdateChecking\GitHub\ReleasesResponse.cs" />
@@ -227,7 +227,7 @@
     <Compile Include="src\ExternalPrograms\Gpg\GPG.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\EmbeddedResources.cs" />
-    <Compile Include="src\StartupLink.cs" />
+    <Compile Include="src\WinApi\StartupLink.cs" />
     <Compile Include="src\Utilities\Helpers.cs" />
     <Compile Include="src\Utilities\NativeMethods.cs" />
     <Compile Include="src\Windows\EditWindow.xaml.cs">

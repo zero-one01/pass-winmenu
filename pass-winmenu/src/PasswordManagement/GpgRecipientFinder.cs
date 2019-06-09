@@ -18,7 +18,7 @@ namespace PassWinmenu.PasswordManagement
 
 		public string[] FindRecipients(PasswordFile file)
 		{
-			IDirectoryInfo current = file.Directory;
+			var current = file.Directory;
 
 			// Walk up from the innermost directory, and keep moving up until an existing directory 
 			// containing a gpg-id file is found.
@@ -26,7 +26,7 @@ namespace PassWinmenu.PasswordManagement
 			{
 				if (current.Parent == null || current.PathEquals(passwordStore))
 				{
-					return null;
+					return new string[0];
 				}
 				current = current.Parent;
 			}

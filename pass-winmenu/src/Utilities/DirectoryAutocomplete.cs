@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 
-namespace PassWinmenu
+namespace PassWinmenu.Utilities
 {
 	internal class DirectoryAutocomplete
 	{
