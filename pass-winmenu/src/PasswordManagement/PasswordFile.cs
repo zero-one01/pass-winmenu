@@ -1,7 +1,4 @@
-using System;
-using System.IO;
 using System.IO.Abstractions;
-using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
 
 namespace PassWinmenu.PasswordManagement

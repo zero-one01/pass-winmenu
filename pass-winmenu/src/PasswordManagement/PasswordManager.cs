@@ -40,8 +40,7 @@ namespace PassWinmenu.PasswordManagement
 		/// <summary>
 		/// Adds a new password file at the specified path.
 		/// </summary>
-		/// <param name="path">A path, either absolute or relative to the password store,
-		/// indicating where the password should be created.</param>
+		/// <param name="path">A path, relative to the password store, indicating where the password should be created.</param>
 		/// <param name="password">The password to be encrypted.</param>
 		/// <param name="metadata">Any metadata that should be added.</param>
 		/// <exception cref="InvalidOperationException">If a file already exists at the given location.</exception>
@@ -50,6 +49,10 @@ namespace PassWinmenu.PasswordManagement
 			if (path == null)
 			{
 				throw new ArgumentNullException(nameof(path));
+			}
+			if (FileSystem.Path.IsPathRooted(path))
+			{
+				throw new ArgumentException("Path to the password file must be relative.");
 			}
 
 			var file = CreatePasswordFileFromPath(path);
@@ -110,18 +113,9 @@ namespace PassWinmenu.PasswordManagement
 			return new PasswordFile(file, passwordStore);
 		}
 
-		private PasswordFile CreatePasswordFileFromPath(string path)
+		private PasswordFile CreatePasswordFileFromPath(string relativePath)
 		{
-			var relativePath = FileSystem.Path.IsPathRooted(path) 
-				? Helpers.GetRelativePath(FileSystem, path, passwordStore.FullName)
-				: path;
-
 			var fullPath = FileSystem.Path.Combine(passwordStore.FullName, relativePath);
-			if (FileSystem.Path.GetDirectoryName(fullPath) == null)
-			{
-				throw new ArgumentException("Invalid password store path.");
-			}
-
 			return new PasswordFile(FileSystem.FileInfo.FromFileName(fullPath), passwordStore);
 		}
 	}

@@ -6,44 +6,6 @@ namespace PassWinmenu.Utilities.ExtensionMethods
 {
 	internal static class DirectoryInfoExtensions
 	{
-
-		/// <summary>
-		/// Checks whether the current directory is a child of the given directory.
-		/// </summary>
-		/// <returns>True if the current directory is a parent of the given directory,
-		/// or if they're the same directory. False otherwise.</returns>
-		internal static bool IsChildOf(this IDirectoryInfo child, IDirectoryInfo parent)
-		{
-			for (var current = child; !current.PathEquals(parent); current = current.Parent)
-			{
-				if(current.Parent == null)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		/// <summary>
-		/// Checks whether the current directory is a parent of the given directory.
-		/// </summary>
-		/// <returns>True if the current directory is a parent of the given directory, 
-		/// or if they're the same directory. False otherwise.</returns>
-		internal static bool IsParentOf(this IDirectoryInfo parent, IDirectoryInfo child)
-		{
-			return IsChildOf(child, parent);
-		}
-
-		/// <summary>
-		/// Checks whether the current directory is a parent of the given directory.
-		/// </summary>
-		/// <returns>True if the current directory is a parent of the given directory, 
-		/// or if they're the same directory. False otherwise.</returns>
-		internal static bool IsParentOf(this IDirectoryInfo parent, string child)
-		{
-			return IsChildOf(parent.FileSystem.DirectoryInfo.FromDirectoryName(child), parent);
-		}
-
 		/// <summary>
 		/// Checks whether the directory contains the given file.
 		/// </summary>

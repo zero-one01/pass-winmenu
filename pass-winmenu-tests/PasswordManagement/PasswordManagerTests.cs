@@ -107,17 +107,23 @@ namespace PassWinmenuTests.PasswordManagement
 		}
 
 		[Fact]
-		public void AddPassword_AbsolutePath_AddsPasswordAtSpecifiedLocation()
+		public void AddPassword_NullPath_ThrowsArgumentNullException()
 		{
-			var fileSystem = new MockFileSystemBuilder()
-				.WithFile(@"C:\password-store\password_1", "password_1_content")
-				.Build();
+			var fileSystem = new MockFileSystemBuilder().Build();
 			var passwordDirectory = new MockDirectoryInfo(fileSystem, passwordStorePath);
 			var passwordManager = new PasswordManager(passwordDirectory, new FakeCryptoService(fileSystem), Mock.Of<IRecipientFinder>());
 
-			passwordManager.AddPassword(@"C:\password-store\new_password", "new_content", null);
+			Should.Throw<ArgumentNullException>(() => passwordManager.AddPassword(null, "new_content", null));
+		}
 
-			fileSystem.File.ReadAllText(@"C:\password-store\new_password").ShouldBe("new_content");
+		[Fact]
+		public void AddPassword_AbsolutePath_ThrowsArgumentException()
+		{
+			var fileSystem = new MockFileSystemBuilder().Build();
+			var passwordDirectory = new MockDirectoryInfo(fileSystem, passwordStorePath);
+			var passwordManager = new PasswordManager(passwordDirectory, new FakeCryptoService(fileSystem), Mock.Of<IRecipientFinder>());
+
+			Should.Throw<ArgumentException>(() => passwordManager.AddPassword(@"C:\password-store\new_password", "new_content", null));
 		}
 
 		[Fact]
@@ -143,7 +149,34 @@ namespace PassWinmenuTests.PasswordManagement
 			var passwordDirectory = new MockDirectoryInfo(fileSystem, passwordStorePath);
 			var passwordManager = new PasswordManager(passwordDirectory, new FakeCryptoService(fileSystem), Mock.Of<IRecipientFinder>());
 
-			Should.Throw<InvalidOperationException>(() => passwordManager.AddPassword(@"C:\password-store\password_1", "new_content", null));
+			Should.Throw<InvalidOperationException>(() => passwordManager.AddPassword(@"password_1", "new_content", null));
+		}
+
+		[Fact]
+		public void DecryptPassword_FileDoesNotExist_ThrowsArgumentException()
+		{
+			var fileSystem = new MockFileSystemBuilder().Build();
+			var passwordDirectory = new MockDirectoryInfo(fileSystem, passwordStorePath);
+			var passwordManager = new PasswordManager(passwordDirectory, new FakeCryptoService(fileSystem), Mock.Of<IRecipientFinder>());
+			var file = new PasswordFile(fileSystem.FileInfo.FromFileName(@"C:\password-store\password_1"), passwordDirectory);
+
+			Should.Throw<ArgumentException>(() => passwordManager.DecryptPassword(file, true));
+		}
+
+
+		[Fact]
+		public void DecryptPassword_FileExists_DecryptsPassword()
+		{
+			var fileSystem = new MockFileSystemBuilder()
+				.WithFile(@"C:\password-store\password_1", "password\nmetadata")
+				.Build();
+			var passwordDirectory = new MockDirectoryInfo(fileSystem, passwordStorePath);
+			var passwordManager = new PasswordManager(passwordDirectory, new FakeCryptoService(fileSystem), Mock.Of<IRecipientFinder>());
+			var file = new PasswordFile(fileSystem.FileInfo.FromFileName(@"C:\password-store\password_1"), passwordDirectory);
+
+			var decrypted = passwordManager.DecryptPassword(file, true);
+
+			decrypted.Content.ShouldBe("password\nmetadata");
 		}
 
 		private DecryptedPasswordFile CreateDecryptedPassword(MockFileSystem fileSystem, string path, string content)

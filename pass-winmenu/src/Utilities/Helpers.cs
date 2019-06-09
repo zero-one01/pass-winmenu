@@ -1,11 +1,9 @@
 using System;
 using System.IO;
-using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
-using PassWinmenu.Utilities.ExtensionMethods;
 
 namespace PassWinmenu.Utilities
 {
@@ -22,38 +20,6 @@ namespace PassWinmenu.Utilities
 			var normalised = directory.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 			var stripped = normalised.TrimEnd(Path.DirectorySeparatorChar);
 			return stripped;
-		}
-		
-		/// <summary>
-		/// Returns the path of a file relative to a specified root directory.
-		/// </summary>
-		/// <param name="filespec">The path to the file or directory for which the relative path should be calculated.</param>
-		/// <param name="root">The root directory relative to which the relative path should be calculated.</param>
-		/// <returns></returns>
-		internal static string GetRelativePath(IFileSystem fileSystem, string filespec, string root)
-		{
-			if(!fileSystem.Path.IsPathRooted(filespec)) throw new ArgumentException("File spec should be absolute", nameof(filespec));
-			if(!fileSystem.Path.IsPathRooted(root)) throw new ArgumentException("Root path must be absolute", nameof(root));
-
-			var rootDir = fileSystem.DirectoryInfo.FromDirectoryName(root);
-			// Even if fileDir is pointing to a file, creating a DirectoryInfo is fine,
-			// since we're only concerned about comparing their paths, and DirectoryInfo
-			// does not actually check if a directory exists at its location.
-			var fileDir = fileSystem.DirectoryInfo.FromDirectoryName(filespec);
-			if (!rootDir.IsParentOf(fileDir))
-			{
-				throw new ArgumentException("File spec should point to a path within the root directory", nameof(filespec));
-			}
-
-			var pathUri = new Uri(filespec);
-
-			// The directory URI must end with a directory separator char.
-			if (!root.EndsWith(Path.DirectorySeparatorChar.ToString()))
-			{
-				root += Path.DirectorySeparatorChar;
-			}
-			var directoryUri = new Uri(root);
-			return Uri.UnescapeDataString(directoryUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
 		}
 
 		/// <summary>
