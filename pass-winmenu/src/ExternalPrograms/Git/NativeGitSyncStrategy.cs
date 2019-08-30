@@ -49,7 +49,7 @@ namespace PassWinmenu.ExternalPrograms
 				RedirectStandardOutput = true,
 				CreateNoWindow = true
 			};
-			if (!String.IsNullOrEmpty(Configuration.ConfigManager.Config.Git.SshPath))
+			if (!string.IsNullOrEmpty(Configuration.ConfigManager.Config.Git.SshPath))
 			{
 				psi.EnvironmentVariables.Add("GIT_SSH", Configuration.ConfigManager.Config.Git.SshPath);
 			}
