@@ -148,9 +148,9 @@ gpg:
             allow-config-management: false
             # Add the following configuration keys to `gpg-agent.conf`:
             keys:
-                # Remember your GPG passphrase for up to one hour.
+                # Remember your GPG passphrase for up to 3600 seconds (one hour).
                 # Every time you decrypt a password within this one-hour timespan, the timer will reset.
-                default-cache-ttl: 7200
+                default-cache-ttl: 3600
                 # This is the maximum amount of time gpg-agent will remember your passphrase
                 # Once this amount of time has expired, gpg-agent will always ask you to re-enter it.
                 max-cache-ttl: 127800
