@@ -22,7 +22,7 @@ namespace PassWinmenu.WinApi
 			Helpers.AssertOnUiThread();
 
 			var clipboardBackup = MakeClipboardBackup();
-			Clipboard.SetText(text, TextDataFormat.UnicodeText);
+			Clipboard.SetDataObject(text);
 
 			Task.Delay(timeout).ContinueWith(_ =>
 			{
