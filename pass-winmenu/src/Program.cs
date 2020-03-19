@@ -16,6 +16,7 @@ using PassWinmenu.ExternalPrograms;
 using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.PasswordManagement;
+using PassWinmenu.src.WinApi;
 using PassWinmenu.UpdateChecking;
 using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
@@ -368,7 +369,15 @@ namespace PassWinmenu
 				Log.Send("Failed to register hotkeys", LogLevel.Error);
 				Log.ReportException(e);
 
-				notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
+				if((uint)e.InnerException.HResult == HResult.HotkeyAlreadyRegistered)
+				{
+					notificationService.ShowErrorWindow("An error occured in registering the hotkey.\r\n" +
+						"One or more hotkeys are already in use by another application.", "Could not register hotkey");
+				}
+				else
+				{
+					notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
+				}
 				Exit();
 			}
 		}

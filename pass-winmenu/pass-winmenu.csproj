@@ -185,6 +185,7 @@
     <Compile Include="src\WinApi\Environment.cs" />
     <Compile Include="src\WinApi\ExecutableNotFoundException.cs" />
     <Compile Include="src\WinApi\ExecutablePathResolver.cs" />
+    <Compile Include="src\WinApi\HResult.cs" />
     <Compile Include="src\WinApi\IEnvironment.cs" />
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
     <Compile Include="src\WinApi\SendKeysEscapeGenerator.cs" />
