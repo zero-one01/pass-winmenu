@@ -83,7 +83,7 @@ namespace PassWinmenu.Actions
 			}
 			else if (local.GetValueOrDefault() == 0 && remote.GetValueOrDefault() == 0)
 			{
-				notificationService.Raise("Nothing to commit.", Severity.Info);
+				notificationService.Raise("Remote already contains your latest changes.", Severity.Info);
 			}
 			else if (local > 0)
 			{
