@@ -67,7 +67,7 @@ namespace PassWinmenu.Actions
 
 		public Action Dispatch(HotkeyAction hotkeyAction)
 		{
-			if (actions.TryGetValue(hotkeyAction, out IAction action))
+			if (actions.TryGetValue(hotkeyAction, out var action))
 			{
 				return action.Execute;
 			}
