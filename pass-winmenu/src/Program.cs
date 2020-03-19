@@ -147,7 +147,9 @@ namespace PassWinmenu
 				.AsSelf();
 
 			// Register GPG installation
-			builder.Register(context => context.Resolve<GpgInstallationFinder>().FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath));
+			// Single instance, as there is no need to look for the same GPG installation multiple times.
+			builder.Register(context => context.Resolve<GpgInstallationFinder>().FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath))
+				.SingleInstance();
 
 			// Register GPG
 			builder.Register(context => new GPG(
