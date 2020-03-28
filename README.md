@@ -103,8 +103,7 @@ You should now have a working password manager.
 ### Password synchronisation
 
 If you want to access your passwords on multiple devices, you have several options.
-What follows are the instructions for setting up Git (which is by far the most popular option), but all software 
-able to synchronise directories will work: Git, SVN, Dropbox, Google Drive, ownCloud, network shares, bittorrent sync...
+What follows are the instructions for setting up Git (which is by far the most popular option), but you can also use SVN, Dropbox, Google Drive, ownCloud, network shares, bittorrent sync, or anything else that synchronises files or provides access to them from multiple locations.
 
 To synchronise your passwords using Git, initialise a new Git repository at the root of your password store:
 ```
