@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace PassWinmenu.UpdateChecking.GitHub
 {
 	internal class GitHubUpdateSource : IUpdateSource
 	{
-		private const string UpdateUrl = "https://api.github.com/repos/Baggykiin/pass-winmenu/releases";
+		private const string UpdateUrl = "https://api.github.com/repos/geluk/pass-winmenu/releases";
 		private readonly JsonSerializerSettings settings;
 
 		public bool RequiresConnectivity => true;
