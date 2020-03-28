@@ -158,6 +158,7 @@
     <Compile Include="src\UpdateChecking\Dummy\DummyUpdateSource.cs" />
     <Compile Include="src\UpdateChecking\UpdateCheckerFactory.cs" />
     <Compile Include="src\UpdateChecking\UpdateSourceExtensions.cs" />
+    <Compile Include="src\Utilities\Option.cs" />
     <Compile Include="src\WinApi\Clipboard.cs" />
     <Compile Include="src\Configuration\Classes\GitConfig.cs" />
     <Compile Include="src\Configuration\Classes\GpgAgentConfig.cs" />

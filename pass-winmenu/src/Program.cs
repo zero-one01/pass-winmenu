@@ -18,6 +18,7 @@ using PassWinmenu.Hotkeys;
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.src.WinApi;
 using PassWinmenu.UpdateChecking;
+using PassWinmenu.Utilities;
 using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
 
@@ -179,8 +180,8 @@ namespace PassWinmenu
 				.AsSelf();
 
 			// Create the Git wrapper, if enabled.
-			builder.Register(RegisterSyncService)
-				.AsImplementedInterfaces();
+			builder.Register(CreateSyncService)
+				.AsSelf();
 
 			builder.Register(context => UpdateCheckerFactory.CreateUpdateChecker(context.Resolve<UpdateCheckingConfig>(), context.Resolve<INotificationService>()));
 
@@ -200,36 +201,31 @@ namespace PassWinmenu
 			// Assign our hotkeys.
 			hotkeys = new HotkeyManager();
 			AssignHotkeys(hotkeys);
+
+			// Start checking for updates
+			updateChecker = container.Resolve<UpdateChecker>();
 		}
 
-		private static ISyncService RegisterSyncService (IComponentContext context)
+		private static Option<ISyncService> CreateSyncService (IComponentContext context)
 		{
 			var config = context.Resolve<GitConfig>();
 			var passwordStore = context.ResolveNamed<IDirectoryInfo>("PasswordStore");
 			var notificationService = context.Resolve<INotificationService>();
 
-			if (config.UseGit)
+			var factory = new SyncServiceFactory(config, passwordStore.FullName);
+
+			var syncService = factory.BuildSyncService();
+			switch(factory.Status)
 			{
-				try
-				{
-					return new SyncServiceFactory().BuildSyncService(config, passwordStore.FullName);
-				}
-				catch (RepositoryNotFoundException)
-				{
-					// Password store doesn't appear to be a Git repository.
-					// Git support will be disabled.
-				}
-				catch (TypeInitializationException e) when (e.InnerException is DllNotFoundException)
-				{
+				case SyncServiceStatus.GitLibraryNotFound:
 					notificationService.ShowErrorWindow("The git2 DLL could not be found. Git support will be disabled.");
-				}
-				catch (Exception e)
-				{
-					notificationService.ShowErrorWindow($"Failed to open the password store Git repository ({e.GetType().Name}: {e.Message}). Git support will be disabled.");
-				}
+					break;
+				case SyncServiceStatus.GitRepositoryNotFound:
+					notificationService.ShowErrorWindow($"Failed to open the password store Git repository ({factory.Exception.GetType().Name}: {factory.Exception.Message}). Git support will be disabled.");
+					break;
 			}
 
-			return null;
+			return Option<ISyncService>.FromNullable(syncService);
 		}
 
 		/// <summary>
