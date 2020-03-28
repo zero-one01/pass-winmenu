@@ -112,6 +112,7 @@
     <Compile Include="src\Actions\ActionDispatcher.cs" />
     <Compile Include="src\Actions\CheckForUpdatesAction.cs" />
     <Compile Include="src\Actions\CommitChangesAction.cs" />
+    <Compile Include="src\Actions\EditConfigurationAction.cs" />
     <Compile Include="src\Actions\OpenExplorerAction.cs" />
     <Compile Include="src\Actions\OpenPasswordShellAction.cs" />
     <Compile Include="src\Actions\RetrieveChangesAction.cs" />
