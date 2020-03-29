@@ -66,6 +66,7 @@ namespace PassWinmenu
 				else
 				{
 					notificationService.ShowErrorWindow(errorMessage);
+					notificationService.Dispose();
 				}
 				Exit();
 			}
