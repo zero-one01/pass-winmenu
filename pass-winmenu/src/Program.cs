@@ -181,8 +181,10 @@ namespace PassWinmenu
 				.AsSelf();
 
 			// Create the Git wrapper, if enabled.
+			// This needs to be a single instance to stop startup warnings being displayed multiple times.
 			builder.Register(CreateSyncService)
-				.AsSelf();
+				.AsSelf()
+				.SingleInstance();
 
 			builder.Register(context => UpdateCheckerFactory.CreateUpdateChecker(context.Resolve<UpdateCheckingConfig>(), context.Resolve<INotificationService>()));
 
