@@ -25,11 +25,11 @@ namespace PassWinmenu.Windows
 		private readonly ClipboardHelper clipboard = new ClipboardHelper();
 		private readonly PathDisplayHelper pathDisplayHelper;
 
-		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, ISyncService syncService)
+		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, Option<ISyncService> syncService)
 		{
 			this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
 			this.passwordManager = passwordManager ?? throw new ArgumentNullException(nameof(passwordManager));
-			this.syncService = syncService;
+			this.syncService = syncService.Value;
 			this.pathDisplayHelper = new PathDisplayHelper(ConfigManager.Config.Interface.DirectorySeparator);
 		}
 

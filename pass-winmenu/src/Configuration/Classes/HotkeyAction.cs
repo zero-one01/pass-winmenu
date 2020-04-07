@@ -11,6 +11,7 @@ namespace PassWinmenu.Configuration
 		GitPush, // Run `git push` on the password store
 		OpenShell, // Open a shell with GPG access in your password store
 		OpenExplorer, // Open the password store in Windows Explorer
+		EditConfiguration, // Edit the configuration file in the default text editor
 		SelectNext, // Select the next entry in the password menu
 		SelectPrevious, // Select the previous entry in the password menu
 		SelectFirst, // Select the first entry in the password menu

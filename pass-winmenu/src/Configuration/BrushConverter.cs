@@ -18,7 +18,7 @@ namespace PassWinmenu.Configuration
 		public object ReadYaml(IParser parser, Type type)
 		{
 			// A brush should be represented as a string value.
-			var value = parser.Expect<Scalar>();
+			var value = parser.Consume<Scalar>();
 			return Helpers.BrushFromColourString(value.Value);
 		}
 

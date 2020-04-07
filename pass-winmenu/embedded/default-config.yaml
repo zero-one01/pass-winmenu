@@ -25,7 +25,7 @@ password-store:
         # Default length for newly generated passwords.
         length: 20
         # Defines which character groups can be used to generate passwords.
-        # Each entry represents an group that can be toggled individually in the
+        # Each entry represents a group that can be toggled individually in the
         # password generation window.
         character-groups:
           - 
@@ -148,9 +148,9 @@ gpg:
             allow-config-management: false
             # Add the following configuration keys to `gpg-agent.conf`:
             keys:
-                # Remember your GPG passphrase for up to one hour.
+                # Remember your GPG passphrase for up to 3600 seconds (one hour).
                 # Every time you decrypt a password within this one-hour timespan, the timer will reset.
-                default-cache-ttl: 7200
+                default-cache-ttl: 3600
                 # This is the maximum amount of time gpg-agent will remember your passphrase
                 # Once this amount of time has expired, gpg-agent will always ask you to re-enter it.
                 max-cache-ttl: 127800

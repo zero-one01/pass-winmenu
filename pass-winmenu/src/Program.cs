@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using Autofac;
-using LibGit2Sharp;
 using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -17,6 +16,7 @@ using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.Hotkeys;
 using PassWinmenu.PasswordManagement;
 using PassWinmenu.UpdateChecking;
+using PassWinmenu.Utilities;
 using PassWinmenu.WinApi;
 using PassWinmenu.Windows;
 
@@ -64,6 +64,7 @@ namespace PassWinmenu
 				else
 				{
 					notificationService.ShowErrorWindow(errorMessage);
+					notificationService.Dispose();
 				}
 				Exit();
 			}
@@ -146,7 +147,9 @@ namespace PassWinmenu
 				.AsSelf();
 
 			// Register GPG installation
-			builder.Register(context => context.Resolve<GpgInstallationFinder>().FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath));
+			// Single instance, as there is no need to look for the same GPG installation multiple times.
+			builder.Register(context => context.Resolve<GpgInstallationFinder>().FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath))
+				.SingleInstance();
 
 			// Register GPG
 			builder.Register(context => new GPG(
@@ -176,8 +179,10 @@ namespace PassWinmenu
 				.AsSelf();
 
 			// Create the Git wrapper, if enabled.
-			builder.Register(RegisterSyncService)
-				.AsImplementedInterfaces();
+			// This needs to be a single instance to stop startup warnings being displayed multiple times.
+			builder.Register(CreateSyncService)
+				.AsSelf()
+				.SingleInstance();
 
 			builder.Register(context => UpdateCheckerFactory.CreateUpdateChecker(context.Resolve<UpdateCheckingConfig>(), context.Resolve<INotificationService>()));
 
@@ -197,36 +202,31 @@ namespace PassWinmenu
 			// Assign our hotkeys.
 			hotkeys = new HotkeyManager();
 			AssignHotkeys(hotkeys);
+
+			// Start checking for updates
+			updateChecker = container.Resolve<UpdateChecker>();
 		}
 
-		private static ISyncService RegisterSyncService (IComponentContext context)
+		private static Option<ISyncService> CreateSyncService (IComponentContext context)
 		{
 			var config = context.Resolve<GitConfig>();
 			var passwordStore = context.ResolveNamed<IDirectoryInfo>("PasswordStore");
 			var notificationService = context.Resolve<INotificationService>();
 
-			if (config.UseGit)
+			var factory = new SyncServiceFactory(config, passwordStore.FullName);
+
+			var syncService = factory.BuildSyncService();
+			switch(factory.Status)
 			{
-				try
-				{
-					return new SyncServiceFactory().BuildSyncService(config, passwordStore.FullName);
-				}
-				catch (RepositoryNotFoundException)
-				{
-					// Password store doesn't appear to be a Git repository.
-					// Git support will be disabled.
-				}
-				catch (TypeInitializationException e) when (e.InnerException is DllNotFoundException)
-				{
+				case SyncServiceStatus.GitLibraryNotFound:
 					notificationService.ShowErrorWindow("The git2 DLL could not be found. Git support will be disabled.");
-				}
-				catch (Exception e)
-				{
-					notificationService.ShowErrorWindow($"Failed to open the password store Git repository ({e.GetType().Name}: {e.Message}). Git support will be disabled.");
-				}
+					break;
+				case SyncServiceStatus.GitRepositoryNotFound:
+					notificationService.ShowErrorWindow($"Failed to open the password store Git repository ({factory.Exception.GetType().Name}: {factory.Exception.Message}). Git support will be disabled.");
+					break;
 			}
 
-			return null;
+			return Option<ISyncService>.FromNullable(syncService);
 		}
 
 		/// <summary>
@@ -368,7 +368,15 @@ namespace PassWinmenu
 				Log.Send("Failed to register hotkeys", LogLevel.Error);
 				Log.ReportException(e);
 
-				notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
+				if((uint?)e.InnerException?.HResult == HResult.HotkeyAlreadyRegistered)
+				{
+					notificationService.ShowErrorWindow("An error occured in registering the hotkeys.\r\n" +
+						"One or more hotkeys are already in use by another application.", "Could not register hotkeys");
+				}
+				else
+				{
+					notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
+				}
 				Exit();
 			}
 		}
