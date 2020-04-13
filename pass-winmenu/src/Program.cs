@@ -35,7 +35,6 @@ namespace PassWinmenu
 		public const string ConfigFileName = @".\pass-winmenu.yaml";
 
 		private ActionDispatcher actionDispatcher;
-		private HotkeyManager hotkeys;
 		private UpdateChecker updateChecker;
 		private Notifications notificationService;
 
@@ -113,11 +112,13 @@ namespace PassWinmenu
 			}
 #endif
 
-			// Register actions
+			// Register actions and hotkeys
 			builder.RegisterAssemblyTypes(Assembly.GetAssembly(typeof(ActionDispatcher)))
 				.InNamespaceOf<ActionDispatcher>()
 				.Except<ActionDispatcher>()
 				.AsImplementedInterfaces();
+			builder.RegisterType<HotkeyManager>()
+				.AsSelf();
 
 			builder.RegisterType<ActionDispatcher>()
 				.WithParameter(
@@ -198,8 +199,7 @@ namespace PassWinmenu
 			notificationService.AddMenuActions(actionDispatcher);
 
 			// Assign our hotkeys.
-			hotkeys = new HotkeyManager();
-			AssignHotkeys(hotkeys);
+			AssignHotkeys();
 
 			// Start checking for updates
 			updateChecker = container.Resolve<UpdateChecker>();
@@ -353,10 +353,11 @@ namespace PassWinmenu
 		/// <summary>
 		/// Loads keybindings from the configuration file and registers them with Windows.
 		/// </summary>
-		private void AssignHotkeys(HotkeyManager hotkeyManager)
+		private void AssignHotkeys()
 		{
 			try
 			{
+				var hotkeyManager = container.Resolve<HotkeyManager>();
 				hotkeyManager.AssignHotkeys(
 					ConfigManager.Config.Hotkeys ?? new HotkeyConfig[0],
 					actionDispatcher,
@@ -389,8 +390,8 @@ namespace PassWinmenu
 		public void Dispose()
 		{
 			notificationService?.Dispose();
-			hotkeys?.Dispose();
 			updateChecker?.Dispose();
+			container?.Dispose();
 		}
 	}
 }
