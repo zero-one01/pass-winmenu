@@ -56,22 +56,6 @@ namespace PassWinmenu.WinApi
 			CreateShortcutInternal(false, targetPath, workingDirectory);
 		}
 
-		/// <summary>
-		/// Create a startup link, linking to the specified file. 
-		/// If a link with the same name already exists, it is overwritten.
-		/// </summary>
-		/// <param name="targetPath">The path to the application that should be executed.</param>
-		/// <param name="workingDirectory">The working directory in which the application should execute.
-		/// Leave at Null to use the directory containing the target application.</param>
-		public void CreateOrOverwrite(string targetPath, string workingDirectory = null)
-		{
-			if (workingDirectory == null)
-			{
-				workingDirectory = Path.GetDirectoryName(targetPath);
-			}
-			CreateShortcutInternal(true, targetPath, workingDirectory);
-		}
-
 		private void Delete()
 		{
 			File.Delete(ShortcutPath);
