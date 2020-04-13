@@ -59,7 +59,6 @@ namespace PassWinmenu.UpdateChecking
 			{
 				notificationService.HandleUpdateAvailable(args);
 			};
-			updateChecker.Start();
 			return updateChecker;
 		}
 	}

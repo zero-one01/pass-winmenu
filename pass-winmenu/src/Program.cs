@@ -203,6 +203,7 @@ namespace PassWinmenu
 
 			// Start checking for updates
 			updateChecker = container.Resolve<UpdateChecker>();
+			updateChecker.Start();
 		}
 
 		private static Option<ISyncService> CreateSyncService (IComponentContext context)
