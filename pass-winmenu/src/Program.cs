@@ -82,13 +82,11 @@ namespace PassWinmenu
 			Log.Send($"Starting pass-winmenu {Version}");
 			Log.Send("------------------------------");
 
-			// Set the security protocol to TLS 1.2 only.
-			// We only use this for update checking (Git push over HTTPS is not handled by .NET).
-			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+			Log.Send($"Enabled security protocols: {ServicePointManager.SecurityProtocol}");
 
 			// Create the notification service first, so it's available if initialisation fails.
 			notificationService = Notifications.Create();
-			
+
 			// Initialise the DI Container builder.
 			var builder = new ContainerBuilder();
 
