@@ -9,12 +9,16 @@ namespace PassWinmenu.Windows
 	/// </summary>
 	public sealed partial class MainWindow : Window, IDisposable
 	{
-		private readonly Program program;
+		private Program program = new Program();
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			program = new Program();
+		}
+
+		public void Start()
+		{
+			program.Start();
 		}
 
 		public void Dispose()

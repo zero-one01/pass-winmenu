@@ -9,17 +9,29 @@ namespace PassWinmenu
 	/// </summary>
 	public sealed partial class App : Application, IDisposable
 	{
-		private MainWindow mainWindow;
+		private static MainWindow mainWindow;
 
 		private void App_Startup(object sender, StartupEventArgs e)
 		{
 			var runtimeConfig = RuntimeConfiguration.Parse(e.Args);
 			mainWindow = new MainWindow();
+			mainWindow.Start();
 		}
 
 		public void Dispose()
 		{
+			DisposeApplication();
+		}
+
+		private static void DisposeApplication()
+		{
 			mainWindow?.Dispose();
+		}
+
+		public static new void Exit()
+		{
+			mainWindow.Close();
+			DisposeApplication();
 		}
 	}
 }

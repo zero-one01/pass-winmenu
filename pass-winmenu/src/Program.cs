@@ -40,7 +40,7 @@ namespace PassWinmenu
 
 		private IContainer container;
 
-		public Program()
+		public void Start()
 		{
 			try
 			{
@@ -65,7 +65,7 @@ namespace PassWinmenu
 					notificationService.ShowErrorWindow(errorMessage);
 					notificationService.Dispose();
 				}
-				Exit();
+				App.Exit();
 			}
 		}
 
@@ -238,7 +238,7 @@ namespace PassWinmenu
 			if (!Directory.Exists(ConfigManager.Config.PasswordStore.Location))
 			{
 				notificationService.ShowErrorWindow($"Could not find the password store at {Path.GetFullPath(ConfigManager.Config.PasswordStore.Location)}. Please make sure it exists.");
-				Exit();
+				App.Exit();
 				return;
 			}
 			try
@@ -248,13 +248,13 @@ namespace PassWinmenu
 			catch (System.ComponentModel.Win32Exception)
 			{
 				notificationService.ShowErrorWindow("Could not find GPG. Make sure your gpg-path is set correctly.");
-				Exit();
+				App.Exit();
 				return;
 			}
 			catch (Exception e)
 			{
 				notificationService.ShowErrorWindow($"Failed to initialise GPG. {e.GetType().Name}: {e.Message}");
-				Exit();
+				App.Exit();
 				return;
 			}
 			if (ConfigManager.Config.Gpg.GpgAgent.Preload)
@@ -299,7 +299,7 @@ namespace PassWinmenu
 						"Unable to load configuration file.");
 				}
 
-				Exit();
+				App.Exit();
 				return;
 			}
 			catch (SemanticErrorException e)
@@ -307,7 +307,7 @@ namespace PassWinmenu
 				notificationService.ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
 					"Unable to load configuration file.");
-				Exit();
+				App.Exit();
 				return;
 			}
 			catch (YamlException e)
@@ -315,7 +315,7 @@ namespace PassWinmenu
 				notificationService.ShowErrorWindow(
 					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
 					"Unable to load configuration file.");
-				Exit();
+				App.Exit();
 				return;
 			}
 
@@ -328,7 +328,7 @@ namespace PassWinmenu
 					var open = MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.\n\n" +
 					                           "Would you like to open it now?", "New configuration file created", MessageBoxButton.YesNo);
 					if (open == MessageBoxResult.Yes) Process.Start(ConfigFileName);
-					Exit();
+					App.Exit();
 					return;
 				case LoadResult.NeedsUpgrade:
 					var backedUpFile = ConfigManager.Backup(ConfigFileName);
@@ -340,7 +340,7 @@ namespace PassWinmenu
 						Process.Start(ConfigFileName);
 						Process.Start(backedUpFile);
 					}
-					Exit();
+					App.Exit();
 					return;
 			}
 			if (ConfigManager.Config.Application.ReloadConfig)
@@ -377,15 +377,10 @@ namespace PassWinmenu
 				{
 					notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
 				}
-				Exit();
+				App.Exit();
 			}
 		}
 
-		public static void Exit()
-		{
-			Log.Send("Shutting down.");
-			Environment.Exit(0);
-		}
 
 		public void Dispose()
 		{
