@@ -19,3 +19,16 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "git", Scope = "member", Target = "PassWinmenu.Program.#Dispose()")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "hotkeys", Scope = "member", Target = "PassWinmenu.Program.#Dispose()")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed", MessageId = "updateChecker", Scope = "member", Target = "PassWinmenu.Program.#Dispose()")]
+
+// Ideally we'd only enable this on Exception types, but I have no idea how to do that.
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
+	"Usage", 
+	"CA2237:Mark ISerializable types with serializable",
+	Justification = "This would generate a lot of boilerplate code that will never be used, since pass-winmenu does not serialize any exceptions.")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
+	"Design",
+	"CA1032:Implement standard exception constructors",
+	Justification = "These exceptions are only used internally and must always be created with an exception message.")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
+	"Globalization", "CA1303:Do not pass literals as localized parameters",
+	Justification = "Localisation is currently out of scope for this project.")]

@@ -2,11 +2,14 @@ using System;
 
 namespace PassWinmenu.WinApi
 {
-	[Serializable]
 	public class ExecutableNotFoundException : Exception
 	{
+		public ExecutableNotFoundException() { }
+
 		public ExecutableNotFoundException(string message) : base(message) { }
 
-		public ExecutableNotFoundException() { }
+		public ExecutableNotFoundException(string message, Exception innerException) : base(message, innerException)
+		{
+		}
 	}
 }
