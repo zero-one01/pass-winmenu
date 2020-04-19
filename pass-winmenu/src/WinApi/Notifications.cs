@@ -71,7 +71,7 @@ namespace PassWinmenu.WinApi
 			menu.Items.Add(new ToolStripSeparator());
 
 			var dropDown = new ToolStripMenuItem("More Actions");
-			dropDown.DropDownItems.Add("Check for Updates", null, (sender, args) => actionDispatcher.Dispatch(HotkeyAction.CheckForUpdates));
+			dropDown.DropDownItems.Add("Check for Updates", null, (sender, args) => actionDispatcher.Dispatch(HotkeyAction.CheckForUpdates)());
 			dropDown.DropDownItems.Add("Edit Configuration", null, (sender, args) => actionDispatcher.Dispatch(HotkeyAction.EditConfiguration)());
 			dropDown.DropDownItems.Add("View Log", null, (sender, args) => actionDispatcher.ViewLogs());
 

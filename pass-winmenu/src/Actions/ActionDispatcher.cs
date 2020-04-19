@@ -55,11 +55,6 @@ namespace PassWinmenu.Actions
 			throw new NotImplementedException("Not implemented.");
 		}
 
-		public void ViewLogs()
-		{
-			dialogCreator.ViewLogs();
-		}
-
 		public Action Dispatch(HotkeyAction hotkeyAction)
 		{
 			if (actions.TryGetValue(hotkeyAction, out var action))

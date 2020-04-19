@@ -7,7 +7,7 @@ using LibGit2Sharp;
 
 namespace PassWinmenu.ExternalPrograms
 {
-	public class NativeGitSyncStrategy : IGitSyncStrategy
+	internal class NativeGitSyncStrategy : IGitSyncStrategy
 	{
 		private readonly string gitPath;
 		private readonly string repositoryPath;

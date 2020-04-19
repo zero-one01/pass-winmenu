@@ -46,7 +46,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		/// <exception cref="GpgException">Thrown when encryption fails.</exception>
 		public void Encrypt(string data, string outputFile, params string[] recipients)
 		{
-			if (recipients == null) recipients = new string[0];
+			if (recipients == null) recipients = Array.Empty<string>();
 			var recipientList = string.Join(" ", recipients.Select(r => $"--recipient \"{r}\""));
 
 			var result = gpgTransport.CallGpg($"--output \"{outputFile}\" {recipientList} --encrypt", data);

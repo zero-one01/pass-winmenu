@@ -225,7 +225,7 @@ namespace PassWinmenu
 					break;
 			}
 
-			return Option<ISyncService>.FromNullable(syncService);
+			return Option.FromNullable(syncService);
 		}
 
 		/// <summary>
@@ -359,7 +359,7 @@ namespace PassWinmenu
 			{
 				var hotkeyManager = container.Resolve<HotkeyManager>();
 				hotkeyManager.AssignHotkeys(
-					ConfigManager.Config.Hotkeys ?? new HotkeyConfig[0],
+					ConfigManager.Config.Hotkeys ?? Array.Empty<HotkeyConfig>(),
 					actionDispatcher,
 					notificationService);
 			}

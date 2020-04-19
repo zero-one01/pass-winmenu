@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Windows;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
 using PassWinmenu.ExternalPrograms.Gpg;
 using PassWinmenu.PasswordManagement;
-using PassWinmenu.src.Windows;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
 using PassWinmenu.WinApi;
@@ -22,7 +20,6 @@ namespace PassWinmenu.Windows
 		private readonly INotificationService notificationService;
 		private readonly ISyncService syncService;
 		private readonly IPasswordManager passwordManager;
-		private readonly ClipboardHelper clipboard = new ClipboardHelper();
 		private readonly PathDisplayHelper pathDisplayHelper;
 
 		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, Option<ISyncService> syncService)
@@ -31,11 +28,6 @@ namespace PassWinmenu.Windows
 			this.passwordManager = passwordManager ?? throw new ArgumentNullException(nameof(passwordManager));
 			this.syncService = syncService.Value;
 			this.pathDisplayHelper = new PathDisplayHelper(ConfigManager.Config.Interface.DirectorySeparator);
-		}
-
-		private void EnsureStaThread()
-		{
-			
 		}
 
 		/// <summary>
@@ -101,7 +93,7 @@ namespace PassWinmenu.Windows
 		/// </returns>
 		public PasswordFile RequestPasswordFile()
 		{
-			EnsureStaThread();
+			Helpers.AssertOnUiThread();
 
 			// Find GPG-encrypted password files
 			var passFiles = passwordManager.GetPasswordFiles(ConfigManager.Config.PasswordStore.PasswordFileMatch).ToList();
@@ -188,7 +180,7 @@ namespace PassWinmenu.Windows
 			}
 		}
 
-		private string CreateTemporaryPlaintextFile()
+		private static string CreateTemporaryPlaintextFile()
 		{
 			var tempDir = ConfigManager.Config.Interface.PasswordEditor.TemporaryFileDirectory;
 
@@ -271,7 +263,7 @@ namespace PassWinmenu.Windows
 		/// </summary>
 		public void AddPassword()
 		{
-			EnsureStaThread();
+			Helpers.AssertOnUiThread();
 
 			var passwordFilePath = ShowFileSelectionWindow();
 			// passwordFileName will be null if no file was selected
@@ -307,7 +299,7 @@ namespace PassWinmenu.Windows
 				return;
 			}
 			// Copy the newly generated password.
-			clipboard.Place(password, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
+			ClipboardHelper.Place(password, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
 
 			if (ConfigManager.Config.Notifications.Types.PasswordGenerated)
 			{
@@ -354,7 +346,7 @@ namespace PassWinmenu.Windows
 
 			if (copyToClipboard)
 			{
-				clipboard.Place(passFile.Password, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
+				ClipboardHelper.Place(passFile.Password, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
 				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
 				{
 					notificationService.Raise($"The password has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
@@ -363,7 +355,7 @@ namespace PassWinmenu.Windows
 			var usernameEntered = false;
 			if (typeUsername)
 			{
-				var username = new PasswordFileParser().GetUsername(passFile);
+				var username = PasswordFileParser.GetUsername(passFile);
 				if (username != null)
 				{
 					KeyboardEmulator.EnterText(username, ConfigManager.Config.Output.DeadKeys);
@@ -410,7 +402,7 @@ namespace PassWinmenu.Windows
 
 			if (copyToClipboard)
 			{
-				clipboard.Place(passFile.Metadata, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
+				ClipboardHelper.Place(passFile.Metadata, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
 				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
 				{
 					notificationService.Raise($"The key has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
@@ -485,7 +477,7 @@ namespace PassWinmenu.Windows
 
 			if (copyToClipboard)
 			{
-				clipboard.Place(chosenValue, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
+				ClipboardHelper.Place(chosenValue, TimeSpan.FromSeconds(ConfigManager.Config.Interface.ClipboardTimeout));
 				if (ConfigManager.Config.Notifications.Types.PasswordCopied)
 				{
 					notificationService.Raise($"The key has been copied to your clipboard.\nIt will be cleared in {ConfigManager.Config.Interface.ClipboardTimeout:0.##} seconds.", Severity.Info);
@@ -497,11 +489,6 @@ namespace PassWinmenu.Windows
 			}
 		}
 
-		public void ViewLogs()
-		{
-			var viewer = new LogViewer(string.Join("\n", Log.History.Select(l => l.ToString())));
-			viewer.ShowDialog();
-		}
 	}
 
 	internal class PathDisplayHelper

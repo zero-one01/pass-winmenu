@@ -1,4 +1,4 @@
-﻿<Window x:Class="PassWinmenu.src.Windows.LogViewer"
+<Window x:Class="PassWinmenu.Windows.LogViewer"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Log viewer" Height="450" Width="800">

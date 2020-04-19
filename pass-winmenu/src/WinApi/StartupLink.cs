@@ -6,8 +6,7 @@ namespace PassWinmenu.WinApi
 {
 	internal class StartupLink
 	{
-		[Serializable]
-		private class StartupLinkCreationException : Exception
+		public class StartupLinkCreationException : Exception
 		{
 			public StartupLinkCreationException(string message) : base(message) { }
 		}

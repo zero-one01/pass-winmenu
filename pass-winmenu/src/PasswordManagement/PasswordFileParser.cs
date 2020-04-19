@@ -36,7 +36,7 @@ namespace PassWinmenu.PasswordManagement
 			}
 		}
 
-		private IEnumerable<KeyValuePair<string, string>> ExtractKeys(string metadata)
+		private static IEnumerable<KeyValuePair<string, string>> ExtractKeys(string metadata)
 		{
 			var matches = Regex.Matches(metadata, @"([A-z0-9-_ ]+): (.*?)([\r\n]+|$)", RegexOptions.Singleline);
 			foreach (Match match in matches)
@@ -56,7 +56,7 @@ namespace PassWinmenu.PasswordManagement
 		/// <returns>
 		/// A string containing the username if the password file contains one, null if no username was found.
 		/// </returns>
-		public string GetUsername(ParsedPasswordFile passwordFile)
+		public static string GetUsername(ParsedPasswordFile passwordFile)
 		{
 			// TODO: write tests for this.
 			var options = ConfigManager.Config.PasswordStore.UsernameDetection.Options;
@@ -81,8 +81,7 @@ namespace PassWinmenu.PasswordManagement
 		}
 	}
 
-	[Serializable]
-	internal class PasswordParseException : Exception
+	public class PasswordParseException : Exception
 	{
 		public PasswordParseException(string message) : base(message)
 		{

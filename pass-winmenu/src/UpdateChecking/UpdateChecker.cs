@@ -115,7 +115,7 @@ namespace PassWinmenu.UpdateChecking
 		/// <summary>
 		/// Makes a lightweight HTTP request to Google to check whether an internet connection is available.
 		/// </summary>
-		private bool GetConnectivity()
+		private static bool GetConnectivity()
 		{
 			try
 			{

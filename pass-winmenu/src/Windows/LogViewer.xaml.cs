@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace PassWinmenu.src.Windows
+namespace PassWinmenu.Windows
 {
 	/// <summary>
 	/// Interaction logic for LogViewer.xaml
@@ -24,7 +24,7 @@ namespace PassWinmenu.src.Windows
 			InitializeComponent();
 			LogTextBox.Text = logText;
 			LogTextBox.SelectionStart = 0;
-			LogTextBox.SelectionLength = logText.Length;
+			LogTextBox.SelectionLength = logText?.Length ?? throw new ArgumentNullException(nameof(logText));
 		}
 	}
 }
