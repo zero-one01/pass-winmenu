@@ -183,6 +183,7 @@ namespace PassWinmenu.WinApi
 		{
 			Icon?.Dispose();
 			downloadUpdate?.Dispose();
+			downloadSeparator?.Dispose();
 		}
 	}
 
