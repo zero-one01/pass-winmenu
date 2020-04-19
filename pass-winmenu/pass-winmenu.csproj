@@ -124,6 +124,7 @@
     <Compile Include="src\Actions\OpenExplorerAction.cs" />
     <Compile Include="src\Actions\OpenPasswordShellAction.cs" />
     <Compile Include="src\Actions\RetrieveChangesAction.cs" />
+    <Compile Include="src\Actions\ViewLogAction.cs" />
     <Compile Include="src\Configuration\BrushConverter.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
