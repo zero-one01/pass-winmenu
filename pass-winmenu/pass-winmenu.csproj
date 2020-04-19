@@ -42,6 +42,7 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,6 +57,7 @@
     <DebugSymbols>true</DebugSymbols>
     <NoWarn>
     </NoWarn>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>embedded\pass-winmenu.ico</ApplicationIcon>
@@ -109,6 +111,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="RuntimeConfiguration.cs" />
     <Compile Include="src\Actions\ActionDispatcher.cs" />
     <Compile Include="src\Actions\CheckForUpdatesAction.cs" />
     <Compile Include="src\Actions\CommitChangesAction.cs" />

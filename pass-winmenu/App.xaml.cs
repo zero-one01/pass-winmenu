@@ -7,7 +7,19 @@ namespace PassWinmenu
 	/// <summary>
 	/// Interaction logic for App.xaml
 	/// </summary>
-	public partial class App : Application
+	public sealed partial class App : Application, IDisposable
 	{
+		private MainWindow mainWindow;
+
+		private void App_Startup(object sender, StartupEventArgs e)
+		{
+			var runtimeConfig = RuntimeConfiguration.Parse(e.Args);
+			mainWindow = new MainWindow();
+		}
+
+		public void Dispose()
+		{
+			mainWindow?.Dispose();
+		}
 	}
 }
