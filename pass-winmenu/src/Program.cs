@@ -32,7 +32,7 @@ namespace PassWinmenu
 		public const string LastConfigVersion = "1.7";
 		public const string EncryptedFileExtension = ".gpg";
 		public const string PlaintextFileExtension = ".txt";
-		public const string ConfigFileName = @".\pass-winmenu.yaml";
+		public const string ConfigFileName = "pass-winmenu.yaml";
 
 		private ActionDispatcher actionDispatcher;
 		private UpdateChecker updateChecker;
@@ -280,22 +280,26 @@ namespace PassWinmenu
 		private void LoadConfigFile()
 		{
 			LoadResult result;
+			var configPath = Path.Combine(Environment.CurrentDirectory, ConfigFileName);
 			try
 			{
-				result = ConfigManager.Load(ConfigFileName);
+
+				result = ConfigManager.Load(configPath);
 			}
 			catch (Exception e) when (e.InnerException != null)
 			{
 				if (e is YamlException)
 				{
 					notificationService.ShowErrorWindow(
-						$"The configuration file could not be loaded: {e.Message}\n\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
+						$"The configuration file could not be loaded: {e.Message}\n\n" +
+						$"{e.InnerException.GetType().Name}: {e.InnerException.Message}",
 						"Unable to load configuration file.");
 				}
 				else
 				{
 					notificationService.ShowErrorWindow(
-						$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.InnerException.GetType().Name}: {e.InnerException.Message}",
+						$"The configuration file could not be loaded. An unhandled exception occurred.\n" +
+						$"{e.InnerException.GetType().Name}: {e.InnerException.Message}",
 						"Unable to load configuration file.");
 				}
 
@@ -305,7 +309,9 @@ namespace PassWinmenu
 			catch (SemanticErrorException e)
 			{
 				notificationService.ShowErrorWindow(
-					$"The configuration file could not be loaded. An unhandled exception occurred.\n{e.GetType().Name}: {e.Message}",
+					$"The configuration file could not be loaded, a YAML error was encountered.\n" +
+					$"{e.GetType().Name}: {e.Message}\n\n" +
+					$"File location: {configPath}",
 					"Unable to load configuration file.");
 				App.Exit();
 				return;
