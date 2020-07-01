@@ -6,10 +6,11 @@
 		<TextBox Name="LogTextBox"
 		         Margin="10,10,10,10"
 		         TextWrapping="Wrap"
+		         FontFamily="Consolas"
 		         Text=""
 		         IsEnabled="True"
 		         IsReadOnly="True"
-				 VerticalScrollBarVisibility="Visible"
+		         VerticalScrollBarVisibility="Visible"
 		         />
 
 	</Grid>
