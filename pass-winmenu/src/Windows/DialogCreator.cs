@@ -351,11 +351,19 @@ namespace PassWinmenu.Windows
 			var usernameEntered = false;
 			if (typeUsername)
 			{
-				var username = PasswordFileParser.GetUsername(passFile);
-				if (username != null)
+				try
 				{
-					KeyboardEmulator.EnterText(username, ConfigManager.Config.Output.DeadKeys);
-					usernameEntered = true;
+					var username = passwordFileParser.GetUsername(passFile);
+					if (username != null)
+					{
+						KeyboardEmulator.EnterText(username, ConfigManager.Config.Output.DeadKeys);
+						usernameEntered = true;
+					}
+				}
+				catch (Exception e)
+				{
+					notificationService.ShowErrorWindow($"Could not retrieve your username: {e.Message}");
+					return;
 				}
 			}
 			if (typePassword)
