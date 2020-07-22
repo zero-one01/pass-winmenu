@@ -8,6 +8,13 @@ namespace PassWinmenu.PasswordManagement
 {
 	internal class PasswordFileParser
 	{
+		private readonly UsernameDetectionConfig usernameDetection;
+
+		public PasswordFileParser(UsernameDetectionConfig usernameDetection)
+		{
+			this.usernameDetection = usernameDetection;
+		}
+
 		/// <summary>
 		/// Extracts the username and any possible metadata from a password file
 		/// by auto-detecting the correct line-endings.
@@ -56,11 +63,10 @@ namespace PassWinmenu.PasswordManagement
 		/// <returns>
 		/// A string containing the username if the password file contains one, null if no username was found.
 		/// </returns>
-		public static string GetUsername(ParsedPasswordFile passwordFile)
+		public string GetUsername(ParsedPasswordFile passwordFile)
 		{
-			// TODO: write tests for this.
-			var options = ConfigManager.Config.PasswordStore.UsernameDetection.Options;
-			switch (ConfigManager.Config.PasswordStore.UsernameDetection.Method)
+			var options = usernameDetection.Options;
+			switch (usernameDetection.Method)
 			{
 				case UsernameDetectionMethod.FileName:
 					return passwordFile.FileNameWithoutExtension;

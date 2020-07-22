@@ -102,6 +102,7 @@ namespace PassWinmenu
 			builder.Register(_ => ConfigManager.Config.Git).AsSelf();
 			builder.Register(_ => ConfigManager.Config.PasswordStore).AsSelf();
 			builder.Register(_ => ConfigManager.Config.Application.UpdateChecking).AsSelf();
+			builder.Register(_ => ConfigManager.Config.PasswordStore.UsernameDetection).AsSelf();
 
 #if DEBUG
 			Log.EnableFileLogging();
@@ -176,6 +177,8 @@ namespace PassWinmenu
 					(parameter, context) => context.ResolveNamed<IDirectoryInfo>("PasswordStore"))
 				.AsImplementedInterfaces()
 				.AsSelf();
+
+			builder.RegisterType<PasswordFileParser>().AsSelf();
 
 			// Create the Git wrapper, if enabled.
 			// This needs to be a single instance to stop startup warnings being displayed multiple times.

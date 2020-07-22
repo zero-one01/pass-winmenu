@@ -20,12 +20,18 @@ namespace PassWinmenu.Windows
 		private readonly INotificationService notificationService;
 		private readonly ISyncService syncService;
 		private readonly IPasswordManager passwordManager;
+		private readonly PasswordFileParser passwordFileParser;
 		private readonly PathDisplayHelper pathDisplayHelper;
 
-		public DialogCreator(INotificationService notificationService, IPasswordManager passwordManager, Option<ISyncService> syncService)
+		public DialogCreator(
+			INotificationService notificationService,
+			IPasswordManager passwordManager,
+			PasswordFileParser passwordFileParser,
+			Option<ISyncService> syncService)
 		{
 			this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
 			this.passwordManager = passwordManager ?? throw new ArgumentNullException(nameof(passwordManager));
+			this.passwordFileParser = passwordFileParser;
 			this.syncService = syncService.Value;
 			this.pathDisplayHelper = new PathDisplayHelper(ConfigManager.Config.Interface.DirectorySeparator);
 		}
@@ -323,17 +329,7 @@ namespace PassWinmenu.Windows
 			{
 				passFile = passwordManager.DecryptPassword(selectedFile, ConfigManager.Config.PasswordStore.FirstLineOnly);
 			}
-			catch (GpgError e)
-			{
-				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
-				return;
-			}
-			catch (GpgException e)
-			{
-				notificationService.ShowErrorWindow("Password decryption failed. " + e.Message);
-				return;
-			}
-			catch (ConfigurationException e)
+			catch (Exception e) when (e is GpgError || e is GpgException || e is ConfigurationException)
 			{
 				notificationService.ShowErrorWindow("Password decryption failed: " + e.Message);
 				return;
@@ -417,7 +413,7 @@ namespace PassWinmenu.Windows
 		public void GetKey(bool copyToClipboard, bool type, string key)
 		{
 			var selectedFile = RequestPasswordFile();
-			if(selectedFile == null) return;
+			if (selectedFile == null) return;
 
 			KeyedPasswordFile passFile;
 			try
