@@ -24,9 +24,10 @@ namespace PassWinmenu.WinApi
 		private ToolStripSeparator downloadSeparator;
 		private const int ToolTipTimeoutMs = 5000;
 
-		public Notifications(NotifyIcon icon)
+		private Notifications(NotifyIcon icon)
 		{
 			Icon = icon ?? throw new ArgumentNullException(nameof(icon));
+			Icon.Click += HandleIconClick;
 		}
 
 		public static Notifications Create()
@@ -38,6 +39,21 @@ namespace PassWinmenu.WinApi
 			};
 
 			return new Notifications(icon);
+		}
+
+		private void HandleIconClick(object sender, EventArgs e)
+		{
+			var args = (MouseEventArgs)e;
+			if (args.Button == MouseButtons.Left)
+			{
+				// Unfortunately, calling Show() here does not do what you'd expect.
+				// It displays the menu in the wrong place, and the menu won't hide if you click outside it.
+				// ShowContextMenu() does the right thing, but it's a private method,
+				// so we have to resort to a bit of a hack to get it to work.
+				var mi = typeof(NotifyIcon)
+					.GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
+				mi!.Invoke(Icon, null);
+			}
 		}
 
 		public void AddMenuActions(ActionDispatcher actionDispatcher)
