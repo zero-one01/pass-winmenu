@@ -20,7 +20,12 @@ namespace PassWinmenu.Configuration
 
 		public static void EnableAutoReloading(string fileName)
 		{
-			watcher = new FileSystemWatcher(Path.GetDirectoryName(fileName))
+			var directory = Path.GetDirectoryName(fileName);
+			if (string.IsNullOrWhiteSpace(directory))
+			{
+				directory = Directory.GetCurrentDirectory();
+			}
+			watcher = new FileSystemWatcher(directory)
 			{
 				IncludeSubdirectories = false,
 				EnableRaisingEvents = true
