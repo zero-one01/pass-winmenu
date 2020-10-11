@@ -43,7 +43,7 @@ depending on your `pass-winmenu.yaml` settings.
 
 Pass-winmenu can be configured using the `pass-winmenu.yaml` configuration file located next to the `pass-winmenu.exe` executable.
 
-The configuration file is extensively documented, and there are many settings that can be changed to tweak the application to your liking, so take your time to look through it. You can always generate a new configuration file, containing all settings and their default values, by renaming or deleting the old one and starting pass-winmenu.
+The configuration file is extensively documented, and there are many settings that can be changed to tweak the application to your liking, so take your time to look through it (you can find an example [here](https://github.com/geluk/pass-winmenu/blob/master/pass-winmenu/embedded/default-config.yaml)). You can always generate a new configuration file, containing all settings and their default values, by renaming or deleting the old one and starting pass-winmenu.
 
 ## Dependencies
 
