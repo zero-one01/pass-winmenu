@@ -53,6 +53,10 @@ namespace PassWinmenu
 				Log.Send("Could not start pass-winmenu: An exception occurred.", LogLevel.Error);
 				Log.ReportException(e);
 
+				if (e is DependencyResolutionException de && de.InnerException != null)
+				{
+					e = de.InnerException;
+				}
 				string errorMessage = $"pass-winmenu failed to start ({e.GetType().Name}: {e.Message})";
 				if (notificationService == null)
 				{
