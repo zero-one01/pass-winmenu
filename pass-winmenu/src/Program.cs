@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using Autofac;
+using Autofac.Core;
 using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -96,10 +97,11 @@ namespace PassWinmenu
 			builder.Register(_ => notificationService)
 				.AsImplementedInterfaces()
 				.SingleInstance();
-			
+
 			// Now load the configuration options that we'll need 
 			// to continue initialising the rest of the applications.
-			LoadConfigFile();
+			var runtimeConfig = RuntimeConfiguration.Parse(Environment.GetCommandLineArgs());
+			LoadConfigFile(runtimeConfig);
 
 			builder.Register(_ => ConfigManager.Config).AsSelf();
 			builder.Register(_ => ConfigManager.Config.Gpg).AsSelf();
@@ -209,7 +211,7 @@ namespace PassWinmenu
 			remoteUpdateChecker.Apply(c => c.Start());
 		}
 
-		private static Option<ISyncService> CreateSyncService (IComponentContext context)
+		private static Option<ISyncService> CreateSyncService(IComponentContext context)
 		{
 			var config = context.Resolve<GitConfig>();
 			var signService = context.Resolve<ISignService>();
@@ -219,7 +221,7 @@ namespace PassWinmenu
 			var factory = new SyncServiceFactory(config, passwordStore.FullName, signService);
 
 			var syncService = factory.BuildSyncService();
-			switch(factory.Status)
+			switch (factory.Status)
 			{
 				case SyncServiceStatus.GitLibraryNotFound:
 					notificationService.ShowErrorWindow("The git2 DLL could not be found. Git support will be disabled.");
@@ -281,10 +283,20 @@ namespace PassWinmenu
 			}
 		}
 
-		private void LoadConfigFile()
+		private void LoadConfigFile(RuntimeConfiguration runtimeConfig)
 		{
 			LoadResult result;
-			var configPath = Path.Combine(Environment.CurrentDirectory, ConfigFileName);
+
+			string configPath;
+			if (!string.IsNullOrEmpty(runtimeConfig.ConfigFileLocation))
+			{
+				configPath = Path.GetFullPath(runtimeConfig.ConfigFileLocation);
+			}
+			else
+			{
+				var executableDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location);
+				configPath = Path.Combine(executableDirectory!, ConfigFileName);
+			}
 			try
 			{
 
@@ -335,16 +347,16 @@ namespace PassWinmenu
 					notificationService.Raise("A default configuration file was generated, but could not be saved.\nPass-winmenu will fall back to its default settings.", Severity.Error);
 					break;
 				case LoadResult.NewFileCreated:
-					var open = MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.\n\n" +
-					                           "Would you like to open it now?", "New configuration file created", MessageBoxButton.YesNo);
+					var open = MessageBox.Show("A new configuration file has been generated. Please modify it according to your preferences and restart the application.\n\n" + 
+					                                          "Would you like to open it now?", "New configuration file created", MessageBoxButton.YesNo);
 					if (open == MessageBoxResult.Yes) Process.Start(ConfigFileName);
 					App.Exit();
 					return;
 				case LoadResult.NeedsUpgrade:
 					var backedUpFile = ConfigManager.Backup(ConfigFileName);
 					var openBoth = MessageBox.Show("The current configuration file is out of date. A new configuration file has been created, and the old file has been backed up.\n" +
-					                               "Please edit the new configuration file according to your preferences and restart the application.\n\n" +
-					                               "Would you like to open both files now?", "Configuration file out of date", MessageBoxButton.YesNo);
+					                                              "Please edit the new configuration file according to your preferences and restart the application.\n\n" +
+					                                              "Would you like to open both files now?", "Configuration file out of date", MessageBoxButton.YesNo);
 					if (openBoth == MessageBoxResult.Yes)
 					{
 						Process.Start(ConfigFileName);
@@ -378,7 +390,7 @@ namespace PassWinmenu
 				Log.Send("Failed to register hotkeys", LogLevel.Error);
 				Log.ReportException(e);
 
-				if((uint?)e.InnerException?.HResult == HResult.HotkeyAlreadyRegistered)
+				if ((uint?)e.InnerException?.HResult == HResult.HotkeyAlreadyRegistered)
 				{
 					notificationService.ShowErrorWindow("An error occured in registering the hotkeys.\r\n" +
 						"One or more hotkeys are already in use by another application.", "Could not register hotkeys");

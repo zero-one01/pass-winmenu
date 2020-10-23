@@ -13,7 +13,6 @@ namespace PassWinmenu
 
 		private void App_Startup(object sender, StartupEventArgs e)
 		{
-			var runtimeConfig = RuntimeConfiguration.Parse(e.Args);
 			mainWindow = new MainWindow();
 			mainWindow.Start();
 		}

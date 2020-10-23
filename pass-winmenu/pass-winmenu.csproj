@@ -116,7 +116,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="RuntimeConfiguration.cs" />
+    <Compile Include="src\Configuration\RuntimeConfiguration.cs" />
+    <Compile Include="src\Configuration\RuntimeConfigurationError.cs" />
     <Compile Include="src\Actions\ActionDispatcher.cs" />
     <Compile Include="src\Actions\CheckForUpdatesAction.cs" />
     <Compile Include="src\Actions\CommitChangesAction.cs" />
