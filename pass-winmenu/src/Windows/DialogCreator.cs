@@ -125,9 +125,9 @@ namespace PassWinmenu.Windows
 					return;
 				}
 
+				var newFile = new DecryptedPasswordFile(file, window.PasswordContent.Text);
 				try
 				{
-					var newFile = new DecryptedPasswordFile(file, window.PasswordContent.Text);
 					passwordManager.EncryptPassword(newFile);
 
 					syncService?.EditPassword(newFile.FullPath);
@@ -136,10 +136,15 @@ namespace PassWinmenu.Windows
 						notificationService.Raise($"Password file \"{newFile.FileNameWithoutExtension}\" has been updated.", Severity.Info);
 					}
 				}
+				catch (GitException e)
+				{
+					notificationService.ShowErrorWindow($"Unable to commit your changes: {e.Message}");
+					EditWithEditWindow(newFile);
+				}
 				catch (Exception e)
 				{
 					notificationService.ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
-					// TODO: do we want to show the edit window again here?
+					EditWithEditWindow(newFile);
 				}
 			}
 		}
@@ -248,14 +253,26 @@ namespace PassWinmenu.Windows
 				var content = File.ReadAllText(plaintextFile);
 				EnsureRemoval(plaintextFile);
 
-				// Re-encrypt the file.
 				var newPasswordFile = new DecryptedPasswordFile(selectedFile, content);
-				passwordManager.EncryptPassword(newPasswordFile);
-
-				syncService?.EditPassword(selectedFile.FullPath);
-				if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
+				try
 				{
-					notificationService.Raise($"Password file \"{selectedFile}\" has been updated.", Severity.Info);
+					passwordManager.EncryptPassword(newPasswordFile);
+					syncService?.EditPassword(selectedFile.FullPath);
+
+					if (ConfigManager.Config.Notifications.Types.PasswordUpdated)
+					{
+						notificationService.Raise($"Password file \"{selectedFile}\" has been updated.", Severity.Info);
+					}
+				}
+				catch (GitException e)
+				{
+					notificationService.ShowErrorWindow($"Unable to commit your changes: {e.Message}");
+					EditWithTextEditor(newPasswordFile);
+				}
+				catch (Exception e)
+				{
+					notificationService.ShowErrorWindow($"Unable to save your password (encryption failed): {e.Message}");
+					EditWithTextEditor(newPasswordFile);
 				}
 			}
 			else
