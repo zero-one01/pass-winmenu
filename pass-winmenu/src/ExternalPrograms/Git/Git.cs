@@ -44,11 +44,11 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			else if (result.CompletedStepCount > 0)
 			{
-				// One or more commits were rebased
+				Log.Send($"Successfully rebased {head.FriendlyName} onto {head.TrackedBranch.Tip.Sha} in {result.CompletedStepCount} step(s).");
 			}
 			else
 			{
-				// Fast-forward or no upstream changes
+				Log.Send($"No rebase needed (no upstream changes, or fast-forward possible)");
 			}
 		}
 
