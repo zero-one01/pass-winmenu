@@ -92,6 +92,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigManagerTests.cs" />
     <Compile Include="Configuration\WidthConverterTests.cs" />
     <Compile Include="EmbeddedResources\EmbeddedResourcesTests.cs" />
     <Compile Include="ExternalPrograms\Gpg\GpgResultTests.cs" />
