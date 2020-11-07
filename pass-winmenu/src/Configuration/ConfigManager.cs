@@ -71,8 +71,7 @@ namespace PassWinmenu.Configuration
 			using (var reader = File.OpenText(fileName))
 			{
 				var versionCheck = deserialiser.Deserialize<Dictionary<string, object>>(reader);
-
-				if (!versionCheck.ContainsKey("config-version"))
+				if (versionCheck == null || !versionCheck.ContainsKey("config-version"))
 				{
 					return LoadResult.NeedsUpgrade;
 				}
