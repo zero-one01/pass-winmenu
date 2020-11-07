@@ -128,7 +128,7 @@ namespace PassWinmenu.Configuration
 			var counter = 2;
 			while (File.Exists(newFileName))
 			{
-				newFileName =$"{root}-backup-{counter}{extension}";
+				newFileName =$"{root}-backup-{counter++}{extension}";
 			}
 
 			File.Move(fileName, newFileName);
