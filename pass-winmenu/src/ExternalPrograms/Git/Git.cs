@@ -143,13 +143,13 @@ namespace PassWinmenu.ExternalPrograms
 				case FileStatus.NewInWorkdir:
 					return "Add";
 				case FileStatus.ModifiedInWorkdir:
-					return "Modify";
+					return "Edit";
 				case FileStatus.RenamedInWorkdir:
 					return "Rename";
 				case FileStatus.TypeChangeInWorkdir:
 					return "Change filetype for";
 				default:
-					throw new ArgumentException(nameof(status));
+					throw new GitException($"Can't determine commit verb for file status '{status}'");
 			}
 		}
 
