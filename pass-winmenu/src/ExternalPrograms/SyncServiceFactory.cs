@@ -2,7 +2,7 @@ using System;
 using LibGit2Sharp;
 
 using PassWinmenu.Configuration;
-using PassWinmenu.WinApi;
+using PassWinmenu.ExternalPrograms.Gpg;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -10,13 +10,16 @@ namespace PassWinmenu.ExternalPrograms
 	{
 		private readonly GitConfig config;
 		private readonly string passwordStorePath;
+		private readonly ISignService signService;
+
 		public SyncServiceStatus Status { get; private set; }
 		public Exception Exception { get; private set; }
 
-		public SyncServiceFactory(GitConfig config, string passwordStorePath)
+		public SyncServiceFactory(GitConfig config, string passwordStorePath, ISignService signService)
 		{
 			this.config = config;
 			this.passwordStorePath = passwordStorePath;
+			this.signService = signService;
 		}
 		
 		public ISyncService BuildSyncService()
@@ -28,7 +31,7 @@ namespace PassWinmenu.ExternalPrograms
 					var repository = new Repository(passwordStorePath);
 
 					var strategy = ChooseSyncStrategy(repository);
-					var git = new Git(repository, strategy);
+					var git = new Git(repository, strategy, signService);
 					Status = SyncServiceStatus.GitSupportEnabled;
 					return git;
 				}

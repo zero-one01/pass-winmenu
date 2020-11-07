@@ -7,7 +7,7 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 	/// <summary>
 	/// Simple wrapper over GPG.
 	/// </summary>
-	internal class GPG : ICryptoService
+	internal class GPG : ICryptoService, ISignService
 	{
 		private readonly IGpgTransport gpgTransport;
 		private readonly IGpgAgent gpgAgent;
@@ -78,6 +78,14 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		{
 			var output = gpgTransport.CallGpg("--version");
 			return output.Stdout.Split(new []{"\r\n"}, StringSplitOptions.RemoveEmptyEntries).First();
+		}
+
+		public string Sign(string message, string keyId)
+		{
+			if(enablePinentryFix) pinentryWatcher.BumpPinentryWindow();
+			gpgAgent.EnsureAgentResponsive();
+			var result = gpgTransport.CallGpg($"--detach-sign --armor", message);
+			return result.Stdout;
 		}
 	}
 }

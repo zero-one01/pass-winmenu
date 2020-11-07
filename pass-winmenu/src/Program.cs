@@ -204,10 +204,11 @@ namespace PassWinmenu
 		private static Option<ISyncService> CreateSyncService (IComponentContext context)
 		{
 			var config = context.Resolve<GitConfig>();
+			var signService = context.Resolve<ISignService>();
 			var passwordStore = context.ResolveNamed<IDirectoryInfo>("PasswordStore");
 			var notificationService = context.Resolve<INotificationService>();
 
-			var factory = new SyncServiceFactory(config, passwordStore.FullName);
+			var factory = new SyncServiceFactory(config, passwordStore.FullName, signService);
 
 			var syncService = factory.BuildSyncService();
 			switch(factory.Status)
