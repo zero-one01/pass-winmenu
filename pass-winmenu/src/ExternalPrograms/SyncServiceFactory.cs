@@ -37,8 +37,8 @@ namespace PassWinmenu.ExternalPrograms
 				}
 				catch (RepositoryNotFoundException)
 				{
-					// Password store doesn't appear to be a Git repository.
-					// Git support will be disabled.
+					Log.Send("The password store does not appear to be a Git repository; " +
+					         "Git support will be disabled");
 				}
 				catch (TypeInitializationException e) when (e.InnerException is DllNotFoundException)
 				{
