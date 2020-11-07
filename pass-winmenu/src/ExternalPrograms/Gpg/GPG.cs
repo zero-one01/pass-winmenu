@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using PassWinmenu.Configuration;
 
 namespace PassWinmenu.ExternalPrograms.Gpg
 {
@@ -14,12 +15,12 @@ namespace PassWinmenu.ExternalPrograms.Gpg
 		private readonly PinentryWatcher pinentryWatcher = new PinentryWatcher();
 		private readonly bool enablePinentryFix;
 
-		public GPG(IGpgTransport gpgTransport, IGpgAgent gpgAgent, IGpgResultVerifier gpgResultVerifier, bool enablePinentryFix)
+		public GPG(IGpgTransport gpgTransport, IGpgAgent gpgAgent, IGpgResultVerifier gpgResultVerifier, GpgConfig gpgConfig)
 		{
 			this.gpgTransport = gpgTransport;
 			this.gpgAgent = gpgAgent;
 			this.gpgResultVerifier = gpgResultVerifier;
-			this.enablePinentryFix = enablePinentryFix;
+			this.enablePinentryFix = gpgConfig.PinentryFix;
 		}
 
 		/// <summary>

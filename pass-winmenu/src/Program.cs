@@ -142,7 +142,8 @@ namespace PassWinmenu
 					typeof(GpgAgentConfigUpdater),
 					typeof(GpgTransport),
 					typeof(GpgAgent),
-					typeof(GpgResultVerifier)
+					typeof(GpgResultVerifier),
+					typeof(GPG)
 				).AsImplementedInterfaces()
 				.AsSelf();
 
@@ -150,15 +151,6 @@ namespace PassWinmenu
 			// Single instance, as there is no need to look for the same GPG installation multiple times.
 			builder.Register(context => context.Resolve<GpgInstallationFinder>().FindGpgInstallation(ConfigManager.Config.Gpg.GpgPath))
 				.SingleInstance();
-
-			// Register GPG
-			builder.Register(context => new GPG(
-					context.Resolve<IGpgTransport>(),
-					context.Resolve<IGpgAgent>(),
-					context.Resolve<IGpgResultVerifier>(),
-					context.Resolve<GpgConfig>().PinentryFix))
-				.AsImplementedInterfaces()
-				.AsSelf();
 
 			builder.RegisterType<DialogCreator>()
 				.AsSelf();
