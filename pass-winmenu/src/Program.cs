@@ -207,7 +207,11 @@ namespace PassWinmenu
 			// Start checking for updates
 			updateChecker = container.Resolve<UpdateChecker>();
 			remoteUpdateChecker = container.Resolve<Option<RemoteUpdateChecker>>();
-			updateChecker.Start();
+
+			if (container.Resolve<UpdateCheckingConfig>().CheckForUpdates)
+			{
+				updateChecker.Start();
+			}
 			remoteUpdateChecker.Apply(c => c.Start());
 		}
 

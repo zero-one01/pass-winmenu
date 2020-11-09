@@ -12,11 +12,8 @@ namespace PassWinmenu.UpdateChecking
 {
 	static class UpdateCheckerFactory
 	{
-		public static UpdateChecker CreateUpdateChecker(UpdateCheckingConfig config, INotificationService notificationService)
+		public static UpdateChecker CreateUpdateChecker(UpdateCheckingConfig updateCfg, INotificationService notificationService)
 		{
-			var updateCfg = ConfigManager.Config.Application.UpdateChecking;
-			if (!updateCfg.CheckForUpdates) return null;
-
 			IUpdateSource updateSource;
 			switch (updateCfg.UpdateSource)
 			{
