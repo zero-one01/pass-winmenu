@@ -142,23 +142,17 @@ namespace PassWinmenu.ExternalPrograms
 			}
 		}
 
-		private string GetVerbFromGitFileStatus(FileStatus status)
+		private static string GetVerbFromGitFileStatus(FileStatus status)
 		{
-			switch (status)
+			return status switch
 			{
-				case FileStatus.DeletedFromWorkdir:
-					return "Delete";
-				case FileStatus.NewInWorkdir:
-					return "Add";
-				case FileStatus.ModifiedInWorkdir:
-					return "Edit";
-				case FileStatus.RenamedInWorkdir:
-					return "Rename";
-				case FileStatus.TypeChangeInWorkdir:
-					return "Change filetype for";
-				default:
-					throw new GitException($"Can't determine commit verb for file status '{status}'");
-			}
+				FileStatus.DeletedFromWorkdir => "Delete",
+				FileStatus.NewInWorkdir => "Add",
+				FileStatus.ModifiedInWorkdir => "Edit",
+				FileStatus.RenamedInWorkdir => "Rename",
+				FileStatus.TypeChangeInWorkdir => "Change filetype for",
+				_ => throw new GitException($"Can't determine commit verb for file status '{status}'"),
+			};
 		}
 
 		private void UnstageAll()

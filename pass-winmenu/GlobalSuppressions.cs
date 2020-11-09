@@ -32,6 +32,10 @@ using System.Diagnostics.CodeAnalysis;
 	"CA1032:Implement standard exception constructors",
 	Justification = "These exceptions are only used internally and must always be created with an exception message.")]
 [assembly: SuppressMessage(
+	"Design", 
+	"CA1031:Do not catch general exception types",
+	Justification = "Catching general exceptions is sometimes necessary in non-critical code paths in user-facing applications.")]
+[assembly: SuppressMessage(
 	"Globalization", "CA1303:Do not pass literals as localized parameters",
 	Justification = "Localisation is currently out of scope for this project.")]
 
@@ -47,4 +51,3 @@ using System.Diagnostics.CodeAnalysis;
 	Justification = "Interop with other languages is not a feature of pass-winmenu, so this name can be used safely.",
 	Scope = "type",
 	Target = "~T:PassWinmenu.Utilities.Option`1")]
-

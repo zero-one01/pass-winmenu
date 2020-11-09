@@ -11,7 +11,7 @@ namespace PassWinmenu.Actions
 	{
 		private readonly DialogCreator dialogCreator;
 
-		private Dictionary<HotkeyAction, IAction> actions;
+		private readonly Dictionary<HotkeyAction, IAction> actions;
 
 		public ActionDispatcher(DialogCreator dialogCreator, Dictionary<HotkeyAction, IAction> actions)
 		{

@@ -34,7 +34,6 @@ namespace PassWinmenu
 		public const string PlaintextFileExtension = ".txt";
 		public const string ConfigFileName = "pass-winmenu.yaml";
 
-		private ActionDispatcher actionDispatcher;
 		private UpdateChecker updateChecker;
 		private Option<RemoteUpdateChecker> remoteUpdateChecker;
 		private Notifications notificationService;
@@ -192,12 +191,12 @@ namespace PassWinmenu
 				container.Resolve<GpgAgentConfigUpdater>().UpdateAgentConfig(gpgConfig.GpgAgent.Config.Keys);
 			}
 
-			actionDispatcher = container.Resolve<ActionDispatcher>();
+			var actionDispatcher = container.Resolve<ActionDispatcher>();
 
 			notificationService.AddMenuActions(actionDispatcher);
 
 			// Assign our hotkeys.
-			AssignHotkeys();
+			AssignHotkeys(actionDispatcher);
 
 			// Start checking for updates
 			updateChecker = container.Resolve<UpdateChecker>();
@@ -360,7 +359,7 @@ namespace PassWinmenu
 		/// <summary>
 		/// Loads keybindings from the configuration file and registers them with Windows.
 		/// </summary>
-		private void AssignHotkeys()
+		private void AssignHotkeys(ActionDispatcher actionDispatcher)
 		{
 			try
 			{
