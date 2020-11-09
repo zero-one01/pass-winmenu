@@ -82,7 +82,7 @@ namespace PassWinmenu.Actions
 				notificationService.Raise($"All changes pushed to remote ({local} pushed, {remote} pulled)",
 										  Severity.Info);
 			}
-			else if (local.GetValueOrDefault() == 0 && remote.GetValueOrDefault() == 0)
+			else if (local == 0 && remote == 0)
 			{
 				notificationService.Raise("Remote already contains your latest changes.", Severity.Info);
 			}

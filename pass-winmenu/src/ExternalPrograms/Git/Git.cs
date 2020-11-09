@@ -27,7 +27,15 @@ namespace PassWinmenu.ExternalPrograms
 			this.signService = signService;
 		}
 
-		public BranchTrackingDetails GetTrackingDetails() => repo.Head.TrackingDetails;
+		public TrackingDetails GetTrackingDetails()
+		{
+			var trackingDetails = repo.Head.TrackingDetails;
+			return new TrackingDetails
+			{
+				AheadBy = trackingDetails.AheadBy ?? 0,
+				BehindBy = trackingDetails.BehindBy ?? 0,
+			};
+		}
 
 		/// <summary>
 		/// Rebases the current branch onto the branch it is tracking.

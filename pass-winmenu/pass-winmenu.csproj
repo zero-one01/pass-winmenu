@@ -157,6 +157,7 @@
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\ExternalPrograms\Processes.cs" />
     <Compile Include="src\ExternalPrograms\ProcessWrapper.cs" />
+    <Compile Include="src\ExternalPrograms\TrackingDetails.cs" />
     <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\GpgRecipientFinder.cs" />
     <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
