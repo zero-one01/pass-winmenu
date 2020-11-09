@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using PassWinmenu.Utilities;
 using PassWinmenu.Utilities.ExtensionMethods;
 using YamlDotNet.Serialization;
@@ -30,5 +30,10 @@ namespace PassWinmenu.Configuration
 		}
 
 		public string SshPath { get; set; } = null;
+		public bool AutoFetch { get; set; } = true;
+		public double AutoFetchInterval { get; set; } = 3600;
+		[YamlIgnore]
+		public TimeSpan AutoFetchIntervalTimeSpan => TimeSpan.FromSeconds(AutoFetchInterval);
+
 	}
 }

@@ -115,6 +115,11 @@ git:
     # on your key and want to use plink.exe/pageant.exe to supply the key.
     # Example: 'C:\Program Files\PuTTY\plink.exe'
     ssh-path: null
+    # Periodically run 'git fetch' on the password repository.
+    auto-fetch: true
+    # Interval (in seconds) at which pass-winmenu should automatically fetch
+    # the latest changes from your remote.
+    auto-fetch-interval: 3600
 
 # GPG-related settings
 gpg:

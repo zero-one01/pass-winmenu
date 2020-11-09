@@ -36,6 +36,7 @@ namespace PassWinmenu
 
 		private ActionDispatcher actionDispatcher;
 		private UpdateChecker updateChecker;
+		private Option<RemoteUpdateChecker> remoteUpdateChecker;
 		private Notifications notificationService;
 
 		private IContainer container;
@@ -179,6 +180,8 @@ namespace PassWinmenu
 				.SingleInstance();
 
 			builder.Register(context => UpdateCheckerFactory.CreateUpdateChecker(context.Resolve<UpdateCheckingConfig>(), context.Resolve<INotificationService>()));
+			builder.RegisterType<RemoteUpdateCheckerFactory>().AsSelf();
+			builder.Register(context => context.Resolve<RemoteUpdateCheckerFactory>().Build()).AsSelf();
 
 			// Build the container
 			container = builder.Build();
@@ -198,7 +201,9 @@ namespace PassWinmenu
 
 			// Start checking for updates
 			updateChecker = container.Resolve<UpdateChecker>();
+			remoteUpdateChecker = container.Resolve<Option<RemoteUpdateChecker>>();
 			updateChecker.Start();
+			remoteUpdateChecker.Apply(c => c.Start());
 		}
 
 		private static Option<ISyncService> CreateSyncService (IComponentContext context)

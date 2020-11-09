@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using PassWinmenu.ExternalPrograms;
 
 namespace PassWinmenu.Utilities
 {
-	public struct Option<T> : IEquatable<Option<T>>
+	internal readonly struct Option<T> : IEquatable<Option<T>>
 	{
 		public T Value { get; }
 		public bool HasValue { get; }
@@ -48,11 +47,11 @@ namespace PassWinmenu.Utilities
 
 		public bool Equals(Option<T> other)
 		{
-			if(!HasValue && !other.HasValue)
+			if (!HasValue && !other.HasValue)
 			{
 				return true;
 			}
-			if(HasValue && other.HasValue)
+			if (HasValue && other.HasValue)
 			{
 				return Value.Equals(other.Value);
 			}
@@ -60,8 +59,28 @@ namespace PassWinmenu.Utilities
 		}
 	}
 
-	public static class Option
+	internal static class Option
 	{
-		public static Option<T> FromNullable<T>(T value) => new Option<T>(value, value == null);
+		public static Option<T> FromNullable<T>(T value) => new Option<T>(value, value != null);
+	}
+
+	internal static class OptionExtensions
+	{
+		public static Option<TDst> Select<TSrc, TDst>(this Option<TSrc> source, Func<TSrc, TDst> valueMap)
+		{
+			if (source.HasValue)
+			{
+				return new Option<TDst>(valueMap(source.Value), true);
+			}
+			return new Option<TDst>(default, false);
+		}
+
+		public static void Apply<T>(this Option<T> source, Action<T> action)
+		{
+			if (source.HasValue)
+			{
+				action(source.Value);
+			}
+		}
 	}
 }

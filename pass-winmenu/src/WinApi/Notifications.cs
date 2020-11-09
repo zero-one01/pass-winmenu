@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
-using McSherry.SemanticVersioning;
 using PassWinmenu.Actions;
 using PassWinmenu.Configuration;
+using PassWinmenu.ExternalPrograms;
 using PassWinmenu.UpdateChecking;
 using PassWinmenu.Utilities;
 using Application = System.Windows.Application;
@@ -15,7 +15,7 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace PassWinmenu.WinApi
 {
-	internal class Notifications : INotificationService
+	internal class Notifications : INotificationService, ISyncStateTracker
 	{
 		public NotifyIcon Icon { get; set; }
 
@@ -200,6 +200,25 @@ namespace PassWinmenu.WinApi
 			Icon?.Dispose();
 			downloadUpdate?.Dispose();
 			downloadSeparator?.Dispose();
+		}
+
+		public void SetSyncState(SyncState state)
+		{
+			switch (state)
+			{
+				case SyncState.UpToDate:
+					Icon.Icon = EmbeddedResources.Icon;
+					break;
+				case SyncState.Ahead:
+					Icon.Icon = EmbeddedResources.IconAhead;
+					break;
+				case SyncState.Behind:
+					Icon.Icon = EmbeddedResources.IconBehind;
+					break;
+				case SyncState.Diverged:
+					Icon.Icon = EmbeddedResources.IconDiverged;
+					break;
+			}
 		}
 	}
 
