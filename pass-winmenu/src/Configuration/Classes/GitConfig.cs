@@ -12,7 +12,7 @@ namespace PassWinmenu.Configuration
 		[YamlIgnore]
 		public SyncMode SyncMode => (SyncMode)Enum.Parse(typeof(SyncMode), SyncModeString.ToPascalCase(), true);
 		[YamlMember(Alias = "sync-mode")]
-		public string SyncModeString { get; set; } = "builtin";
+		public string SyncModeString { get; set; } = "auto";
 
 		private string gitPath = @"git";
 		public string GitPath

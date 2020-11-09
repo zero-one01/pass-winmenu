@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.8\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.8\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" />
   <Import Project="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props')" />
@@ -132,6 +132,7 @@
     <Compile Include="src\Configuration\Classes\UpdateSource.cs" />
     <Compile Include="src\Configuration\WidthConverter.cs" />
     <Compile Include="src\Configuration\LoadResult.cs" />
+    <Compile Include="src\ExternalPrograms\Git\GitSyncStrategies.cs" />
     <Compile Include="src\ExternalPrograms\Git\GitException.cs" />
     <Compile Include="src\ExternalPrograms\ISyncStateTracker.cs" />
     <Compile Include="src\ExternalPrograms\Git\RemoteUpdateChecker.cs" />

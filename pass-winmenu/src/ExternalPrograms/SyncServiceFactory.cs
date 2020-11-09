@@ -3,6 +3,7 @@ using LibGit2Sharp;
 
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms.Gpg;
+using PassWinmenu.WinApi;
 
 namespace PassWinmenu.ExternalPrograms
 {
@@ -11,15 +12,17 @@ namespace PassWinmenu.ExternalPrograms
 		private readonly GitConfig config;
 		private readonly string passwordStorePath;
 		private readonly ISignService signService;
+		private readonly GitSyncStrategies gitSyncStrategies;
 
 		public SyncServiceStatus Status { get; private set; }
 		public Exception Exception { get; private set; }
 
-		public SyncServiceFactory(GitConfig config, string passwordStorePath, ISignService signService)
+		public SyncServiceFactory(GitConfig config, string passwordStorePath, ISignService signService, GitSyncStrategies gitSyncStrategies)
 		{
 			this.config = config;
 			this.passwordStorePath = passwordStorePath;
 			this.signService = signService;
+			this.gitSyncStrategies = gitSyncStrategies;
 		}
 		
 		public ISyncService BuildSyncService()
@@ -30,7 +33,7 @@ namespace PassWinmenu.ExternalPrograms
 				{
 					var repository = new Repository(passwordStorePath);
 
-					var strategy = ChooseSyncStrategy(repository);
+					var strategy = gitSyncStrategies.ChooseSyncStrategy(passwordStorePath, repository, config);
 					var git = new Git(repository, strategy, signService);
 					Status = SyncServiceStatus.GitSupportEnabled;
 					return git;
@@ -56,18 +59,6 @@ namespace PassWinmenu.ExternalPrograms
 			}
 
 			return null;
-		}
-
-		private IGitSyncStrategy ChooseSyncStrategy(Repository repository)
-		{
-			if (config.SyncMode == SyncMode.NativeGit)
-			{
-				return new NativeGitSyncStrategy(config.GitPath, passwordStorePath);
-			}
-			else
-			{
-				return new LibGit2SharpSyncStrategy(repository);
-			}
 		}
 	}
 

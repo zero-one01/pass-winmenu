@@ -97,18 +97,22 @@ password-store:
 # Settings for git-based password stores
 git:
     # Pass-winmenu will automatically commit new and changed passwords if it
-    # detects that your password store is a git repository, as well as providing
-    # options for pushing to/pulling from the remote repository.
+    # detects that your password store is a git repository, as well as
+    # providing options for pushing to/pulling from the remote repository.
     # You can disable this feature by setting the following option to false:
     use-git: true
-    # Either 'builtin' or 'native-git'. 'builtin', the default option, will use
-    # the Git library to sync your password repository. This library, however,
-    # has several limitations. For instance, SSH remotes are not supported.
-    # By setting this value to 'native-git', pass-winmenu will use your native
-    # Git installation instead.
-    sync-mode: builtin
+    # One of 'auto', 'builtin', or 'native-git'. 'builtin' will use the Git
+    # library to sync your password repository. This will work out of the box,
+    # but the library has several limitations. Notably, credential helpers
+    # (as used by GitHub, for instance) and SSH remotes are not supported.
+    # 'native-git' will make use of your local Git installation instead,
+    # providing better interoperability, but it does require git to be
+    # accessible from your PATH.
+    # 'auto', the default option, will try to use 'native-git', falling back
+    # to 'builtin' if the Git executable cannot be found.
+    sync-mode: auto
     # Path to the Git executable that should be used. Only used when sync-mode
-    # is set to 'native-git'.
+    # is set to 'auto' or 'native-git'.
     git-path: git
     # Path to the ssh client executable that should be used. Only used when
     # sync-mode is set to 'native-git'. This is useful if you have a passphrase

@@ -180,6 +180,7 @@ namespace PassWinmenu
 
 			// Create the Git wrapper, if enabled.
 			// This needs to be a single instance to stop startup warnings being displayed multiple times.
+			builder.RegisterType<GitSyncStrategies>().AsSelf();
 			builder.Register(CreateSyncService)
 				.AsSelf()
 				.SingleInstance();
@@ -221,8 +222,9 @@ namespace PassWinmenu
 			var signService = context.Resolve<ISignService>();
 			var passwordStore = context.ResolveNamed<IDirectoryInfo>("PasswordStore");
 			var notificationService = context.Resolve<INotificationService>();
+			var strategies = context.Resolve<GitSyncStrategies>();
 
-			var factory = new SyncServiceFactory(config, passwordStore.FullName, signService);
+			var factory = new SyncServiceFactory(config, passwordStore.FullName, signService, strategies);
 
 			var syncService = factory.BuildSyncService();
 			switch (factory.Status)
