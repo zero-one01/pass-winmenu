@@ -6,7 +6,7 @@ Pass-winmenu follows the philosophy of (and is compatible with) the Linux passwo
 
 ---
 
-![demonstration GIF](https://i.imgur.com/Yf9XBQn.gif)
+![demonstration GIF](https://i.imgur.com/ihaveJt.gif)
 
 Donations to this project will go to acquiring a code signing certificate; for verifying downloads and allowing Windows Defender to eventually start trusting the application.
 
