@@ -52,11 +52,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="16.970563"
-     inkscape:cx="20.413184"
-     inkscape:cy="5.9562667"
+     inkscape:zoom="64"
+     inkscape:cx="12.246497"
+     inkscape:cy="14.744919"
      inkscape:document-units="px"
-     inkscape:current-layer="g858"
+     inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="true"
      inkscape:window-width="2880"
@@ -88,8 +88,9 @@
      style="display:inline">
     <path
        id="key"
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.16785;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 7.4257812,7.5839844 A 5.9160752,7.4160752 0 0 0 1.5839844,15 5.9160752,7.4160752 0 0 0 7.5,22.416016 5.9160752,7.4160752 0 0 0 13.291016,16.511719 H 21.5 V 20.5 h 3 v -2 h 1 v 4 h 3 v -5.988281 h 2.011719 V 13.488281 H 13.291016 A 5.9160752,7.4160752 0 0 0 7.5,7.5839844 a 5.9160752,7.4160752 0 0 0 -0.074219,0 z M 7.5,10 A 3.5,5 0 0 1 11,15 3.5,5 0 0 1 7.5,20 3.5,5 0 0 1 4,15 3.5,5 0 0 1 7.5,10 Z" />
+       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 7.5,7.5 c -3.2463846,0.051257 -6.0002295,3.417508 -6,7.5 2.62e-5,4.118754 2.7245216,7.499959 6,7.5 2.809222,-4.97e-4 5.163613,-2.541716 5.736277,-6 H 21.5 v 4 h 3 v -2 h 1 v 4 h 3 v -6 h 1.999999 v -3 H 13.236277 C 12.663612,10.041716 10.309222,7.5004968 7.5,7.5 c -0.024801,-1.956e-4 0.024801,-1.956e-4 0,0 z m 0,2.5 c 1.9378254,-4e-7 3.5,2.223055 3.5,5 0,2.776945 -1.5621743,5 -3.5,5 -1.9378256,0 -3.5000002,-2.223055 -3.5,-5 2e-7,-2.776945 1.5621747,-5.0000001 3.5,-5 z"
+       sodipodi:nodetypes="cccccccccccccccccsssss" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -112,7 +113,7 @@
      inkscape:groupmode="layer"
      id="g20"
      inkscape:label="overlay-behind"
-     style="display:inline">
+     style="display:none">
     <circle
        style="fill:#005ab4;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="orb-blue"
