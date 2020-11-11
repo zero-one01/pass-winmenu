@@ -134,7 +134,7 @@ namespace PassWinmenu.ExternalPrograms
 
 				var gpgSignature = signService.Sign(commitBuffer, keyId.Value);
 				var signedCommit = repo.ObjectDatabase.CreateCommitWithSignature(commitBuffer, gpgSignature);
-				repo.Refs.UpdateTarget(repo.Refs.Head, signedCommit);
+				repo.Refs.UpdateTarget(repo.Refs.Head.ResolveToDirectReference(), signedCommit);
 			}
 			else
 			{
