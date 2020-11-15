@@ -114,7 +114,7 @@ namespace PassWinmenu.ExternalPrograms
 			var tree = repo.ObjectDatabase.CreateTree(repo.Index);
 
 			var sign = repo.Config.Get<bool>("commit.gpgsign");
-			if (sign.Value)
+			if (sign?.Value ?? false)
 			{
 				Log.Send($"Generating GPG signature for {filePath}");
 				var keyId = repo.Config.Get<string>("user.signingkey");
