@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LibGit2Sharp;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -34,8 +35,19 @@ namespace PassWinmenu.Actions
 				return;
 			}
 
-			// First, commit any uncommitted files
-			syncService.Commit();
+			try
+			{
+				// First, commit any uncommitted files
+				syncService.Commit();
+			}
+			catch (Exception e)
+			{
+				notificationService.ShowErrorWindow(
+					$"Unable to commit your changes. An error occurred: {e.GetType().Name} ({e.Message})");
+				Log.ReportException(e);
+				return;
+			}
+
 			// Now fetch the latest changes
 			try
 			{
