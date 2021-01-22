@@ -138,6 +138,7 @@ namespace PassWinmenu.ExternalPrograms
 			}
 			else
 			{
+				Log.Send($"Generating unsigned commit for {filePath}");
 				repo.Commit(message, commitSignature, commitSignature);
 			}
 		}
