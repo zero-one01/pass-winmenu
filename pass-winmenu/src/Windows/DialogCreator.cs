@@ -152,7 +152,7 @@ namespace PassWinmenu.Windows
 					var username = passwordFileParser.GetUsername(passFile);
 					if (username != null)
 					{
-						KeyboardEmulator.EnterText(username, ConfigManager.Config.Output.DeadKeys);
+						KeyboardEmulator.EnterText(username);
 						usernameEntered = true;
 					}
 				}
@@ -165,9 +165,9 @@ namespace PassWinmenu.Windows
 			if (typePassword)
 			{
 				// If a username has also been entered, press Tab to switch to the password field.
-				if (usernameEntered) KeyboardEmulator.EnterRawText("{TAB}");
+				if (usernameEntered) KeyboardEmulator.EnterTab();
 
-				KeyboardEmulator.EnterText(passFile.Password, ConfigManager.Config.Output.DeadKeys);
+				KeyboardEmulator.EnterText(passFile.Password);
 			}
 		}
 
@@ -210,7 +210,7 @@ namespace PassWinmenu.Windows
 			}
 			if (type)
 			{
-				KeyboardEmulator.EnterText(passFile.Metadata, ConfigManager.Config.Output.DeadKeys);
+				KeyboardEmulator.EnterText(passFile.Metadata);
 			}
 		}
 
@@ -285,7 +285,7 @@ namespace PassWinmenu.Windows
 			}
 			if (type)
 			{
-				KeyboardEmulator.EnterText(chosenValue, ConfigManager.Config.Output.DeadKeys);
+				KeyboardEmulator.EnterText(chosenValue);
 			}
 		}
 

@@ -142,7 +142,6 @@
     <Compile Include="Utilities\DisposableTests.cs" />
     <Compile Include="Utilities\ExtensionMethods\KeyEventArgsExtensionsTests.cs" />
     <Compile Include="WinApi\ExecutablePathResolverTests.cs" />
-    <Compile Include="WinApi\SendKeysEscapeGeneratorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

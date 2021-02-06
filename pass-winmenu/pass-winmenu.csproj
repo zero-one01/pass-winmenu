@@ -206,7 +206,6 @@
     <Compile Include="src\WinApi\HResult.cs" />
     <Compile Include="src\WinApi\IEnvironment.cs" />
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
-    <Compile Include="src\WinApi\SendKeysEscapeGenerator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\Utilities\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgAgent.cs" />
