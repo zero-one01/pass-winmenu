@@ -1,11 +1,10 @@
-﻿namespace PassWinmenu.Configuration
+namespace PassWinmenu.Configuration
 {
 	internal class Config
 	{
 		public PasswordStoreConfig PasswordStore { get; set; } = new PasswordStoreConfig();
 		public GitConfig Git { get; set; } = new GitConfig();
 		public GpgConfig Gpg { get; set; } = new GpgConfig();
-		public OutputConfig Output { get; set; } = new OutputConfig();
 
 		public HotkeyConfig[] Hotkeys { get; set; } =
 		{

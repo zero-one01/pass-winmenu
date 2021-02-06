@@ -187,7 +187,6 @@
     <Compile Include="src\Configuration\Classes\LabelStyleConfig.cs" />
     <Compile Include="src\Configuration\Classes\NotificationConfig.cs" />
     <Compile Include="src\Configuration\Classes\NotificationTypesConfig.cs" />
-    <Compile Include="src\Configuration\Classes\OutputConfig.cs" />
     <Compile Include="src\Configuration\Classes\PasswordEditorConfig.cs" />
     <Compile Include="src\Configuration\Classes\PasswordGenerationConfig.cs" />
     <Compile Include="src\Configuration\Classes\PasswordStoreConfig.cs" />

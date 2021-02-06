@@ -165,12 +165,6 @@ gpg:
                 # Once this amount of time has expired, gpg-agent will always ask you to re-enter it.
                 max-cache-ttl: 127800
 
-output:
-    # If your keyboard has dead keys enabled (type ' + e for é), this should
-    # be set to true, otherwise usernames/passwords might not be entered
-    # correctly.
-    dead-keys: false
-
 # Here you can map hotkeys to various actions. Supported actions are:
 # - decrypt-password
 #     available options:
