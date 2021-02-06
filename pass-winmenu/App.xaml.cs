@@ -31,6 +31,7 @@ namespace PassWinmenu
 		{
 			mainWindow.Close();
 			DisposeApplication();
+			Environment.Exit(0);
 		}
 	}
 }
