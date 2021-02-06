@@ -396,15 +396,7 @@ namespace PassWinmenu
 				Log.Send("Failed to register hotkeys", LogLevel.Error);
 				Log.ReportException(e);
 
-				if ((uint?)e.InnerException?.HResult == HResult.HotkeyAlreadyRegistered)
-				{
-					notificationService.ShowErrorWindow("An error occured in registering the hotkeys.\r\n" +
-						"One or more hotkeys are already in use by another application.", "Could not register hotkeys");
-				}
-				else
-				{
-					notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
-				}
+				notificationService.ShowErrorWindow(e.Message, "Could not register hotkeys");
 				App.Exit();
 			}
 		}
