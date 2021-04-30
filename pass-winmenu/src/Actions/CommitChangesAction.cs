@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using LibGit2Sharp;
 using PassWinmenu.Configuration;
 using PassWinmenu.ExternalPrograms;
@@ -27,13 +29,25 @@ namespace PassWinmenu.Actions
 		{
 			if (syncService == null)
 			{
-				notificationService.Raise("Unable to commit your changes: pass-winmenu is not configured to use Git.",
-										  Severity.Warning);
+				notificationService.Raise(
+					"Unable to commit your changes: pass-winmenu is not configured to use Git.",
+					Severity.Warning);
 				return;
 			}
 
-			// First, commit any uncommitted files
-			syncService.Commit();
+			try
+			{
+				// First, commit any uncommitted files
+				syncService.Commit();
+			}
+			catch (Exception e)
+			{
+				notificationService.ShowErrorWindow(
+					$"Unable to commit your changes. An error occurred: {e.GetType().Name} ({e.Message})");
+				Log.ReportException(e);
+				return;
+			}
+
 			// Now fetch the latest changes
 			try
 			{
@@ -43,8 +57,9 @@ namespace PassWinmenu.Actions
 			catch (LibGit2SharpException e) when (e.Message == "unsupported URL protocol")
 			{
 				notificationService.ShowErrorWindow(
-					"Unable to push your changes: Remote uses an unknown protocol.\n\n" +
+					"Unable to fetch the latest changes: Remote uses an unknown protocol.\n\n" +
 					"If your remote URL is an SSH URL, try setting sync-mode to native-git in your configuration file.");
+				Log.ReportException(e);
 				return;
 			}
 			catch (GitException e)
@@ -58,6 +73,16 @@ namespace PassWinmenu.Actions
 				{
 					notificationService.ShowErrorWindow($"Unable to fetch the latest changes: {e.Message}");
 				}
+
+				Log.ReportException(e);
+				return;
+			}
+			catch (Exception e)
+			{
+				notificationService.ShowErrorWindow(
+					$"Unable to fetch the latest changes. An error occurred: ${e.GetType().Name} (${e.Message})");
+				Log.ReportException(e);
+				return;
 			}
 
 			var details = syncService.GetTrackingDetails();
@@ -65,7 +90,10 @@ namespace PassWinmenu.Actions
 			var remote = details.BehindBy;
 			try
 			{
-				syncService.Rebase();
+				if (remote > 0)
+				{
+					syncService.Rebase();
+				}
 			}
 			catch (LibGit2SharpException e)
 			{
@@ -74,15 +102,19 @@ namespace PassWinmenu.Actions
 				return;
 			}
 
-			syncService.Push();
+			if (local > 0)
+			{
+				syncService.Push();
+			}
 
 			if (!ConfigManager.Config.Notifications.Types.GitPush) return;
 			if (local > 0 && remote > 0)
 			{
-				notificationService.Raise($"All changes pushed to remote ({local} pushed, {remote} pulled)",
-										  Severity.Info);
+				notificationService.Raise(
+					$"All changes pushed to remote ({local} pushed, {remote} pulled)", 
+					Severity.Info);
 			}
-			else if (local.GetValueOrDefault() == 0 && remote.GetValueOrDefault() == 0)
+			else if (local == 0 && remote == 0)
 			{
 				notificationService.Raise("Remote already contains your latest changes.", Severity.Info);
 			}

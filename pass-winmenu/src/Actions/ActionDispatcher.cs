@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using LibGit2Sharp;
 using PassWinmenu.Configuration;
 using PassWinmenu.Windows;
 
@@ -11,7 +9,7 @@ namespace PassWinmenu.Actions
 	{
 		private readonly DialogCreator dialogCreator;
 
-		private Dictionary<HotkeyAction, IAction> actions;
+		private readonly Dictionary<HotkeyAction, IAction> actions;
 
 		public ActionDispatcher(DialogCreator dialogCreator, Dictionary<HotkeyAction, IAction> actions)
 		{
@@ -53,11 +51,6 @@ namespace PassWinmenu.Actions
 			// Either create a new window accessible from 'More Actions',
 			// or add the information to the log viewer.
 			throw new NotImplementedException("Not implemented.");
-		}
-
-		public void ViewLogs()
-		{
-			dialogCreator.ViewLogs();
 		}
 
 		public Action Dispatch(HotkeyAction hotkeyAction)

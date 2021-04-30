@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.NetCore.Analyzers.2.9.8\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetCore.Analyzers.2.9.8\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
   <Import Project="..\packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props" Condition="Exists('..\packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props')" />
   <Import Project="..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -42,6 +46,7 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -51,14 +56,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>true</DebugSymbols>
     <NoWarn>
     </NoWarn>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>embedded\pass-winmenu.ico</ApplicationIcon>
+    <ApplicationIcon>embedded\pass-winmenu-plain.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
@@ -109,6 +115,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="src\Configuration\RuntimeConfiguration.cs" />
+    <Compile Include="src\Configuration\RuntimeConfigurationError.cs" />
     <Compile Include="src\Actions\ActionDispatcher.cs" />
     <Compile Include="src\Actions\CheckForUpdatesAction.cs" />
     <Compile Include="src\Actions\CommitChangesAction.cs" />
@@ -116,13 +124,20 @@
     <Compile Include="src\Actions\OpenExplorerAction.cs" />
     <Compile Include="src\Actions\OpenPasswordShellAction.cs" />
     <Compile Include="src\Actions\RetrieveChangesAction.cs" />
+    <Compile Include="src\Actions\ViewLogAction.cs" />
     <Compile Include="src\Configuration\BrushConverter.cs" />
     <Compile Include="src\Configuration\Classes\ApplicationConfig.cs" />
     <Compile Include="src\Configuration\Classes\CharacterGroupConfig.cs" />
     <Compile Include="src\Configuration\Classes\UpdateSource.cs" />
     <Compile Include="src\Configuration\WidthConverter.cs" />
     <Compile Include="src\Configuration\LoadResult.cs" />
+    <Compile Include="src\ExternalPrograms\Git\GitSyncStrategies.cs" />
     <Compile Include="src\ExternalPrograms\Git\GitException.cs" />
+    <Compile Include="src\ExternalPrograms\ISyncStateTracker.cs" />
+    <Compile Include="src\ExternalPrograms\Git\RemoteUpdateChecker.cs" />
+    <Compile Include="src\ExternalPrograms\Git\RemoteUpdateCheckerFactory.cs" />
+    <Compile Include="src\ExternalPrograms\SyncState.cs" />
+    <Compile Include="src\ExternalPrograms\Gpg\ISignService.cs" />
     <Compile Include="src\ExternalPrograms\Git\LibGit2SharpSyncStrategy.cs" />
     <Compile Include="src\ExternalPrograms\Git\NativeGitSyncStrategy.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgAgentConfigReader.cs" />
@@ -147,6 +162,7 @@
     <Compile Include="src\ExternalPrograms\ISyncService.cs" />
     <Compile Include="src\ExternalPrograms\Processes.cs" />
     <Compile Include="src\ExternalPrograms\ProcessWrapper.cs" />
+    <Compile Include="src\ExternalPrograms\TrackingDetails.cs" />
     <Compile Include="src\PasswordManagement\DecryptedPasswordFile.cs" />
     <Compile Include="src\PasswordManagement\GpgRecipientFinder.cs" />
     <Compile Include="src\PasswordManagement\KeyedPasswordFile.cs" />
@@ -171,7 +187,6 @@
     <Compile Include="src\Configuration\Classes\LabelStyleConfig.cs" />
     <Compile Include="src\Configuration\Classes\NotificationConfig.cs" />
     <Compile Include="src\Configuration\Classes\NotificationTypesConfig.cs" />
-    <Compile Include="src\Configuration\Classes\OutputConfig.cs" />
     <Compile Include="src\Configuration\Classes\PasswordEditorConfig.cs" />
     <Compile Include="src\Configuration\Classes\PasswordGenerationConfig.cs" />
     <Compile Include="src\Configuration\Classes\PasswordStoreConfig.cs" />
@@ -190,7 +205,6 @@
     <Compile Include="src\WinApi\HResult.cs" />
     <Compile Include="src\WinApi\IEnvironment.cs" />
     <Compile Include="src\WinApi\KeyboardEmulator.cs" />
-    <Compile Include="src\WinApi\SendKeysEscapeGenerator.cs" />
     <Compile Include="src\Windows\DialogCreator.cs" />
     <Compile Include="src\Utilities\DirectoryAutocomplete.cs" />
     <Compile Include="src\ExternalPrograms\Gpg\GpgAgent.cs" />
@@ -291,9 +305,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="embedded\pass-winmenu.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="src\app.config" />
     <None Include="build-package.ps1" />
     <None Include="include\GnuPG.zip" />
@@ -325,7 +336,21 @@
     <EmbeddedResource Include="embedded\version.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="embedded\pass-winmenu-new.ico" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\analyzers\dotnet\cs\Humanizer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.CodeQuality.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetCore.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="embedded\pass-winmenu-ahead.ico" />
+    <EmbeddedResource Include="embedded\pass-winmenu-behind.ico" />
+    <EmbeddedResource Include="embedded\pass-winmenu-diverged.ico" />
+    <EmbeddedResource Include="embedded\pass-winmenu-plain.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -335,6 +360,10 @@
     <Error Condition="!Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props'))" />
     <Error Condition="!Exists('..\packages\Fody.6.1.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.1.1\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LibGit2Sharp.NativeBinaries.2.0.306\build\net46\LibGit2Sharp.NativeBinaries.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NetCore.Analyzers.2.9.8\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NetCore.Analyzers.2.9.8\build\Microsoft.NetCore.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props'))" />
   </Target>
   <PropertyGroup>
     <PreBuildEvent>git describe --tags &gt; "$(ProjectDir)\embedded\version.txt"</PreBuildEvent>

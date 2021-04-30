@@ -1,5 +1,3 @@
-﻿using PassWinmenu.Utilities.ExtensionMethods;
-
 namespace PassWinmenu.Configuration
 {
 	internal class Config
@@ -7,7 +5,6 @@ namespace PassWinmenu.Configuration
 		public PasswordStoreConfig PasswordStore { get; set; } = new PasswordStoreConfig();
 		public GitConfig Git { get; set; } = new GitConfig();
 		public GpgConfig Gpg { get; set; } = new GpgConfig();
-		public OutputConfig Output { get; set; } = new OutputConfig();
 
 		public HotkeyConfig[] Hotkeys { get; set; } =
 		{

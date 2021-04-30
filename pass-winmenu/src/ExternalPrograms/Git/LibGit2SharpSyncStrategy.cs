@@ -1,11 +1,10 @@
-using System;
 using System.Linq;
 
 using LibGit2Sharp;
 
 namespace PassWinmenu.ExternalPrograms
 {
-	public class LibGit2SharpSyncStrategy : IGitSyncStrategy
+	internal class LibGit2SharpSyncStrategy : IGitSyncStrategy
 	{
 		private readonly Repository repo;
 		private readonly PushOptions pushOptions;

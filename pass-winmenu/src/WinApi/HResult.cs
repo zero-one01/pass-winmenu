@@ -2,6 +2,6 @@ namespace PassWinmenu.WinApi
 {
 	static class HResult
 	{
-		public const uint HotkeyAlreadyRegistered = 0x80070581;
+		public const int HotkeyAlreadyRegistered = unchecked((int)0x80070581);
 	}
 }

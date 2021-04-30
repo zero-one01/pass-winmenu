@@ -32,7 +32,16 @@ namespace PassWinmenu.Actions
 			try
 			{
 				syncService.Fetch();
-				syncService.Rebase();
+				var details = syncService.GetTrackingDetails();
+				if (details.BehindBy > 0)
+				{
+					syncService.Rebase();
+					notificationService.Raise($"Pulled {details.BehindBy} new changes.", Severity.Info);
+				}
+				else
+				{
+					notificationService.Raise($"Your local repository already contains the latest changes.", Severity.Info);
+				}
 			}
 			catch (LibGit2SharpException e) when (e.Message == "unsupported URL protocol")
 			{
